@@ -20,7 +20,7 @@
         <Canvas Name="wrapper_canvas" Grid.ColumnSpan="3" Grid.RowSpan="3" Background="{Binding BackGround}" ClipToBounds="True">
             <Canvas Name="canvas" />
         </Canvas>
-        <Grid Grid.Row="1" Grid.Column="1" Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}">
+        <Grid Grid.Row="1" Grid.Column="1" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
             <TextBox Name="zoomValue" PreviewTextInput="PreviewTextInput" KeyDown="zoomValueSubmit" DataObject.Pasting="TextBoxPasting" Margin="2,2,2,2" />
         </Grid>
     </Grid>

@@ -18,7 +18,8 @@ namespace NodeVideoEffects.UITest
     {
         public MainWindow()
         {
-            //InitializeComponent();
+            this.Hide();
+
             var editor = new NodeEditor();
             editor.Show();
 
