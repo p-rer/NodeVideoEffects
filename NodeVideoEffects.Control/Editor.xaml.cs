@@ -21,7 +21,7 @@ namespace NodeVideoEffects
         private TranslateTransform translateTransform;
 
         private Point lastPos;
-        private double scale;
+        double scale;
         private Rect wrapRect;
 
         public Editor()

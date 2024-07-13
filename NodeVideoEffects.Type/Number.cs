@@ -1,0 +1,44 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace NodeVideoEffects.Type
+{
+    public class Number : PortValue
+    {        
+        private double _value;
+        private double _default;
+        private double _min;
+        private double _max;
+        private int _digits;
+
+        public Number(double _default, double _min, double _max, int _decimal)
+        {
+            this._min = _min;
+            this._max = _max;
+            this._default = _default;
+            this._value = _default;
+            this._digits = _decimal;
+        }
+
+        public object Value { get { return _value; } }
+        public System.Type Type { get { return typeof(double); } }
+
+        public void SetValue(object value)
+        {
+            if (value.GetType() == typeof(double))
+            {
+                if ((double)value == Double.NaN) value = _default;
+                else
+                {
+                    if (_min != Double.NaN && (double)value < _min) value = _min;
+                    if (_max != Double.NaN && (double)value > _max) value = _max;
+                }
+                
+                    _value = Math.Round((double)value, _digits);
+            }
+        }
+    }
+}
