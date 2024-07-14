@@ -14,31 +14,28 @@ namespace NodeVideoEffects.Type
         private double _max;
         private int _digits;
 
-        public Number(double _default, double _min, double _max, int _decimal)
+        public Number(double _default, double _min, double _max, int _digits)
         {
             this._min = _min;
             this._max = _max;
             this._default = _default;
             this._value = _default;
-            this._digits = _decimal;
+            this._digits = _digits;
         }
 
         public object Value { get { return _value; } }
         public System.Type Type { get { return typeof(double); } }
 
-        public void SetValue(object value)
+        private void BeforeSetValue(object value)
         {
-            if (value.GetType() == typeof(double))
+            if ((double)value == Double.NaN) value = _default;
+            else
             {
-                if ((double)value == Double.NaN) value = _default;
-                else
-                {
-                    if (_min != Double.NaN && (double)value < _min) value = _min;
-                    if (_max != Double.NaN && (double)value > _max) value = _max;
-                }
-                
-                    _value = Math.Round((double)value, _digits);
+                if (_min != Double.NaN && (double)value < _min) value = _min;
+                if (_max != Double.NaN && (double)value > _max) value = _max;
             }
+                
+            _value = Math.Round((double)value, _digits);
         }
     }
 }
