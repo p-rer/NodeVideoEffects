@@ -11,23 +11,41 @@ namespace NodeVideoEffects.Test
         [TestMethod]
         public void GetNumberOutputTest()
         {
-            Assert.AreEqual(number_output.Value.Value, 10.0);
+            Assert.AreEqual(number_output.Value, 10.0);
         }
 
         [TestMethod]
         public void SetNumberOutputTest()
         {
-            number_output.Value.SetValue(14.2);
-            Assert.AreEqual(number_output.Value.Value, 14.2);
+            number_output.Value = 14.2;
+            Assert.AreEqual(number_output.Value, 14.2);
         }
 
         [TestMethod]
         public void OutOfToleranceNumberOutputTest()
         {
-            number_output.Value.SetValue(-4.0);
-            Assert.AreEqual(number_output.Value.Value, 0.0);
-            number_output.Value.SetValue(125.0);
-            Assert.AreEqual(number_output.Value.Value, 100.0);
+            number_output.Value = -4.0;
+            Assert.AreEqual(number_output.Value, 0.0);
+            number_output.Value = 125.0;
+            Assert.AreEqual(number_output.Value, 100.0);
+        }
+
+        [TestMethod]
+        public void RoudNumberOutputTest()
+        {
+            number_output.Value = 8.68;
+            Assert.AreEqual(number_output.Value, 8.7);
+        }
+
+        [TestMethod]
+        public void TypeMismatchNumberOutputTest()
+        {
+            var ex = Assert.ThrowsException<TypeMismatchException>(() =>
+                {
+                    number_output.Value = "abc";
+                }
+            );
+            Assert.AreEqual("Type mismatch: 'Double' <- 'String'", ex.Message);
         }
     }
 }
