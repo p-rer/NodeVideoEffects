@@ -4,17 +4,17 @@
     {
         public System.Type Type { get; }
         public object Value { get; }
-        public void SetValue(Object value)
+        private void BeforeSetValue(Object value)
         {
             if (value.GetType() == Value.GetType())
             {
-                BeforeSetValue(value);
+                SetValue(value);
             }
             else
             {
                 throw new TypeMismatchException(Value.GetType(), value.GetType());
             }
         }
-        private void BeforeSetValue(object value) { }
+        public void SetValue(object value);
     }
 }

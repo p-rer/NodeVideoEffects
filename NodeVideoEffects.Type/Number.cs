@@ -26,7 +26,7 @@ namespace NodeVideoEffects.Type
         public object Value { get { return _value; } }
         public System.Type Type { get { return typeof(double); } }
 
-        private void BeforeSetValue(object value)
+        public void SetValue(object value)
         {
             if ((double)value == Double.NaN) value = _default;
             else

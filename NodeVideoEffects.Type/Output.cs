@@ -16,7 +16,7 @@ namespace NodeVideoEffects.Type
             _value = value;
         }
 
-        public Object Value { get { return _value.Value; } set { if (value.GetType() == _value.Type) _value.SetValue(value); } }
+        public Object Value { get { return _value.Value; } set { _value.SetValue(value); } }
         public System.Type Type { get { return _value.Type; } }
         public Connection[] Connection { get { return _connection; } set { _connection = value; } }
     }
