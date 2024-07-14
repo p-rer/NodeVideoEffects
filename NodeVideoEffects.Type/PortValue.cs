@@ -4,7 +4,7 @@
     {
         public System.Type Type { get; }
         public object Value { get; }
-        private void BeforeSetValue(Object value)
+        public void SetValue(Object value)
         {
             if (value.GetType() == Value.GetType())
             {
@@ -15,6 +15,6 @@
                 throw new TypeMismatchException(Value.GetType(), value.GetType());
             }
         }
-        public void SetValue(object value);
+        protected void _SetValue(object value);
     }
 }

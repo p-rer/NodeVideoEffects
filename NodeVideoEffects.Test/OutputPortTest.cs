@@ -5,7 +5,7 @@ using System.Collections.ObjectModel;
 namespace NodeVideoEffects.Test
 {
     [TestClass]
-    public class PortTest
+    public class OutputPortTest
     {
         Output number_output = new(new Number(10, 0, 100, 1));
         [TestMethod]
