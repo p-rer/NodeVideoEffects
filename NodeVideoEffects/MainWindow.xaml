@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:NodeVideoEffects"
         mc:Ignorable="d"
-        Title="Editor" MinHeight="450" MinWidth="800">
+        Title="{x:Static local:Translate.Editor}" MinHeight="450" MinWidth="800">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*"/>
@@ -17,22 +17,22 @@
             <RowDefinition Height="1*"/>
         </Grid.RowDefinitions>
         <Menu Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3">
-            <MenuItem Header="File">
-                <MenuItem Header="Import..." />
-                <MenuItem Header="Export..." />
+            <MenuItem Header="{x:Static local:Translate.File}">
+                <MenuItem Header="{x:Static local:Translate.Import}" />
+                <MenuItem Header="{x:Static local:Translate.Export}" />
                 <Separator />
-                <MenuItem Header="Close" />
+                <MenuItem Header="{x:Static local:Translate.Close}" />
             </MenuItem>
-            <MenuItem Header="Edit">
-                <MenuItem Header="Copy" />
+            <MenuItem Header="{x:Static local:Translate.Edit}">
+                <MenuItem Header="{x:Static local:Translate.Copy}" />
             </MenuItem>
-            <MenuItem Header="View">
-                <MenuItem Header="Reset view" />
+            <MenuItem Header="{x:Static local:Translate.View}">
+                <MenuItem Header="{x:Static local:Translate.ResetView}" />
             </MenuItem>
-            <MenuItem Header="Help">
-                <MenuItem Header="Open help site..." />
-                <MenuItem Header="Check for update..." />
-                <MenuItem Header="About..." />
+            <MenuItem Header="{x:Static local:Translate.Help}">
+                <MenuItem Header="{x:Static local:Translate.OpenHelpSite}" />
+                <MenuItem Header="{x:Static local:Translate.CheckUpdate}" />
+                <MenuItem Header="{x:Static local:Translate.About}" />
             </MenuItem>
         </Menu>
         <Rectangle Grid.Column="1" Grid.Row="1" Fill="{DynamicResource {x:Static SystemColors.WindowFrameBrushKey}}" Width="1" />

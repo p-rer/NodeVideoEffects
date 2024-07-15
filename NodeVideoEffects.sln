@@ -18,7 +18,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NodeVideoEffects.Node", "No
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NodeVideoEffects.Test", "NodeVideoEffects.Test\NodeVideoEffects.Test.csproj", "{7B6B5757-D7A5-4283-AE17-69090AC11000}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NodeVideoEffects.Type", "NodeVideoEffects.Type\NodeVideoEffects.Type.csproj", "{88FECD16-26E7-4FFF-9F74-BA496B548158}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NodeVideoEffects.Type", "NodeVideoEffects.Type\NodeVideoEffects.Type.csproj", "{88FECD16-26E7-4FFF-9F74-BA496B548158}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YukkuriMovieMaker.Generator", "YukkuriMovieMaker.Generator\YukkuriMovieMaker.Generator\YukkuriMovieMaker.Generator.csproj", "{99B4D6EF-6621-43C1-8A6A-C07CB716621F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -50,6 +52,10 @@ Global
 		{88FECD16-26E7-4FFF-9F74-BA496B548158}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{88FECD16-26E7-4FFF-9F74-BA496B548158}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{88FECD16-26E7-4FFF-9F74-BA496B548158}.Release|Any CPU.Build.0 = Release|Any CPU
+		{99B4D6EF-6621-43C1-8A6A-C07CB716621F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{99B4D6EF-6621-43C1-8A6A-C07CB716621F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{99B4D6EF-6621-43C1-8A6A-C07CB716621F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{99B4D6EF-6621-43C1-8A6A-C07CB716621F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

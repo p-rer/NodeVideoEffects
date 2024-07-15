@@ -9,15 +9,16 @@ using YukkuriMovieMaker.Controls;
 using YukkuriMovieMaker.Exo;
 using YukkuriMovieMaker.Player.Video;
 using YukkuriMovieMaker.Plugin.Effects;
+using YukkuriMovieMaker.Resources.Localization;
 
 namespace NodeVideoEffects
 {
-    [VideoEffect("NodeVideoEffects", new[] { "ノード" }, new string[] { })]
+    [VideoEffect("NodeVideoEffects", [nameof(Translate.Node)], [],ResourceType = typeof(string))]
     internal class NodeVideoEffectsPlugin : VideoEffectBase
     {
         public override string Label => "NodeVideoEffects";
 
-        [Display(Name = "ノードエディター")]
+        [Display(Name = nameof(Translate.NodeEditor),GroupName = "NodeVideoEffects")]
         [OpenNodeEditor]
         public String Blur { get; } = "";
 

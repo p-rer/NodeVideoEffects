@@ -6,6 +6,6 @@
              xmlns:local="clr-namespace:NodeVideoEffects"
              mc:Ignorable="d" >
     <Grid>
-        <Button Grid.Row="0" Content="ノードを編集..." Click="Button_Click"/>
+        <Button Grid.Row="0" Content="{x:Static local:Translate.OpenEditor}" Click="Button_Click"/>
     </Grid>
 </UserControl>
