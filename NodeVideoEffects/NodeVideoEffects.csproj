@@ -10,6 +10,12 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\NodeVideoEffects.Control\NodeVideoEffects.Control.csproj" />
+	  <ProjectReference Include="..\YukkuriMovieMaker.Generator\YukkuriMovieMaker.Generator\YukkuriMovieMaker.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+	  <AdditionalFiles Include="**/*.csv" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Remove="translate.csv" />
 	</ItemGroup>
 
 	<ItemGroup>
