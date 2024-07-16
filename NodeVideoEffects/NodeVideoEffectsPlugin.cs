@@ -13,12 +13,12 @@ using YukkuriMovieMaker.Resources.Localization;
 
 namespace NodeVideoEffects
 {
-    [VideoEffect("NodeVideoEffects", [nameof(Translate.Node)], [],ResourceType = typeof(string))]
+    [VideoEffect("NodeVideoEffects", [nameof(Translate.Node)], [],ResourceType = typeof(Translate))]
     internal class NodeVideoEffectsPlugin : VideoEffectBase
     {
         public override string Label => "NodeVideoEffects";
 
-        [Display(Name = nameof(Translate.NodeEditor),GroupName = "NodeVideoEffects")]
+        [Display(Name = nameof(Translate.NodeEditor), GroupName = nameof(Translate.NodeVideoEffects), ResourceType = typeof(Translate))]
         [OpenNodeEditor]
         public String Blur { get; } = "";
 
