@@ -32,7 +32,7 @@
             <MenuItem Header="{x:Static local:Translate.Help}">
                 <MenuItem Header="{x:Static local:Translate.OpenHelpSite}" />
                 <MenuItem Header="{x:Static local:Translate.CheckUpdate}" />
-                <MenuItem Header="{x:Static local:Translate.About}" />
+                <MenuItem Header="{x:Static local:Translate.ShowAbout}" Click="ShowAbout" />
             </MenuItem>
         </Menu>
         <Rectangle Grid.Column="1" Grid.Row="1" Fill="{DynamicResource {x:Static SystemColors.WindowFrameBrushKey}}" Width="1" />

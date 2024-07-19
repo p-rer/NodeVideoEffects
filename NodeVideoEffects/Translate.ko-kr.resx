@@ -75,5 +75,6 @@
 <data name="Help" xml:space="preserve"><value>도움말</value></data>
 <data name="OpenHelpSite" xml:space="preserve"><value>도움말 사이트 열기...</value></data>
 <data name="CheckUpdate" xml:space="preserve"><value>업데이트 확인...</value></data>
-<data name="About" xml:space="preserve"><value>About...</value></data>
+<data name="ShowAbout" xml:space="preserve"><value>About...</value></data>
+<data name="About" xml:space="preserve"><value>About</value></data>
 </root>

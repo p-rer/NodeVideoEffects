@@ -38,4 +38,16 @@
 			<HintPath>C:\ymm4\YukkuriMovieMaker.Plugin.dll</HintPath>
 		</Reference>
 	</ItemGroup>
+
+	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+		<Exec Command="git rev-parse --short HEAD &gt;$(ProjectDir)git_id.txt&#xD;" />
+	</Target>
+
+	<ItemGroup>
+		<None Remove="git_id.txt" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Include="git_id.txt" />
+	</ItemGroup>
 </Project>

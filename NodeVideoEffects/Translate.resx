@@ -75,5 +75,6 @@
 <data name="Help" xml:space="preserve"><value>ヘルプ</value></data>
 <data name="OpenHelpSite" xml:space="preserve"><value>ヘルプサイトを開く...</value></data>
 <data name="CheckUpdate" xml:space="preserve"><value>更新を確認...</value></data>
-<data name="About" xml:space="preserve"><value>概要...</value></data>
+<data name="ShowAbout" xml:space="preserve"><value>概要...</value></data>
+<data name="About" xml:space="preserve"><value>概要</value></data>
 </root>

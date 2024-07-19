@@ -75,5 +75,6 @@
 <data name="Help" xml:space="preserve"><value>مساعدة</value></data>
 <data name="OpenHelpSite" xml:space="preserve"><value>فتح موقع المساعدة...</value></data>
 <data name="CheckUpdate" xml:space="preserve"><value>التحقق من التحديثات...</value></data>
-<data name="About" xml:space="preserve"><value>حول...</value></data>
+<data name="ShowAbout" xml:space="preserve"><value>حول...</value></data>
+<data name="About" xml:space="preserve"><value>حول</value></data>
 </root>
