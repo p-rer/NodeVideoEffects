@@ -21,7 +21,6 @@ namespace NodeVideoEffects.UITest
             this.Hide();
 
             var editor = new NodeEditor();
-            editor.Show();
 
             var rect = new Rectangle()
             {
@@ -30,6 +29,9 @@ namespace NodeVideoEffects.UITest
                 Fill = new SolidColorBrush(Colors.Red)
             };
             editor.AddChildren(rect, 20, 50);
+
+            editor.ShowDialog();
+            this.Close();
         }
     }
 }
