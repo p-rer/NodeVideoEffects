@@ -8,7 +8,7 @@
         {
             if (value.GetType() == Value.GetType())
             {
-                SetValue(value);
+                _SetValue(value);
             }
             else
             {
