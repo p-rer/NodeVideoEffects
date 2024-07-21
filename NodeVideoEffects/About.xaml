@@ -6,15 +6,15 @@
         xmlns:local="clr-namespace:NodeVideoEffects"
         mc:Ignorable="d"
         Title="{x:Static local:Translate.About}" Height="200" Width="300" BorderBrush="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" BorderThickness="1"
-        WindowStyle="None" ResizeMode="NoResize" ShowInTaskbar="False">
+        WindowStyle="None" ResizeMode="NoResize" ShowInTaskbar="False" WindowStartupLocation="CenterScreen">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="30" />
+            <RowDefinition Height="40" />
             <RowDefinition Height="30" />
             <RowDefinition Height="1*" />
             <RowDefinition Height="30" />
         </Grid.RowDefinitions>
-        <Label FontSize="15" Content="NodeVideoEffects" Grid.Row="0"/>
+        <Label FontSize="20" Content="NodeVideoEffects" Grid.Row="0"/>
         <Label Name="git" Content="" UseLayoutRounding="False" Grid.Row="1"/>
         <Button Content="{x:Static local:Translate.Close}" Click="Close" Grid.Row="3" HorizontalAlignment="Right" Width="70" Height="30" VerticalAlignment="Center"/>
     </Grid>
