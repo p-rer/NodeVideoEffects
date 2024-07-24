@@ -9,19 +9,27 @@ namespace NodeVideoEffects
     /// </summary>
     public partial class NodeEditor : Window
     {
-        string commitid;
+        string tag;
+        string commit;
         public NodeEditor()
         {
             InitializeComponent();
-            var asm = Assembly.GetExecutingAssembly();
-            var resName = asm.GetManifestResourceNames().FirstOrDefault(a => a.EndsWith("git_id.txt"));
-            if (resName == null)
-                commitid = string.Empty;
-            using (var st = asm.GetManifestResourceStream(resName))
+
+            tag = FileLoad("git_tag.txt");
+            commit = FileLoad("git_id.txt");
+
+            string FileLoad(string file_name)
             {
-                if (st == null) commitid = string.Empty;
-                var reader = new StreamReader(st);
-                commitid = reader.ReadToEnd().Trim('\r', '\n');
+                var asm = Assembly.GetExecutingAssembly();
+                var resName = asm.GetManifestResourceNames().FirstOrDefault(a => a.EndsWith(file_name));
+                if (resName == null)
+                    return string.Empty;
+                using (var st = asm.GetManifestResourceStream(resName))
+                {
+                    if (st == null) return string.Empty;
+                    var reader = new StreamReader(st);
+                    return reader.ReadToEnd().Trim('\r', '\n');
+                }
             }
         }
 
@@ -32,7 +40,7 @@ namespace NodeVideoEffects
 
         private void ShowAbout(object sender, RoutedEventArgs e)
         {
-            new About(commitid).ShowDialog();
+            new About(tag, commit).ShowDialog();
         }
     }
 }

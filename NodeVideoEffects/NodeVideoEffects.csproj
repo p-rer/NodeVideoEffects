@@ -41,13 +41,16 @@
 
 	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
 		<Exec Command="git rev-parse --short HEAD &gt;$(ProjectDir)git_id.txt&#xD;" />
+		<Exec Command="git describe --tags --abbrev=0 &gt;$(ProjectDir)git_tag.txt&#xD;" />
 	</Target>
 
 	<ItemGroup>
 		<None Remove="git_id.txt" />
+		<None Remove="git_tag.txt" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<EmbeddedResource Include="git_id.txt" />
+		<EmbeddedResource Include="git_tag.txt" />
 	</ItemGroup>
 </Project>

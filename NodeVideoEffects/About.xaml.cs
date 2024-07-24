@@ -7,10 +7,10 @@ namespace NodeVideoEffects
     /// </summary>
     public partial class About : Window
     {
-        public About(string git)
+        public About(string tag, string commit)
         {
             InitializeComponent();
-            this.git.Content = $"Git Commit ID: {git}";
+            this.ver.Content = $"{tag} (Git {commit})";
         }
 
         private void Close(object sender, RoutedEventArgs e)

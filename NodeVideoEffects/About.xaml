@@ -15,7 +15,7 @@
             <RowDefinition Height="30" />
         </Grid.RowDefinitions>
         <Label FontSize="20" Content="NodeVideoEffects" Grid.Row="0"/>
-        <Label Name="git" Content="" UseLayoutRounding="False" Grid.Row="1"/>
+        <Label Name="ver" Content="" UseLayoutRounding="False" Grid.Row="1"/>
         <Button Content="{x:Static local:Translate.Close}" Click="Close" Grid.Row="3" HorizontalAlignment="Right" Width="70" Height="30" VerticalAlignment="Center"/>
     </Grid>
 </Window>
