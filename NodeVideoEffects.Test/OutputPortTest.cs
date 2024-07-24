@@ -1,6 +1,4 @@
-using NodeVideoEffects.Node;
 using NodeVideoEffects.Type;
-using System.Collections.ObjectModel;
 
 namespace NodeVideoEffects.Test
 {
@@ -8,6 +6,7 @@ namespace NodeVideoEffects.Test
     public class OutputPortTest
     {
         Output number_output = new(new Number(10, 0, 100, 1), "Number");
+
         [TestMethod]
         public void GetNumberOutputTest()
         {

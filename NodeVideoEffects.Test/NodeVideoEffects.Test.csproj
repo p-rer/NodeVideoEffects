@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\NodeVideoEffects.Node\NodeVideoEffects.Node.csproj" />
+    <ProjectReference Include="..\NodeVideoEffects.Nodes\NodeVideoEffects.Nodes.csproj" />
     <ProjectReference Include="..\NodeVideoEffects.Type\NodeVideoEffects.Type.csproj" />
   </ItemGroup>
 

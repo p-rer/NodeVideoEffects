@@ -1,19 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 using YukkuriMovieMaker.Commons;
-using YukkuriMovieMaker.Controls;
 using YukkuriMovieMaker.Exo;
 using YukkuriMovieMaker.Player.Video;
 using YukkuriMovieMaker.Plugin.Effects;
-using YukkuriMovieMaker.Resources.Localization;
 
 namespace NodeVideoEffects
 {
-    [VideoEffect("NodeVideoEffects", [nameof(Translate.Node)], [],ResourceType = typeof(Translate))]
+    [VideoEffect("NodeVideoEffects", [nameof(Translate.Node)], [], ResourceType = typeof(Translate))]
     internal class NodeVideoEffectsPlugin : VideoEffectBase
     {
         public override string Label => "NodeVideoEffects";

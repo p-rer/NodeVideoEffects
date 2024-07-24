@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Vortice;
-using Vortice.Direct2D1;
-using Vortice.DXGI;
-using Windows.Win32.Graphics.Gdi;
+﻿using Vortice.Direct2D1;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
 
@@ -49,7 +41,7 @@ namespace NodeVideoEffects
         public void Dispose()
         {
             ClearInput();
-            if(Output != null)Output.Dispose();
+            if (Output != null) Output.Dispose();
         }
     }
 }

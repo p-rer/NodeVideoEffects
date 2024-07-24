@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace NodeVideoEffects.Type
+﻿namespace NodeVideoEffects.Type
 {
     public class Number : PortValue
-    {        
+    {
         private double _value;
         private double _default;
         private double _min;
@@ -34,7 +28,7 @@ namespace NodeVideoEffects.Type
                 if (_min != Double.NaN && (double)value < _min) value = _min;
                 if (_max != Double.NaN && (double)value > _max) value = _max;
             }
-                
+
             _value = Math.Round((double)value, _digits);
         }
     }
