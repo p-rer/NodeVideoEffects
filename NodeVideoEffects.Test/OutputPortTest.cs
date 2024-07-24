@@ -7,7 +7,7 @@ namespace NodeVideoEffects.Test
     [TestClass]
     public class OutputPortTest
     {
-        Output number_output = new(new Number(10, 0, 100, 1));
+        Output number_output = new(new Number(10, 0, 100, 1), "Number");
         [TestMethod]
         public void GetNumberOutputTest()
         {

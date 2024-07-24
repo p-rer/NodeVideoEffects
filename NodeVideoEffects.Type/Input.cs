@@ -10,14 +10,17 @@ namespace NodeVideoEffects.Type
     {
         private PortValue _value;
         private Connection? _connection;
+        private String _name;
 
-        public Input(PortValue value)
+        public Input(PortValue value, string name)
         {
             _value = value;
+            _name = name;
         }
 
         public Object Value { get { return _value.Value; } set { _value.SetValue(value); } }
         public System.Type Type { get { return _value.Type; } }
+        public String Name { get { return _name; } }
         public Connection? Connection { get { return _connection; } set { _connection = value; } }
     }
 }
