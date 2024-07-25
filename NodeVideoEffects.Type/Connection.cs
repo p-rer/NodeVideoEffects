@@ -2,7 +2,9 @@
 {
     public struct Connection
     {
-        string id;
-        int index;
+        public string id;
+        public int index;
+
+        public Connection(string id, int index) : this() => (this.id, this.index) = (id, index);
     }
 }

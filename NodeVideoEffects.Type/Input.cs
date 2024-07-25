@@ -15,6 +15,16 @@
         public Object Value { get { return _value.Value; } set { _value.SetValue(value); } }
         public System.Type Type { get { return _value.Type; } }
         public String Name { get { return _name; } }
-        public Connection? Connection { get { return _connection; } set { _connection = value; } }
+        public Connection? Connection { get { return _connection; } }
+
+        public void AddConnection(string id, int index)
+        {
+            _connection = new(id, index);
+        }
+
+        public void RemoveConnection(string id, int index)
+        {
+            _connection = null;
+        }
     }
 }
