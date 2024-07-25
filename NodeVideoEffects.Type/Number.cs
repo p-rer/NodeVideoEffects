@@ -8,13 +8,13 @@
         private double _max;
         private int _digits;
 
-        public Number(double _default, double _min, double _max, int _digits)
+        public Number(double _default, double? _min, double? _max, int? _digits)
         {
-            this._min = _min;
-            this._max = _max;
+            this._min = _min ?? Double.NaN;
+            this._max = _max ?? Double.NaN;
             this._default = _default;
             this._value = _default;
-            this._digits = _digits;
+            this._digits = _digits ?? 8;
         }
 
         public object Value { get { return _value; } }
