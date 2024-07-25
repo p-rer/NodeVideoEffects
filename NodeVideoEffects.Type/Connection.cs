@@ -2,7 +2,7 @@
 {
     public struct Connection
     {
-        int id;
+        string id;
         int index;
     }
 }
