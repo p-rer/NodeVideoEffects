@@ -7,12 +7,13 @@ namespace NodeVideoEffects.Nodes
         public Add() : base(
             [
                 new(new Number(0, null, null, null), "Value1"),
-                new(new Number(0, null, null, null), "Value2") 
+                new(new Number(0, null, null, null), "Value2")
             ],
             [
                 new (new Number(0, null, null, null), "Result")
             ],
-            "Add") {}
+            "Add")
+        { }
 
         public override async Task Calculate()
         {
