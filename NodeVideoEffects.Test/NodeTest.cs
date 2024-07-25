@@ -35,4 +35,38 @@ namespace NodeVideoEffects.Test
             Assert.AreEqual((double)SubNode.Outputs[0].Value, -1.667);
         }
     }
+
+    [TestClass]
+    public class MulTest
+    {
+        Mul MulNode = new();
+        [TestMethod]
+        public async Task MulAsync()
+        {
+            await MulNode.Calculate();
+            Assert.AreEqual((double)MulNode.Outputs[0].Value, 0);
+
+            MulNode.SetInput(0, 4.23);
+            MulNode.SetInput(1, -3.1);
+            await MulNode.Calculate();
+            Assert.AreEqual((double)MulNode.Outputs[0].Value, -13.113);
+        }
+    }
+
+    [TestClass]
+    public class DivTest
+    {
+        Div DivNode = new();
+        [TestMethod]
+        public async Task DivAsync()
+        {
+            await DivNode.Calculate();
+            Assert.AreEqual((double)DivNode.Outputs[0].Value, 0);
+
+            DivNode.SetInput(0, 2.5);
+            DivNode.SetInput(1, -5.2);
+            await DivNode.Calculate();
+            Assert.AreEqual((double)DivNode.Outputs[0].Value, -0.48076923);
+        }
+    }
 }
