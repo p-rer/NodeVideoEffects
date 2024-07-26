@@ -1,6 +1,6 @@
 ﻿using NodeVideoEffects.Type;
 
-namespace NodeVideoEffects.Nodes
+namespace NodeVideoEffects.Nodes.Math
 {
     public class Mul : INode
     {

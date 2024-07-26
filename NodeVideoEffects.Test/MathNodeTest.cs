@@ -1,4 +1,4 @@
-﻿using NodeVideoEffects.Nodes;
+﻿using NodeVideoEffects.Nodes.Math;
 
 namespace NodeVideoEffects.Test
 {
@@ -67,6 +67,40 @@ namespace NodeVideoEffects.Test
             DivNode.SetInput(1, -5.2);
             await DivNode.Calculate();
             Assert.AreEqual((double)DivNode.Outputs[0].Value, -0.48076923);
+        }
+    }
+
+    [TestClass]
+    public class PowTest
+    {
+        Pow PowNode = new();
+        [TestMethod]
+        public async Task PowAsync()
+        {
+            await PowNode.Calculate();
+            Assert.AreEqual((double)PowNode.Outputs[0].Value, 1);
+
+            PowNode.SetInput(0, 4.32);
+            PowNode.SetInput(1, -2.11);
+            await PowNode.Calculate();
+            Assert.AreEqual((double)PowNode.Outputs[0].Value, 0.04561727);
+        }
+    }
+
+    [TestClass]
+    public class RootTest
+    {
+        Root RootNode = new();
+        [TestMethod]
+        public async Task RootAsync()
+        {
+            await RootNode.Calculate();
+            Assert.AreEqual((double)RootNode.Outputs[0].Value, 0);
+
+            RootNode.SetInput(0, -3.6);
+            RootNode.SetInput(1, 2.3);
+            await RootNode.Calculate();
+            Assert.AreEqual((double)RootNode.Outputs[0].Value, -1.74530227);
         }
     }
 }

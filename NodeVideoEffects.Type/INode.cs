@@ -19,13 +19,13 @@
             _outputs = outputs;
             _name = name;
             
-            _id = Guid.NewGuid().ToString("N");
-            _nodesDictionary.Add(_id, this);
+            //_id = Guid.NewGuid().ToString("N");
+            //_nodesDictionary.Add(_id, this);
         }
 
         ~INode()
         {
-            _nodesDictionary.Remove(_id);
+            //_nodesDictionary.Remove(_id);
         }
 
         public void SetInput(int index, Object value)
