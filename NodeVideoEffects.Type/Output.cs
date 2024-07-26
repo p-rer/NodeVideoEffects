@@ -13,7 +13,7 @@
             _name = name;
         }
 
-        public Object? Value { get { return _result; } set { _value.SetValue(value); } }
+        public Object? Value { get { return _result; } set { _value.SetValue(value); _result = _value.Value; } }
         public System.Type Type { get { return _value.Type; } }
         public String Name { get { return _name; } }
         public List<Connection> Connection { get { return _connection; } }

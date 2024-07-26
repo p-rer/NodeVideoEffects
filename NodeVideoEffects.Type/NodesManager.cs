@@ -2,7 +2,7 @@
 {
     public static class NodesManager
     {
-        private static Dictionary<string, INode>? _dictionary;
+        private static Dictionary<string, INode>? _dictionary = new();
 
         public static async Task<Object> GetOutputValue(string id, int index)
         {
