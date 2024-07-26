@@ -1,7 +1,5 @@
 ﻿using NodeVideoEffects.Type;
-using System.ComponentModel;
 using Vortice.Direct2D1;
-using Windows.Win32.Graphics.Gdi;
 
 namespace NodeVideoEffects.Nodes.Basic
 {
