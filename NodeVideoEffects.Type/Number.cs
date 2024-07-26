@@ -18,7 +18,6 @@
         }
 
         public object Value { get { return _value; } }
-        public System.Type Type { get { return typeof(double); } }
 
         public void _SetValue(object value)
         {

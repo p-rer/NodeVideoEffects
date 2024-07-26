@@ -2,7 +2,7 @@
 {
     public interface PortValue
     {
-        public System.Type Type { get; }
+        public System.Type Type { get => Value.GetType(); }
         public object Value { get; }
         public void SetValue(Object value)
         {

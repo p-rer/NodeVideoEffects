@@ -6,4 +6,10 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Reference Include="Vortice.Direct2D1">
+      <HintPath>..\..\..\ymm4\Vortice.Direct2D1.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>
