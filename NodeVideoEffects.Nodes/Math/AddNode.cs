@@ -2,9 +2,9 @@
 
 namespace NodeVideoEffects.Nodes.Math
 {
-    public class Add : INode
+    public class AddNode : INode
     {
-        public Add() : base(
+        public AddNode() : base(
             [
                 new(new Number(0, null, null, null), "Value1"),
                 new(new Number(0, null, null, null), "Value2")

@@ -2,9 +2,9 @@
 
 namespace NodeVideoEffects.Nodes.Math
 {
-    public class Root : INode
+    public class RootNode : INode
     {
-        public Root() : base(
+        public RootNode() : base(
             [
                 new(new Number(0, null, null, null), "Radicand"),
                 new(new Number(1, null, null, null), "Degree"),
