@@ -7,25 +7,25 @@
         private string _name;
 
         private string _id;
-        private static Dictionary<string, INode> _nodesDictionary;
 
         public Input[]? Inputs { get => _inputs; }
         public Output[]? Outputs { get => _outputs; }
         public string Name { get => _name; }
+        public string Id { get => _id; }
 
         public INode(Input[]? inputs, Output[]? outputs, string name)
         {
             _inputs = inputs;
             _outputs = outputs;
             _name = name;
-            
-            //_id = Guid.NewGuid().ToString("N");
-            //_nodesDictionary.Add(_id, this);
+
+            _id = Guid.NewGuid().ToString("N");
+            NodesManager.AddNode(_id, this);
         }
 
         ~INode()
         {
-            //_nodesDictionary.Remove(_id);
+            NodesManager.RemoveNode(_id);
         }
 
         public void SetInput(int index, Object value)
