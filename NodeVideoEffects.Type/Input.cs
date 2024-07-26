@@ -14,13 +14,18 @@ namespace NodeVideoEffects.Type
             _name = name;
         }
 
-        public Object Value { get { return _value.Value; } set {
-            if (_value != value)
+        public Object Value
+        {
+            get { return _value.Value; }
+            set
             {
-                _value.SetValue(value);
-                OnPropertyChanged(nameof(Value));
+                if (_value != value)
+                {
+                    _value.SetValue(value);
+                    OnPropertyChanged(nameof(Value));
+                }
             }
-        } }
+        }
         public System.Type Type { get { return _value.Type; } }
         public String Name { get { return _name; } }
         public Connection? Connection { get { return _connection; } }
