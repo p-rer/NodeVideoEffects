@@ -14,9 +14,16 @@ namespace NodeVideoEffects.Type
             _name = name;
         }
 
-        public Object Value
+        public Object? Value
         {
-            get { return _value.Value; }
+            get
+            {
+                if (_connection != null && !NodesManager.IsSuccessOutput(_connection.Value.id, _connection.Value.index))
+                {
+                    return null;
+                }
+                return _value.Value;
+            }
             set
             {
                 if (_value != value)
@@ -30,12 +37,12 @@ namespace NodeVideoEffects.Type
         public String Name { get { return _name; } }
         public Connection? Connection { get { return _connection; } }
 
-        public void AddConnection(string id, int index)
+        public void SetConnection(string id, int index)
         {
             _connection = new(id, index);
         }
 
-        public void RemoveConnection(string id, int index)
+        public void RemoveConnection(int index)
         {
             _connection = null;
         }

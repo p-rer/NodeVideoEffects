@@ -59,6 +59,16 @@ namespace NodeVideoEffects.Type
             _inputs[index].Value = value;
         }
 
+        public void SetInputConnection(int index, Connection connection)
+        {
+            _inputs[index].SetConnection(connection.id, connection.index);
+        }
+
+        public void RemoveInputConnection(int index)
+        {
+            _inputs[index].RemoveConnection(index);
+        }
+
         public abstract Task Calculate();
     }
 }
