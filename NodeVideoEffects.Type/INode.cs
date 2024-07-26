@@ -1,4 +1,6 @@
-﻿namespace NodeVideoEffects.Type
+﻿using System.ComponentModel;
+
+namespace NodeVideoEffects.Type
 {
     public abstract class INode
     {
@@ -21,11 +23,35 @@
 
             _id = Guid.NewGuid().ToString("N");
             NodesManager.AddNode(_id, this);
+
+            SubscribeToInputChanges();
         }
 
         ~INode()
         {
             NodesManager.RemoveNode(_id);
+        }
+
+        private void SubscribeToInputChanges()
+        {
+            if (_inputs == null)
+                return;
+
+            foreach (var input in _inputs)
+            {
+                input.PropertyChanged += Input_PropertyChanged;
+            }
+        }
+
+        private void Input_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(Input.Value))
+            {
+                foreach (Output output in _outputs)
+                {
+                    output.IsSuccess = false;
+                }
+            }
         }
 
         public void SetInput(int index, Object value)

@@ -4,6 +4,7 @@
     {
         private PortValue _value;
         private Object? _result = null;
+        private bool _isSuccess = false;
         private List<Connection> _connection;
         private String _name;
 
@@ -13,10 +14,11 @@
             _name = name;
         }
 
-        public Object? Value { get { return _result; } set { _value.SetValue(value); _result = _value.Value; } }
+        public Object? Value { get { return _isSuccess ? _result : null; } set { _value.SetValue(value); _result = _value.Value; _isSuccess = true; } }
         public System.Type Type { get { return _value.Type; } }
         public String Name { get { return _name; } }
         public List<Connection> Connection { get { return _connection; } }
+        public bool IsSuccess { get { return _isSuccess; } set => _isSuccess = value; }
 
         public void AddConnection(string id, int index)
         {

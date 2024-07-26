@@ -1,6 +1,8 @@
-﻿namespace NodeVideoEffects.Type
+﻿using System.ComponentModel;
+
+namespace NodeVideoEffects.Type
 {
-    public class Input
+    public class Input : INotifyPropertyChanged
     {
         private PortValue _value;
         private Connection? _connection;
@@ -12,7 +14,13 @@
             _name = name;
         }
 
-        public Object Value { get { return _value.Value; } set { _value.SetValue(value); } }
+        public Object Value { get { return _value.Value; } set {
+            if (_value != value)
+            {
+                _value.SetValue(value);
+                OnPropertyChanged(nameof(Value));
+            }
+        } }
         public System.Type Type { get { return _value.Type; } }
         public String Name { get { return _name; } }
         public Connection? Connection { get { return _connection; } }
@@ -25,6 +33,13 @@
         public void RemoveConnection(string id, int index)
         {
             _connection = null;
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }
