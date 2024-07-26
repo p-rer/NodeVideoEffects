@@ -6,7 +6,7 @@ namespace NodeVideoEffects.Test
     [TestClass]
     public class AddTest
     {
-        Add AddNode = new();
+        AddNode AddNode = new();
         [TestMethod]
         public async Task AddAsync()
         {
@@ -24,7 +24,7 @@ namespace NodeVideoEffects.Test
     [TestClass]
     public class SubTest
     {
-        Sub SubNode = new();
+        SubNode SubNode = new();
         [TestMethod]
         public async Task SubAsync()
         {
@@ -42,7 +42,7 @@ namespace NodeVideoEffects.Test
     [TestClass]
     public class MulTest
     {
-        Mul MulNode = new();
+        MulNode MulNode = new();
         [TestMethod]
         public async Task MulAsync()
         {
@@ -60,7 +60,7 @@ namespace NodeVideoEffects.Test
     [TestClass]
     public class DivTest
     {
-        Div DivNode = new();
+        DivNode DivNode = new();
         [TestMethod]
         public async Task DivAsync()
         {
@@ -78,7 +78,7 @@ namespace NodeVideoEffects.Test
     [TestClass]
     public class PowTest
     {
-        Pow PowNode = new();
+        PowNode PowNode = new();
         [TestMethod]
         public async Task PowAsync()
         {
@@ -96,7 +96,7 @@ namespace NodeVideoEffects.Test
     [TestClass]
     public class RootTest
     {
-        Root RootNode = new();
+        RootNode RootNode = new();
         [TestMethod]
         public async Task RootAsync()
         {
