@@ -59,6 +59,11 @@ namespace NodeVideoEffects.Type
             _inputs[index].Value = value;
         }
 
+        public virtual object? GetOutput(int index)
+        {
+            return _outputs[index].Value;
+        }
+
         public void SetInputConnection(int index, Connection connection)
         {
             _inputs[index].SetConnection(connection.id, connection.index);

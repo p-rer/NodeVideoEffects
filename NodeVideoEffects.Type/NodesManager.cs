@@ -15,9 +15,9 @@ namespace NodeVideoEffects.Type
         {
             INode node = _dictionary[id];
             if (node.Outputs[index].IsSuccess == true)
-                return node.Outputs[index].Value;
+                return node.GetOutput(index);
             await node.Calculate();
-            return node.Outputs[index].Value;
+            return node.GetOutput(index);
         }
 
         public static bool IsSuccessOutput(string id, int index) => _dictionary[id].Outputs[index].IsSuccess;

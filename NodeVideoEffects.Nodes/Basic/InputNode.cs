@@ -5,19 +5,29 @@ namespace NodeVideoEffects.Nodes.Basic
 {
     public class InputNode : INode
     {
-        public InputNode(ID2D1Bitmap bitmap) : base(
+        private ID2D1Image _image;
+
+        public InputNode() : base(
             [],
-            [new(new Bitmap(bitmap), "Input")],
+            [new(new Image(null), "Input")],
             "Input")
         {
         }
 
-        public void UpdateImage(ID2D1Bitmap bitmap)
+        public override object? GetOutput(int index)
         {
-            Outputs[0].Value = bitmap;
+            return _image;
         }
 
-        public override async Task Calculate() { return; }
+        public void SetImage(ID2D1Image image)
+        {
+            _image = image;
+        }
+
+        public override async Task Calculate()
+        {
+            return;
+        }
     }
 }
 

@@ -20,7 +20,7 @@ namespace NodeVideoEffects.Type
             {
                 if (_connection != null)
                 {
-                    var task = NodesManager.GetOutputValue(_connection.Value.id, _connection.Value.index);
+                    Task<object> task = NodesManager.GetOutputValue(_connection.Value.id, _connection.Value.index);
                     task.Wait();
                     return task.Result;
                 }
