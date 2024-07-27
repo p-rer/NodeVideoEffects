@@ -6,11 +6,12 @@
         public object Value { get; }
         public void SetValue(Object value)
         {
-            if (value.GetType() == Value.GetType())
+            try
             {
+                Convert.ChangeType(value, Type);
                 _SetValue(value);
             }
-            else
+            catch (Exception _)
             {
                 throw new TypeMismatchException(Value.GetType(), value.GetType());
             }

@@ -18,9 +18,11 @@ namespace NodeVideoEffects.Type
         {
             get
             {
-                if (_connection != null && !NodesManager.IsSuccessOutput(_connection.Value.id, _connection.Value.index))
+                if (_connection != null)
                 {
-                    return null;
+                    var task = NodesManager.GetOutputValue(_connection.Value.id, _connection.Value.index);
+                    task.Wait();
+                    return task.Result;
                 }
                 return _value.Value;
             }
