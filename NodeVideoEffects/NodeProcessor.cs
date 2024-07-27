@@ -25,13 +25,8 @@ namespace NodeVideoEffects
 
         public void SetInput(ID2D1Image input)
         {
-            Console.WriteLine(input);
             inputNode.SetImage(input);
-            Console.WriteLine(inputNode.GetOutput(0)??"null");
             outputNode.SetInputConnection(0, new(inputNode.Id, 0));
-            Console.WriteLine(outputNode.Inputs[0].Connection.Value.id??"null");
-            Console.WriteLine(outputNode.Inputs[0].Connection.Value.index);
-            Console.WriteLine(outputNode.Inputs[0].Value??"null");
             Output = (ID2D1Image)outputNode.Inputs[0].Value;
         }
 
