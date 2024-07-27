@@ -1,4 +1,5 @@
 ﻿using NodeVideoEffects.Type;
+using System.Reflection;
 using Vortice.Direct2D1;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
@@ -36,20 +37,9 @@ namespace NodeVideoEffects
             try
             {
                 typeof(NodesManager)
-                    .GetMethod("SetFrame", 
-                    System.Reflection.BindingFlags.NonPublic
-                    | System.Reflection.BindingFlags.Static)
-                    .Invoke(null, [frame]);
-                typeof(NodesManager)
-                    .GetMethod("SetLength",
-                    System.Reflection.BindingFlags.NonPublic
-                    | System.Reflection.BindingFlags.Static)
-                    .Invoke(null, [length]);
-                typeof(NodesManager)
-                    .GetMethod("SetFPS",
-                    System.Reflection.BindingFlags.NonPublic
-                    | System.Reflection.BindingFlags.Static)
-                    .Invoke(null, [fps]);
+                    .GetMethod("SetInfo",
+                    BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
+                    .Invoke(null, [effectDescription]);
             } catch (NullReferenceException e)
             {
 

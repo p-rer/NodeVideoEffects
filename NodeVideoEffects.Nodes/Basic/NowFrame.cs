@@ -23,11 +23,6 @@ namespace NodeVideoEffects.Nodes.Basic
             }
         }
 
-        public void UpdateFPS(int fps)
-        {
-            Outputs[0].Value = fps;
-        }
-
         public override async Task Calculate() { return; }
     }
 }

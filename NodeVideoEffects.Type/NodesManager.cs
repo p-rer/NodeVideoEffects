@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Reflection.Metadata.Ecma335;
+using YukkuriMovieMaker.Player.Video;
 
 namespace NodeVideoEffects.Type
 {
@@ -35,10 +36,14 @@ namespace NodeVideoEffects.Type
         public static int _LENGTH { get => _length; }
         public static int _FPS { get => _fps; }
 
-        internal static void SetFrame(int frame)
+        internal static void SetInfo(EffectDescription info)
         {
-            _frame = frame;
+            _frame = info.ItemPosition.Frame;
+            _length = info.ItemDuration.Frame;
+            _fps = info.FPS;
             OnFrameChanged(nameof(_FRAME));
+            OnLengthChanged(nameof(_LENGTH));
+            OnFPSChanged(nameof(_FPS));
         }
 
         internal static void SetLength(int length)
@@ -54,6 +59,16 @@ namespace NodeVideoEffects.Type
         public static event PropertyChangedEventHandler FrameChanged;
 
         private static void OnFrameChanged(string propertyName)
+        {
+            FrameChanged?.Invoke(null, new PropertyChangedEventArgs(propertyName));
+        }
+
+        private static void OnLengthChanged(string propertyName)
+        {
+            FrameChanged?.Invoke(null, new PropertyChangedEventArgs(propertyName));
+        }
+
+        private static void OnFPSChanged(string propertyName)
         {
             FrameChanged?.Invoke(null, new PropertyChangedEventArgs(propertyName));
         }
