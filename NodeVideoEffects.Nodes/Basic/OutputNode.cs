@@ -1,5 +1,4 @@
 ﻿using NodeVideoEffects.Type;
-using Vortice.Direct2D1;
 
 namespace NodeVideoEffects.Nodes.Basic
 {
@@ -17,8 +16,8 @@ namespace NodeVideoEffects.Nodes.Basic
             return Inputs[0].Value;
         }
 
-        public override async Task Calculate() 
-        { 
+        public override async Task Calculate()
+        {
             return;
         }
     }

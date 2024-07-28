@@ -40,7 +40,7 @@ namespace NodeVideoEffects.Test
             double result;
 
             addNode.SetInput(0, -12.0);
-            
+
             result = (double)await NodesManager.GetOutputValue(subNode.Id, 0);
             Assert.AreEqual(result, -444.0);
 

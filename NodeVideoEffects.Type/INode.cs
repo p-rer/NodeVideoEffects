@@ -42,7 +42,7 @@ namespace NodeVideoEffects.Type
             _outputs = outputs;
             _name = name;
 
-            _id = id??Guid.NewGuid().ToString("N");
+            _id = id ?? Guid.NewGuid().ToString("N");
             NodesManager.AddNode(_id, this);
 
             SubscribeToInputChanges();

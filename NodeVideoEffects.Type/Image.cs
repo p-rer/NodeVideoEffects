@@ -1,6 +1,4 @@
-﻿using Vortice.Direct2D1;
-
-namespace NodeVideoEffects.Type
+﻿namespace NodeVideoEffects.Type
 {
     public class Image : PortValue
     {

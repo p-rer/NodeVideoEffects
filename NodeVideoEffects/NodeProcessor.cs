@@ -1,5 +1,4 @@
-﻿using NodeVideoEffects.Nodes.Basic;
-using NodeVideoEffects.Type;
+﻿using NodeVideoEffects.Type;
 using System.Reflection;
 using Vortice.Direct2D1;
 using YukkuriMovieMaker.Commons;
@@ -49,7 +48,8 @@ namespace NodeVideoEffects
                     .GetMethod("SetInfo",
                     BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
                     .Invoke(null, [effectDescription]);
-            } catch (NullReferenceException e)
+            }
+            catch (NullReferenceException e)
             {
 
             }

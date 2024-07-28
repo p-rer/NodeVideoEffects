@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using System.Reflection.Metadata.Ecma335;
 using YukkuriMovieMaker.Player.Video;
 
 namespace NodeVideoEffects.Type
