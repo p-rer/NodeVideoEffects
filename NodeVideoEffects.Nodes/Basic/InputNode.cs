@@ -1,11 +1,12 @@
 ﻿using NodeVideoEffects.Type;
 using Vortice.Direct2D1;
+using YukkuriMovieMaker.Commons;
 
 namespace NodeVideoEffects.Nodes.Basic
 {
     public class InputNode : INode
     {
-        private ID2D1Image? _image;
+        private ImageAndContext? _image;
 
         public InputNode() : base(
             [],
@@ -19,9 +20,9 @@ namespace NodeVideoEffects.Nodes.Basic
             return _image;
         }
 
-        public void SetImage(ID2D1Image? image)
+        public void SetImage(ID2D1Image? image, IGraphicsDevicesAndContext? context)
         {
-            _image = image;
+            _image = new(image, context);
         }
 
         public override async Task Calculate()

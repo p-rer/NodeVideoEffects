@@ -9,6 +9,7 @@ namespace NodeVideoEffects
 {
     internal class NodeProcessor : IVideoEffectProcessor
     {
+        IGraphicsDevicesAndContext _context;
         readonly NodeVideoEffectsPlugin item;
         public ID2D1Image Output { set; get; }
 
@@ -18,22 +19,23 @@ namespace NodeVideoEffects
         Nodes.Basic.InputNode inputNode = new();
         Nodes.Basic.OutputNode outputNode = new();
 
-        public NodeProcessor(IGraphicsDevicesAndContext devices, NodeVideoEffectsPlugin item)
+        public NodeProcessor(IGraphicsDevicesAndContext context, NodeVideoEffectsPlugin item)
         {
+            _context = context;
             this.item = item;
         }
 
         public void SetInput(ID2D1Image input)
         {
-            inputNode.SetImage(input);
+            inputNode.SetImage(input, _context);
             outputNode.SetInputConnection(0, new(inputNode.Id, 0));
-            ID2D1Image _output = (ID2D1Image)outputNode.Inputs[0].Value;
+            ID2D1Image _output = ((ImageAndContext)outputNode.Inputs[0].Value).Image;
             Output = _output;
         }
 
         public void ClearInput()
         {
-            inputNode.SetImage(null);
+            inputNode.SetImage(null, null);
         }
 
         public DrawDescription Update(EffectDescription effectDescription)
