@@ -27,11 +27,13 @@ namespace NodeVideoEffects
         {
             inputNode.SetImage(input);
             outputNode.SetInputConnection(0, new(inputNode.Id, 0));
-            Output = (ID2D1Image)outputNode.Inputs[0].Value;
+            ID2D1Image _output = (ID2D1Image)outputNode.Inputs[0].Value;
+            Output = _output;
         }
 
         public void ClearInput()
         {
+            inputNode.SetImage(null);
         }
 
         public DrawDescription Update(EffectDescription effectDescription)
@@ -57,7 +59,6 @@ namespace NodeVideoEffects
         public void Dispose()
         {
             ClearInput();
-            if (Output != null) Output.Dispose();
         }
     }
 }
