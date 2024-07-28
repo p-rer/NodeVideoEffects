@@ -26,11 +26,11 @@ namespace NodeVideoEffects.Type
         }
         public static void NoticeInputConnectionAdd(string iid, int iindex, string oid, int oindex)
         {
-            _dictionary[oid].Outputs[oindex].Connection.Add(new(iid, iindex));
+            _dictionary[oid].Outputs[oindex].AddConnection(iid, iindex);
         }
         public static void NoticeInputConnectionRemove(string iid, int iindex, string oid, int oindex)
         {
-            _dictionary[oid].Outputs[oindex].Connection.Remove(new(iid, iindex));
+            _dictionary[oid].Outputs[oindex].RemoveConnection(iid, iindex);
         }
         public static void AddNode(string id, INode node) => _dictionary.Add(id, node);
         public static void RemoveNode(string id) => _dictionary.Remove(id);
