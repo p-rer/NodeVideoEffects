@@ -8,6 +8,13 @@
         private double _max;
         private int _digits;
 
+        /// <summary>
+        /// Create new number object
+        /// </summary>
+        /// <param name="_default">Default number</param>
+        /// <param name="_min">Min value</param>
+        /// <param name="_max">Max value</param>
+        /// <param name="_digits">Number of decimal places</param>
         public Number(double _default, double? _min, double? _max, int? _digits)
         {
             this._min = _min ?? Double.NaN;
@@ -17,6 +24,9 @@
             this._digits = _digits ?? 8;
         }
 
+        /// <summary>
+        /// Double value
+        /// </summary>
         public object Value { get { return _value; } }
 
         public void _SetValue(object value)

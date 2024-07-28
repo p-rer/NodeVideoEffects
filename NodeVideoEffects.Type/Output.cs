@@ -1,5 +1,8 @@
 ﻿namespace NodeVideoEffects.Type
 {
+    /// <summary>
+    /// Output port
+    /// </summary>
     public class Output
     {
         private PortValue _value;
@@ -8,16 +11,41 @@
         private List<Connection> _connection = new();
         private String _name;
 
+        /// <summary>
+        /// Create new output port object
+        /// </summary>
+        /// <param name="value">PortValue</param>
+        /// <param name="name">This port's name</param>
         public Output(PortValue value, string name)
         {
             _value = value;
             _name = name;
         }
 
+        /// <summary>
+        /// Value of this port
+        /// </summary>
+        /// <exception cref="ArrayTypeMismatchException">Type of set value is wrong.</exception>
         public Object? Value { get { return _isSuccess ? _result : null; } set { _value.SetValue(value); _result = _value.Value; _isSuccess = true; } }
+
+        /// <summary>
+        /// Type of output value
+        /// </summary>
         public System.Type Type { get { return _value.Type; } }
+
+        /// <summary>
+        /// Name of this output port
+        /// </summary>
         public String Name { get { return _name; } }
+
+        /// <summary>
+        /// List of node id and output port connected to this port
+        /// </summary>
         public List<Connection> Connection { get { return _connection; } }
+
+        /// <summary>
+        /// Was the calculation successful
+        /// </summary>
         public bool IsSuccess
         {
             get { return _isSuccess; }
@@ -34,11 +62,21 @@
             }
         }
 
+        /// <summary>
+        /// Set node and input port connected to this port
+        /// </summary>
+        /// <param name="id">ID of node will be connected to this port</param>
+        /// <param name="index">Index of input port will be connected to this port</param>
         public void AddConnection(string id, int index)
         {
             _connection.Add(new(id, index));
         }
 
+        /// <summary>
+        /// Remove node and input port connected to this port
+        /// </summary>
+        /// <param name="id">ID of node was connected to this port</param>
+        /// <param name="index">Index of input port was connected to this port</param>
         public void RemoveConnection(string id, int index)
         {
             _connection.Remove(new(id, index));

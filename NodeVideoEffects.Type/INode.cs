@@ -2,6 +2,9 @@
 
 namespace NodeVideoEffects.Type
 {
+    /// <summary>
+    /// Base class of nodes
+    /// </summary>
     public abstract class INode
     {
         private Input[]? _inputs;
@@ -10,11 +13,29 @@ namespace NodeVideoEffects.Type
 
         private string _id;
 
+        /// <summary>
+        /// Get input ports
+        /// </summary>
         public Input[]? Inputs { get => _inputs; }
-        public Output[]? Outputs { get => _outputs; }
-        public string Name { get => _name; }
-        public string Id { get => _id; }
 
+        /// <summary>
+        /// Get output ports
+        /// </summary>
+        public Output[]? Outputs { get => _outputs; }
+
+        /// <summary>
+        /// Name of this node
+        /// </summary>
+        public string Name { get => _name; }
+
+        public string Id { get => _id; }
+        /// <summary>
+        /// Create new node object
+        /// </summary>
+        /// <param name="inputs">Input ports</param>
+        /// <param name="outputs">Output ports</param>
+        /// <param name="name">Name of this node</param>
+        /// <param name="id">ID of this node(Set this null)</param>
         public INode(Input[]? inputs, Output[]? outputs, string name, string? id)
         {
             _inputs = inputs;
@@ -59,6 +80,12 @@ namespace NodeVideoEffects.Type
             _inputs[index].Value = value;
         }
 
+        /// <summary>
+        /// Get value of output port
+        /// </summary>
+        /// <remarks>Override this function if the output value is a constant</remarks>
+        /// <param name="index">Index of port</param>
+        /// <returns>Value of output port</returns>
         public virtual object? GetOutput(int index)
         {
             return _outputs[index].Value;
@@ -74,6 +101,10 @@ namespace NodeVideoEffects.Type
             _inputs[index].RemoveConnection(_id, index);
         }
 
+        /// <summary>
+        /// Calculation on this node (async)
+        /// </summary>
+        /// <returns>The calculation task</returns>
         public abstract Task Calculate();
     }
 }
