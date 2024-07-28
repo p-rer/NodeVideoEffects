@@ -41,25 +41,17 @@ namespace NodeVideoEffects.Type
 
         internal static void SetInfo(EffectDescription info)
         {
-            _frame = info.ItemPosition.Frame;
-            _length = info.ItemDuration.Frame;
-            _fps = info.FPS;
+            if (_frame != (_frame = info.ItemPosition.Frame))
             OnFrameChanged(nameof(_FRAME));
-            OnLengthChanged(nameof(_LENGTH));
-            OnFPSChanged(nameof(_FPS));
-        }
-
-        internal static void SetLength(int length)
-        {
-            _length = length;
-        }
-
-        internal static void SetFPS(int fps)
-        {
-            _fps = fps;
+            if (_length != (_length = info.ItemDuration.Frame))
+                OnFrameChanged(nameof(_LENGTH));
+            if (_fps != (_fps = info.FPS))
+                OnFrameChanged(nameof(_FPS));
         }
 
         public static event PropertyChangedEventHandler FrameChanged;
+        public static event PropertyChangedEventHandler LengthChanged;
+        public static event PropertyChangedEventHandler FPSChanged;
 
         private static void OnFrameChanged(string propertyName)
         {
@@ -68,12 +60,12 @@ namespace NodeVideoEffects.Type
 
         private static void OnLengthChanged(string propertyName)
         {
-            FrameChanged?.Invoke(null, new PropertyChangedEventArgs(propertyName));
+            LengthChanged?.Invoke(null, new PropertyChangedEventArgs(propertyName));
         }
 
         private static void OnFPSChanged(string propertyName)
         {
-            FrameChanged?.Invoke(null, new PropertyChangedEventArgs(propertyName));
+            FPSChanged?.Invoke(null, new PropertyChangedEventArgs(propertyName));
         }
     }
 }
