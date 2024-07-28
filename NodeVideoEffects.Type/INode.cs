@@ -15,13 +15,13 @@ namespace NodeVideoEffects.Type
         public string Name { get => _name; }
         public string Id { get => _id; }
 
-        public INode(Input[]? inputs, Output[]? outputs, string name)
+        public INode(Input[]? inputs, Output[]? outputs, string name, string? id)
         {
             _inputs = inputs;
             _outputs = outputs;
             _name = name;
 
-            _id = Guid.NewGuid().ToString("N");
+            _id = id??Guid.NewGuid().ToString("N");
             NodesManager.AddNode(_id, this);
 
             SubscribeToInputChanges();

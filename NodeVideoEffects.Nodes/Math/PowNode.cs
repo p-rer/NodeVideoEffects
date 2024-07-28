@@ -4,7 +4,7 @@ namespace NodeVideoEffects.Nodes.Math
 {
     public class PowNode : INode
     {
-        public PowNode() : base(
+        public PowNode(string? id = null) : base(
             [
                 new(new Number(0, null, null, null), "Base"),
                 new(new Number(0, null, null, null), "Exponent")
@@ -12,7 +12,7 @@ namespace NodeVideoEffects.Nodes.Math
             [
                 new (new Number(0, null, null, null), "Result")
             ],
-            "Pow")
+            "Pow", id)
         { }
 
         public override async Task Calculate()

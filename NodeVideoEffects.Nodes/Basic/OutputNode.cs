@@ -5,10 +5,10 @@ namespace NodeVideoEffects.Nodes.Basic
 {
     public class OutputNode : INode
     {
-        public OutputNode() : base(
+        public OutputNode(string? id = null) : base(
             [new(new Image(null), "Input")],
             [],
-            "Input")
+            "Input", id)
         {
         }
 
