@@ -5,7 +5,7 @@
         private PortValue _value;
         private Object? _result = null;
         private bool _isSuccess = false;
-        private List<Connection> _connection;
+        private List<Connection> _connection = new();
         private String _name;
 
         public Output(PortValue value, string name)
@@ -18,7 +18,21 @@
         public System.Type Type { get { return _value.Type; } }
         public String Name { get { return _name; } }
         public List<Connection> Connection { get { return _connection; } }
-        public bool IsSuccess { get { return _isSuccess; } set => _isSuccess = value; }
+        public bool IsSuccess
+        {
+            get { return _isSuccess; }
+            set
+            {
+                _isSuccess = value;
+                if (!_isSuccess && !(_connection.Count == 0))
+                {
+                    foreach (Connection connection in _connection)
+                    {
+                        NodesManager.NoticeOutputChanged(connection.id, connection.index);
+                    }
+                }
+            }
+        }
 
         public void AddConnection(string id, int index)
         {

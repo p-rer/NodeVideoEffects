@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Security.Cryptography;
 
 namespace NodeVideoEffects.Type
 {
@@ -39,13 +40,20 @@ namespace NodeVideoEffects.Type
         public String Name { get { return _name; } }
         public Connection? Connection { get { return _connection; } }
 
-        public void SetConnection(string id, int index)
+        public void UpdatedConnectionValue()
         {
-            _connection = new(id, index);
+            OnPropertyChanged(nameof(Value));
         }
 
-        public void RemoveConnection(int index)
+        public void SetConnection(string iid, int iindex, string oid, int oindex)
         {
+            _connection = new(oid, oindex);
+            NodesManager.NoticeInputConnectionAdd(iid, iindex, oid, oindex);
+        }
+
+        public void RemoveConnection(string id, int index)
+        {
+            NodesManager.NoticeInputConnectionRemove(id, index, _connection.Value.id, _connection.Value.index);
             _connection = null;
         }
 

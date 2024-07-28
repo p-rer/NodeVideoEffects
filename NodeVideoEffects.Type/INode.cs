@@ -61,12 +61,12 @@ namespace NodeVideoEffects.Type
 
         public void SetInputConnection(int index, Connection connection)
         {
-            _inputs[index].SetConnection(connection.id, connection.index);
+            _inputs[index].SetConnection(_id, index, connection.id, connection.index);
         }
 
         public void RemoveInputConnection(int index)
         {
-            _inputs[index].RemoveConnection(index);
+            _inputs[index].RemoveConnection(_id, index);
         }
 
         public abstract Task Calculate();
