@@ -21,13 +21,13 @@ namespace NodeVideoEffects
         public NodeProcessor(IGraphicsDevicesAndContext context, NodeVideoEffectsPlugin item)
         {
             _context = context;
+            outputNode.SetInputConnection(0, new(inputNode.Id, 0));
             this.item = item;
         }
 
         public void SetInput(ID2D1Image input)
         {
             inputNode.SetImage(input, _context);
-            outputNode.SetInputConnection(0, new(inputNode.Id, 0));
             ID2D1Image _output = ((ImageAndContext)outputNode.Inputs[0].Value).Image;
             Output = _output;
         }
