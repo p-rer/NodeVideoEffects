@@ -17,17 +17,16 @@ namespace NodeVideoEffects
 
         Nodes.Basic.InputNode inputNode = new();
         Nodes.Basic.OutputNode outputNode = new();
-        Nodes.Effect.GaussianBlurNode blurNode = new();
 
         public NodeProcessor(IGraphicsDevicesAndContext context, NodeVideoEffectsPlugin item)
         {
             _context = context.DeviceContext;
+            outputNode.SetInputConnection(0, new(inputNode.Id, 0));
             this.item = item;
         }
 
         public void SetInput(ID2D1Image input)
         {
-            outputNode.SetInputConnection(0, new(inputNode.Id, 0));
             inputNode.Outputs[0].Value = new ImageAndContext(input, _context);
             ID2D1Image _output = ((ImageAndContext)outputNode.Inputs[0].Value).Image;
             Output = _output;
