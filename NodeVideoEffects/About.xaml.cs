@@ -15,6 +15,7 @@ namespace NodeVideoEffects
 
         private void Close(object sender, RoutedEventArgs e)
         {
+            DialogResult = true;
             this.Close();
         }
     }
