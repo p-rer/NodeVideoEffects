@@ -12,8 +12,8 @@ namespace NodeVideoEffects.Type
         /// <summary>
         /// Device context
         /// </summary>
-        public IGraphicsDevicesAndContext? Context { get; init; }
-        public ImageAndContext(ID2D1Image? image, IGraphicsDevicesAndContext? context)
+        public ID2D1DeviceContext6? Context { get; }
+        public ImageAndContext(ID2D1Image? image, ID2D1DeviceContext6? context)
         {
             Image = image;
             Context = context;

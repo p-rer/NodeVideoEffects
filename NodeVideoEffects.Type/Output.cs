@@ -25,13 +25,8 @@
         /// <summary>
         /// Value of this port
         /// </summary>
-        /// <exception cref="ArrayTypeMismatchException">Type of set value is wrong.</exception>
-        public Object? Value { get { return _isSuccess ? _result : null; } set { _value.SetValue(value); _result = _value.Value; _isSuccess = true; } }
-
-        /// <summary>
-        /// Type of output value
-        /// </summary>
-        public System.Type Type { get { return _value.Type; } }
+        /// <exception cref="TypeMismatchException">Type of set value is wrong.</exception>
+        public Object? Value { get { return _isSuccess ? _result : null; } set { _value.SetValue(value); _result = _value.Value; IsSuccess = true; } }
 
         /// <summary>
         /// Name of this output port
@@ -51,8 +46,7 @@
             get { return _isSuccess; }
             set
             {
-                _isSuccess = value;
-                if (!_isSuccess && !(_connection.Count == 0))
+                if ((_isSuccess = value) && !(_connection.Count == 0))
                 {
                     foreach (Connection connection in _connection)
                     {

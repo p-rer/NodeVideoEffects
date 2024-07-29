@@ -5,7 +5,7 @@ namespace NodeVideoEffects.Type
     /// <summary>
     /// Base class of nodes
     /// </summary>
-    public abstract class INode
+    public abstract class INode : IDisposable
     {
         private Input[]? _inputs;
         private Output[]? _outputs;
@@ -106,5 +106,7 @@ namespace NodeVideoEffects.Type
         /// </summary>
         /// <returns>The calculation task</returns>
         public abstract Task Calculate();
+
+        public virtual void Dispose() { }
     }
 }

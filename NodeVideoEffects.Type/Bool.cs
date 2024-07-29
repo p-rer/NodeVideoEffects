@@ -12,6 +12,8 @@
             this._value = _value;
         }
 
+        public System.Type Type { get => typeof(bool); }
+
         /// <summary>
         /// Value
         /// </summary>

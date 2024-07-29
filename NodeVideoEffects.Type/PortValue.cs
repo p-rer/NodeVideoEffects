@@ -5,28 +5,20 @@
         /// <summary>
         /// Type of value
         /// </summary>
-        public System.Type Type { get => Value.GetType(); }
+        public System.Type Type { get; }
         /// <summary>
         /// Value of port
         /// </summary>
         public object Value { get; }
-        public void SetValue(Object value)
+        public void SetValue(object? value)
         {
-            try
-            {
-                Convert.ChangeType(value, Type);
-                _SetValue(value);
-            }
-            catch (Exception _)
-            {
-                throw new TypeMismatchException(Value.GetType(), value.GetType());
-            }
+            _SetValue(value);
         }
 
         /// <summary>
         /// Set value
         /// </summary>
         /// <param name="value">Value</param>
-        protected void _SetValue(object value);
+        protected void _SetValue(object? value);
     }
 }

@@ -7,6 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Reference Include="SharpGen.Runtime">
+      <HintPath>..\..\..\ymm4\SharpGen.Runtime.dll</HintPath>
+    </Reference>
     <Reference Include="Vortice.Direct2D1">
       <HintPath>..\..\..\ymm4\Vortice.Direct2D1.dll</HintPath>
     </Reference>

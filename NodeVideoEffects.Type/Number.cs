@@ -24,6 +24,8 @@
             this._digits = _digits ?? 8;
         }
 
+        public System.Type Type { get => typeof(double); }
+
         /// <summary>
         /// Double value
         /// </summary>

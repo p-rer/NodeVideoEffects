@@ -12,14 +12,16 @@
             this._value = _value;
         }
 
+        public System.Type Type { get => typeof(ImageAndContext); }
+
         /// <summary>
         /// Value contains image and device context
         /// </summary>
         public object Value { get { return _value; } }
 
-        public void _SetValue(object value)
+        public void _SetValue(object? value)
         {
-            _value = (ImageAndContext)value;
+            _value = (ImageAndContext?)value;
         }
     }
 }

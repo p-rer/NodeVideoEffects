@@ -15,16 +15,6 @@ namespace NodeVideoEffects.Nodes.Basic
         {
         }
 
-        public override object? GetOutput(int index)
-        {
-            return _image;
-        }
-
-        public void SetImage(ID2D1Image? image, IGraphicsDevicesAndContext? context)
-        {
-            _image = new(image, context);
-        }
-
         public override async Task Calculate()
         {
             return;

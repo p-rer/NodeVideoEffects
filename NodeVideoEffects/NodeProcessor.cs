@@ -8,7 +8,7 @@ namespace NodeVideoEffects
 {
     internal class NodeProcessor : IVideoEffectProcessor
     {
-        IGraphicsDevicesAndContext _context;
+        ID2D1DeviceContext6 _context;
         readonly NodeVideoEffectsPlugin item;
         public ID2D1Image Output { set; get; }
 
@@ -17,24 +17,25 @@ namespace NodeVideoEffects
 
         Nodes.Basic.InputNode inputNode = new();
         Nodes.Basic.OutputNode outputNode = new();
+        Nodes.Effect.GaussianBlurNode blurNode = new();
 
         public NodeProcessor(IGraphicsDevicesAndContext context, NodeVideoEffectsPlugin item)
         {
-            _context = context;
+            _context = context.DeviceContext;
             this.item = item;
         }
 
         public void SetInput(ID2D1Image input)
         {
-            inputNode.SetImage(input, _context);
             outputNode.SetInputConnection(0, new(inputNode.Id, 0));
+            inputNode.Outputs[0].Value = new ImageAndContext(input, _context);
             ID2D1Image _output = ((ImageAndContext)outputNode.Inputs[0].Value).Image;
             Output = _output;
         }
 
         public void ClearInput()
         {
-            inputNode.SetImage(null, null);
+            inputNode.Outputs[0].Value = null;
         }
 
         public DrawDescription Update(EffectDescription effectDescription)
@@ -61,6 +62,14 @@ namespace NodeVideoEffects
         public void Dispose()
         {
             ClearInput();
+            try
+            {
+                Output.Dispose();
+            }
+            catch
+            {
+
+            }
         }
     }
 }
