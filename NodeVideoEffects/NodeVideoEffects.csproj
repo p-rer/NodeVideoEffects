@@ -9,7 +9,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\NodeVideoEffects.Control\NodeVideoEffects.Control.csproj" />
+	  <ProjectReference Include="..\NodeVideoEffects.Editor\NodeVideoEffects.Editor.csproj" />
 	  <ProjectReference Include="..\NodeVideoEffects.Nodes\NodeVideoEffects.Nodes.csproj" />
 	  <ProjectReference Include="..\NodeVideoEffects.Type\NodeVideoEffects.Type.csproj" />
 	  <ProjectReference Include="..\YukkuriMovieMaker.Generator\YukkuriMovieMaker.Generator\YukkuriMovieMaker.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />

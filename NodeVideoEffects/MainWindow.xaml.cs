@@ -40,7 +40,7 @@ namespace NodeVideoEffects
 
         private void ShowAbout(object sender, RoutedEventArgs e)
         {
-            new About(tag, commit).ShowDialog();
+            new About(tag, commit) { Owner = this }.ShowDialog();
         }
     }
 }

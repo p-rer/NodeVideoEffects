@@ -4,7 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 
-namespace NodeVideoEffects
+namespace NodeVideoEffects.Editor
 {
     /// <summary>
     /// Interaction logic for UserControl1.xaml
@@ -103,7 +103,6 @@ namespace NodeVideoEffects
             translateTransform.Y += (rate - 1) * (translateTransform.Y - e.GetPosition(wrapper_canvas).Y);
             zoomValue.Text = ((int)(scale * 100)).ToString() + "%";
         }
-
         private new void PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             Regex regex = new("[^0-9]");

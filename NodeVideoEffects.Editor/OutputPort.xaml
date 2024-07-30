@@ -1,0 +1,17 @@
+﻿<UserControl x:Class="NodeVideoEffects.Editor.OutputPort"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:NodeVideoEffects.Editor"
+             mc:Ignorable="d" 
+             MinHeight="30" Width="250">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*" />
+            <ColumnDefinition Width="30" />
+        </Grid.ColumnDefinitions>
+        <Label Name="portName" Grid.Column="0" HorizontalContentAlignment="Right" />
+        <Ellipse Name="port" Grid.Column="1" Margin="5" />
+    </Grid>
+</UserControl>
