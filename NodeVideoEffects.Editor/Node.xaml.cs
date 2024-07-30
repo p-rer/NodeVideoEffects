@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace NodeVideoEffects.Control
+namespace NodeVideoEffects.Editor
 {
     /// <summary>
     /// Interaction logic for Node.xaml

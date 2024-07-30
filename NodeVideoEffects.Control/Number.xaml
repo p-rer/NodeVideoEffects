@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="NodeVideoEffects.Control.OutputPort"
+﻿<UserControl x:Class="NodeVideoEffects.Control.Number"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -6,11 +6,10 @@
              xmlns:local="clr-namespace:NodeVideoEffects.Control"
              mc:Ignorable="d" 
              MinHeight="30" Width="250">
+    <UserControl.Resources>
+        <ResourceDictionary Source="Style/TextBox.xaml" />
+    </UserControl.Resources>
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="1*" />
-            <ColumnDefinition Width="30" />
-        </Grid.ColumnDefinitions>
-        <Ellipse Name="port" Grid.Column="1" Margin="5" />
+        <TextBox Name="box" Text="{Binding Value}" PreviewTextInput="PreviewTextInput" KeyDown="ValueSubmit" DataObject.Pasting="TextBoxPasting" />
     </Grid>
 </UserControl>

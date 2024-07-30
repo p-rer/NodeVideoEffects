@@ -13,14 +13,14 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace NodeVideoEffects.Control
+namespace NodeVideoEffects.Editor
 {
     /// <summary>
     /// Interaction logic for OutputPort.xaml
     /// </summary>
-    public partial class InputPort : UserControl
+    public partial class OutputPort : UserControl
     {
-        public InputPort()
+        public OutputPort()
         {
             InitializeComponent();
         }

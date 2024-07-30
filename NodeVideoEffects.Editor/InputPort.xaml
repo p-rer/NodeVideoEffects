@@ -1,9 +1,9 @@
-﻿<UserControl x:Class="NodeVideoEffects.Control.InputPort"
+﻿<UserControl x:Class="NodeVideoEffects.Editor.InputPort"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:NodeVideoEffects.Control"
+             xmlns:local="clr-namespace:NodeVideoEffects.Editor"
              mc:Ignorable="d" 
              MinHeight="30" Width="250">
     <Grid>
@@ -12,5 +12,9 @@
             <ColumnDefinition Width="1*" />
         </Grid.ColumnDefinitions>
         <Ellipse Name="port" Grid.Column="0" Margin="5" />
+        <StackPanel Orientation="Horizontal" Grid.Column="1">
+            <Label Name="portName"/>
+            <ContentControl Name="portControl" />
+        </StackPanel>
     </Grid>
 </UserControl>

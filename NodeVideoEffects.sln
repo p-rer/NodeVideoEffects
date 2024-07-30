@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NodeVideoEffects", "NodeVid
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NodeVideoEffects.UITest", "NodeVideoEffects.UITest\NodeVideoEffects.UITest.csproj", "{3C0FF06D-9AB9-4080-BBF5-96DF8AEFBE93}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NodeVideoEffects.Control", "NodeVideoEffects.Control\NodeVideoEffects.Control.csproj", "{1DF9E1C3-83CC-460D-9A2D-1C8C530EEA89}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NodeVideoEffects.Editor", "NodeVideoEffects.Editor\NodeVideoEffects.Editor.csproj", "{1DF9E1C3-83CC-460D-9A2D-1C8C530EEA89}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{499DAC14-04C5-4431-8899-BD5FBDD5EDB7}"
 	ProjectSection(SolutionItems) = preProject
@@ -21,6 +21,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YukkuriMovieMaker.Generator", "YukkuriMovieMaker.Generator\YukkuriMovieMaker.Generator\YukkuriMovieMaker.Generator.csproj", "{99B4D6EF-6621-43C1-8A6A-C07CB716621F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NodeVideoEffects.Nodes", "NodeVideoEffects.Nodes\NodeVideoEffects.Nodes.csproj", "{7F1EEFCC-84F4-488F-8386-3F9DEFE83047}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NodeVideoEffects.Control", "NodeVideoEffects.Control\NodeVideoEffects.Control.csproj", "{30C6F0EA-23AC-4AE1-BEA0-611A102ACF68}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -56,6 +58,10 @@ Global
 		{7F1EEFCC-84F4-488F-8386-3F9DEFE83047}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7F1EEFCC-84F4-488F-8386-3F9DEFE83047}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7F1EEFCC-84F4-488F-8386-3F9DEFE83047}.Release|Any CPU.Build.0 = Release|Any CPU
+		{30C6F0EA-23AC-4AE1-BEA0-611A102ACF68}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{30C6F0EA-23AC-4AE1-BEA0-611A102ACF68}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{30C6F0EA-23AC-4AE1-BEA0-611A102ACF68}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{30C6F0EA-23AC-4AE1-BEA0-611A102ACF68}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

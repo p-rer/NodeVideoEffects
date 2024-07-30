@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NodeVideoEffects.Type;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,16 +14,19 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace NodeVideoEffects.Control
+namespace NodeVideoEffects.Editor
 {
     /// <summary>
     /// Interaction logic for OutputPort.xaml
     /// </summary>
-    public partial class OutputPort : UserControl
+    public partial class InputPort : UserControl
     {
-        public OutputPort()
+        public InputPort(Input input)
         {
             InitializeComponent();
+            
+            portName.Content = input.Name;
+            //portControl.Content = control;
         }
     }
 }
