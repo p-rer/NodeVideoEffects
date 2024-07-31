@@ -18,9 +18,9 @@ using System.Windows.Shapes;
 namespace NodeVideoEffects.Control
 {
     /// <summary>
-    /// Interaction logic for Number.xaml
+    /// Interaction logic for NumberPort.xaml
     /// </summary>
-    public partial class Number : UserControl
+    public partial class NumberPort : UserControl, IControl
     {
         double _def;
         double _value;
@@ -28,7 +28,7 @@ namespace NodeVideoEffects.Control
         double _max;
         int _dig;
 
-        public Number(double def, double value, double min, double max, int dig)
+        public NumberPort(double def, double value, double min, double max, int dig)
         {
             InitializeComponent();
 
@@ -37,19 +37,9 @@ namespace NodeVideoEffects.Control
             _min = min;
             _max = max;
             _dig = dig;
+            box.Text = Math.Round(_value, _dig).ToString("F" + _dig);
         }
         
-        public string Value
-        {
-            get { return Math.Round(_value, _dig).ToString("F"+_dig); }
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
         private new void PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             Regex regex = new("[^0-9]");
@@ -89,7 +79,7 @@ namespace NodeVideoEffects.Control
                     value = _value;
                 }
                 _value = value;
-                OnPropertyChanged("TextBoxContent");
+                box.Text = Math.Round(_value, _dig).ToString("F" + _dig);
 
                 Keyboard.ClearFocus();
             }

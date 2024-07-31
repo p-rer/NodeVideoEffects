@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Update="Number.xaml.cs">
+    <Compile Update="NumberPort.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>

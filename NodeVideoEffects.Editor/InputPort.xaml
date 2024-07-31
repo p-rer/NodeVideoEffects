@@ -11,7 +11,7 @@
             <ColumnDefinition Width="30" />
             <ColumnDefinition Width="1*" />
         </Grid.ColumnDefinitions>
-        <Ellipse Name="port" Grid.Column="0" Margin="5" />
+        <Ellipse Fill="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" Name="port" Grid.Column="0" Margin="10" />
         <StackPanel Orientation="Horizontal" Grid.Column="1">
             <Label Name="portName"/>
             <ContentControl Name="portControl" />

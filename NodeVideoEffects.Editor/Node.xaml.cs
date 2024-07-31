@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NodeVideoEffects.Type;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,9 +21,18 @@ namespace NodeVideoEffects.Editor
     /// </summary>
     public partial class Node : UserControl
     {
-        public Node()
+        public Node(INode node)
         {
             InitializeComponent();
+            nodeName.Content = node.Name;
+            foreach (Output output in node.Outputs)
+            {
+                inputsPanel.Children.Add(new OutputPort(output));
+            }
+            foreach (Input input in node.Inputs)
+            {
+                inputsPanel.Children.Add(new InputPort(input));
+            }
         }
     }
 }

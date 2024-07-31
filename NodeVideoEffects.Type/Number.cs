@@ -1,4 +1,6 @@
-﻿namespace NodeVideoEffects.Type
+﻿using NodeVideoEffects.Control;
+
+namespace NodeVideoEffects.Type
 {
     public class Number : PortValue
     {
@@ -42,5 +44,7 @@
 
             _value = Math.Round((double)value, _digits);
         }
+
+        public IControl? Control => new NumberPort(_default, _value, _min, _max, _digits);
     }
 }

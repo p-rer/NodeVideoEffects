@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using NodeVideoEffects.Editor;
+using NodeVideoEffects.Nodes.Math;
+using System.Windows;
 using System.Windows.Media;
 using System.Windows.Shapes;
 
@@ -15,13 +17,8 @@ namespace NodeVideoEffects.UITest
 
             var editor = new NodeEditor();
 
-            var rect = new Rectangle()
-            {
-                Width = 200,
-                Height = 200,
-                Fill = new SolidColorBrush(Colors.Red)
-            };
-            editor.AddChildren(rect, 20, 50);
+            var node = new AddNode();
+            editor.AddChildren(new Node(node), 20, 50);
 
             editor.ShowDialog();
             this.Close();

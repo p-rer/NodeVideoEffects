@@ -19,7 +19,14 @@
                 <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.ActiveBorderColorKey}}" />
             </Label.BorderBrush>
         </Label>
-        <Ellipse Name="categorySign" Grid.Row="0" Height="15" Width="14" Margin="0,5,5,5" HorizontalAlignment="Right" />
-        <StackPanel Name="portsPanel" Grid.Row="2" VerticalAlignment="Top" />
+        <Ellipse Name="categorySign" Grid.Row="0" Height="15" Width="15" Margin="0,5,5,5" HorizontalAlignment="Right" >
+            <Ellipse.Stroke>
+                <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.ControlTextColorKey}}"/>
+            </Ellipse.Stroke>
+        </Ellipse>
+        <StackPanel Name="portsPanel" Grid.Row="2" VerticalAlignment="Top">
+            <StackPanel Name="outputsPanel" />
+            <StackPanel Name="inputsPanel" />
+        </StackPanel>
     </Grid>
 </UserControl>

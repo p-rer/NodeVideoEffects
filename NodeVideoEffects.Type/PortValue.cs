@@ -1,4 +1,6 @@
-﻿namespace NodeVideoEffects.Type
+﻿using NodeVideoEffects.Control;
+
+namespace NodeVideoEffects.Type
 {
     public interface PortValue
     {
@@ -20,5 +22,10 @@
         /// </summary>
         /// <param name="value">Value</param>
         protected void _SetValue(object? value);
+
+        /// <summary>
+        /// Control for input port
+        /// </summary>
+        public IControl? Control { get; }
     }
 }

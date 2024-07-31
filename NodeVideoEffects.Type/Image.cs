@@ -1,4 +1,6 @@
-﻿namespace NodeVideoEffects.Type
+﻿using NodeVideoEffects.Control;
+
+namespace NodeVideoEffects.Type
 {
     public class Image : PortValue
     {
@@ -23,5 +25,7 @@
         {
             _value = (ImageAndContext?)value;
         }
+
+        public IControl? Control => null;
     }
 }

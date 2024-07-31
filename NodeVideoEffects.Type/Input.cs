@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using NodeVideoEffects.Control;
+using System.ComponentModel;
 
 namespace NodeVideoEffects.Type
 {
@@ -57,6 +58,11 @@ namespace NodeVideoEffects.Type
         /// Name of this input port
         /// </summary>
         public String Name { get { return _name; } }
+
+        /// <summary>
+        /// Control of this input port
+        /// </summary>
+        public IControl? Control { get => _value.Control; }
 
         /// <summary>
         /// Node id and output port connected to this port

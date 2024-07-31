@@ -26,7 +26,7 @@ namespace NodeVideoEffects.Editor
             InitializeComponent();
             
             portName.Content = input.Name;
-            //portControl.Content = control;
+            portControl.Content = input.Control;
         }
     }
 }

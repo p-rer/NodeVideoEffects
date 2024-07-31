@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NodeVideoEffects.Type;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,9 +21,10 @@ namespace NodeVideoEffects.Editor
     /// </summary>
     public partial class OutputPort : UserControl
     {
-        public OutputPort()
+        public OutputPort(Output output)
         {
             InitializeComponent();
+            portName.Content = output.Name;
         }
     }
 }
