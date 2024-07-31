@@ -1,3 +1,4 @@
+using System.Collections.Specialized;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -36,6 +37,16 @@ namespace NodeVideoEffects.Editor
             this.MouseMove += new MouseEventHandler(Canvas_MouseMove);
 
             zoomValue.Text = ((int)(scale * 100)).ToString() + "%";
+
+            this.Loaded += EditorLoaded;
+        }
+
+        private void EditorLoaded(object sender, RoutedEventArgs e)
+        {
+            UpdateScrollBar();
+
+            canvas.LayoutUpdated += (s, args) => UpdateScrollBar();
+            wrapper_canvas.SizeChanged += (s, args) => UpdateScrollBar();
         }
 
         public void AddChildren(Object obj, double x, double y)
@@ -43,6 +54,55 @@ namespace NodeVideoEffects.Editor
             Canvas.SetLeft((UIElement)obj, x);
             Canvas.SetTop((UIElement)obj, y);
             canvas.Children.Add((UIElement)obj);
+        }
+
+        public void UpdateScrollBar()
+        {
+            double minX = double.MaxValue;
+            double minY = double.MaxValue;
+            double maxX = double.MinValue;
+            double maxY = double.MinValue;
+
+            foreach (UIElement element in canvas.Children)
+            {
+                if (element is FrameworkElement)
+                {
+                    var fe = (FrameworkElement)element;
+
+                    double left = Canvas.GetLeft(fe) * scale + translateTransform.X;
+                    double top = Canvas.GetTop(fe) * scale + translateTransform.Y;
+                    double right = left + fe.ActualWidth * scale;
+                    double bottom = top + fe.ActualHeight * scale;
+
+                    if (left < minX) minX = left;
+                    if (top < minY) minY = top;
+                    if (right > maxX) maxX = right;
+                    if (bottom > maxY) maxY = bottom;
+                }
+            }
+
+            if (minX == double.MaxValue || minY == double.MaxValue || maxX == double.MinValue || maxY == double.MinValue)
+            {
+                wrapRect = Rect.Empty;
+            }
+            else
+            {
+                wrapRect = new Rect(
+                    new Point(
+                        minX < 0 ? minX : 0,
+                        minY < 0 ? minY : 0),
+                    new Point(
+                        maxX > wrapper_canvas.ActualWidth ? maxX : wrapper_canvas.ActualWidth,
+                        maxY > wrapper_canvas.ActualHeight ? maxY : wrapper_canvas.ActualHeight
+                    )
+                );
+            }
+
+            horizontalScrollBar.Width = (wrapper_canvas.ActualWidth * wrapper_canvas.ActualWidth) / wrapRect.Width;
+            horizontalScrollBar.Margin = new Thickness(-wrapRect.Left * wrapper_canvas.ActualWidth / wrapRect.Width, 0, 0, 0);
+
+            verticalScrollBar.Height = (wrapper_canvas.ActualHeight * wrapper_canvas.ActualHeight) / wrapRect.Height;
+            verticalScrollBar.Margin = new Thickness(0, -wrapRect.Top * wrapper_canvas.ActualHeight / wrapRect.Height, 0, 0);
         }
 
         private void Canvas_MouseWheel(object sender, MouseWheelEventArgs e)
@@ -75,6 +135,8 @@ namespace NodeVideoEffects.Editor
                 translateTransform.X += p.X - lastPos.X;
                 translateTransform.Y += p.Y - lastPos.Y;
                 lastPos = p;
+
+                UpdateScrollBar();
             }
         }
 
