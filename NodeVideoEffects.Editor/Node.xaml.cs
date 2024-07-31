@@ -38,7 +38,9 @@ namespace NodeVideoEffects.Editor
                 inputsPanel.Children.Add(new InputPort(input));
             }
             Loaded += (s, e) =>
-            wrapperCanvas = VisualTreeHelper.GetParent(VisualTreeHelper.GetParent(this) as Canvas) as Canvas;
+            {
+                wrapperCanvas = VisualTreeHelper.GetParent(this) as Canvas;
+            };
         }
 
         private void Node_Loaded(object sender, RoutedEventArgs e) => throw new NotImplementedException();
