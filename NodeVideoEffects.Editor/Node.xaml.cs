@@ -23,7 +23,7 @@ namespace NodeVideoEffects.Editor
     public partial class Node : UserControl
     {
         private bool isDragging;
-        private Point clickPosition;
+        private Canvas wrapperCanvas;
         private Point lastPos;
         public Node(INode node)
         {
@@ -37,14 +37,18 @@ namespace NodeVideoEffects.Editor
             {
                 inputsPanel.Children.Add(new InputPort(input));
             }
+            Loaded += (s, e) =>
+            wrapperCanvas = VisualTreeHelper.GetParent(VisualTreeHelper.GetParent(this) as Canvas) as Canvas;
         }
+
+        private void Node_Loaded(object sender, RoutedEventArgs e) => throw new NotImplementedException();
 
         private void Node_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (sender is Node node)
             {
                 isDragging = true;
-                lastPos = new(e.GetPosition(VisualTreeHelper.GetParent(VisualTreeHelper.GetParent(this) as Canvas) as Canvas).X, e.GetPosition(VisualTreeHelper.GetParent(VisualTreeHelper.GetParent(this) as Canvas) as Canvas).Y);
+                lastPos = new(e.GetPosition(wrapperCanvas).X, e.GetPosition(wrapperCanvas).Y);
                 node.CaptureMouse();
                 e.Handled = true;
             }
@@ -54,7 +58,7 @@ namespace NodeVideoEffects.Editor
         {
             if (isDragging && sender is Node node)
             {
-                Point p = new(e.GetPosition(VisualTreeHelper.GetParent(VisualTreeHelper.GetParent(this) as Canvas) as Canvas).X, e.GetPosition(VisualTreeHelper.GetParent(VisualTreeHelper.GetParent(this) as Canvas) as Canvas).Y);
+                Point p = new(e.GetPosition(wrapperCanvas).X, e.GetPosition(wrapperCanvas).Y);
                 Canvas.SetLeft(node, Canvas.GetLeft(node) + p.X - lastPos.X);
                 Canvas.SetTop(node, Canvas.GetTop(node) + p.Y - lastPos.Y);
                 lastPos = p;
