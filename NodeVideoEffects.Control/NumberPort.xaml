@@ -10,6 +10,7 @@
         <ResourceDictionary Source="Style/TextBox.xaml" />
     </UserControl.Resources>
     <Grid>
-        <TextBox Name="box" PreviewTextInput="PreviewTextInput" KeyDown="ValueSubmit" DataObject.Pasting="TextBoxPasting" VerticalAlignment="Center" VerticalContentAlignment="Center" />
+        <TextBox Name="box" PreviewTextInput="PreviewTextInput" KeyDown="ValueSubmit" DataObject.Pasting="TextBoxPasting"
+                 VerticalAlignment="Center" VerticalContentAlignment="Center" />
     </Grid>
 </UserControl>

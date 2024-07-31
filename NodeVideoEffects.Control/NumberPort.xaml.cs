@@ -28,6 +28,9 @@ namespace NodeVideoEffects.Control
         double _max;
         int _dig;
 
+        bool isDragging = false;
+        Point lastPoint;
+
         public NumberPort(double def, double value, double min, double max, int dig)
         {
             InitializeComponent();
@@ -42,7 +45,7 @@ namespace NodeVideoEffects.Control
         
         private new void PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            Regex regex = new("[^0-9]");
+            Regex regex = new("[^0-9.-]+");
             e.Handled = regex.IsMatch(e.Text);
         }
 
@@ -51,7 +54,7 @@ namespace NodeVideoEffects.Control
             if (e.DataObject.GetDataPresent(typeof(String)))
             {
                 String text = (String)e.DataObject.GetData(typeof(String));
-                if (new Regex("[^0-9]").IsMatch(text))
+                if (new Regex("[^0-9.-]+").IsMatch(text))
                 {
                     e.CancelCommand();
                 }
@@ -66,7 +69,10 @@ namespace NodeVideoEffects.Control
         {
             if (e.Key == Key.Return || e.Key == Key.Enter)
             {
-                if (box.Text == "") box.Text = _value.ToString("F" + _dig);
+                if (box.Text == "") {
+                    box.Text = _def.ToString("F" + _dig);
+                    _value = _def;
+                }
                 double value;
                 try
                 {
