@@ -11,7 +11,7 @@
             <ColumnDefinition Width="1*" />
             <ColumnDefinition Width="30" />
         </Grid.ColumnDefinitions>
-        <Label Name="portName" Grid.Column="0" HorizontalContentAlignment="Right" />
+        <Label Name="portName" Grid.Column="0" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
         <Ellipse Fill="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" Name="port" Grid.Column="1" Margin="10" />
     </Grid>
 </UserControl>

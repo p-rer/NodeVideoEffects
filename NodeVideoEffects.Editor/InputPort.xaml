@@ -13,8 +13,8 @@
         </Grid.ColumnDefinitions>
         <Ellipse Fill="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" Name="port" Grid.Column="0" Margin="10" />
         <StackPanel Orientation="Horizontal" Grid.Column="1">
-            <Label Name="portName"/>
-            <ContentControl Name="portControl" />
+            <Label Name="portName" VerticalContentAlignment="Center"/>
+            <ContentControl Name="portControl" VerticalContentAlignment="Center"/>
         </StackPanel>
     </Grid>
 </UserControl>

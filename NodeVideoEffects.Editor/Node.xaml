@@ -7,7 +7,7 @@
              mc:Ignorable="d"
              MinHeight="25" Width="250"
              Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
-             BorderBrush="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"
+             BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
              BorderThickness="1"
              MouseLeftButtonDown="Node_MouseLeftButtonDown"
              MouseMove="Node_MouseMove"
