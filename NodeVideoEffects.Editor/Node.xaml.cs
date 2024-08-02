@@ -42,9 +42,11 @@ namespace NodeVideoEffects.Editor
             _outputs = node.Outputs;
             foreach (Output output in _outputs)
             {
-                OutputPort outputPort = new(output);
+                int index = 0;
+                OutputPort outputPort = new(output, node.Id, index);
                 _outputPorts.Add(outputPort);
                 outputsPanel.Children.Add(outputPort);
+                index++;
             }
 
             foreach (Input input in _inputs)

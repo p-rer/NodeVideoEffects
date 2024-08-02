@@ -24,12 +24,13 @@ namespace NodeVideoEffects.Editor
     public partial class InputPort : UserControl
     {
         private IControl? control;
+        private Input? _input;
 
         public event PropertyChangedEventHandler PropertyChanged;
         public InputPort(Input input)
         {
             InitializeComponent();
-            
+            _input = input;
             portName.Content = input.Name;
             control = input.Control;
             control.PropertyChanged += OnControlPropertyChanged;
@@ -48,7 +49,8 @@ namespace NodeVideoEffects.Editor
 
         private void OnControlPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value)));
+            _input.Value = control.Value;
+            PropertyChanged?.Invoke(_input, new PropertyChangedEventArgs(nameof(Value)));
         }
     }
 }

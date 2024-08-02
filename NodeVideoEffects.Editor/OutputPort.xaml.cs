@@ -21,10 +21,23 @@ namespace NodeVideoEffects.Editor
     /// </summary>
     public partial class OutputPort : UserControl
     {
-        public OutputPort(Output output)
+        string _id;
+        int _index;
+        public OutputPort(Output output, string id, int index)
         {
             InitializeComponent();
+            _id = id;
+            _index = index;
             portName.Content = output.Name;
+            ToolTip = new();
+            ToolTipOpening += OutputPort_ToolTipOpening;
+        }
+
+        private void OutputPort_ToolTipOpening(object sender, ToolTipEventArgs e)
+        {
+            Task<object> @object = NodesManager.GetOutputValue(_id, _index);
+            @object.Wait();
+            ToolTip = @object.Result;
         }
     }
 }
