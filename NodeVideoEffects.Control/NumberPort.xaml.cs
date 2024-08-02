@@ -65,13 +65,16 @@ namespace NodeVideoEffects.Control
             {
                 v = _def;
             }
-            try
+            else
             {
-                v = double.Parse(box.Text);
-            }
-            catch (Exception)
-            {
-                v = _value;
+                try
+                {
+                    v = double.Parse(box.Text);
+                }
+                catch (Exception)
+                {
+                    v = _value;
+                }
             }
             Update(v);
         }
@@ -142,6 +145,7 @@ namespace NodeVideoEffects.Control
         {
             isEditing = false;
             SetCursorPos((int)startPoint.X, (int)startPoint.Y);
+            Update();
         }
 
         private new void PreviewTextInput(object sender, TextCompositionEventArgs e)
