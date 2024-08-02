@@ -1,6 +1,7 @@
 ﻿using NodeVideoEffects.Type;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,6 +23,14 @@ namespace NodeVideoEffects.Editor
     /// </summary>
     public partial class Node : UserControl
     {
+        private Input[]? _inputs;
+        private Output[]? _outputs;
+        private List<InputPort> _inputPorts = new();
+        private List<OutputPort> _outputPorts = new();
+
+        private string _name;
+        private string _id;
+
         private bool isDragging;
         private Canvas wrapperCanvas;
         private Point lastPos;
@@ -29,13 +38,21 @@ namespace NodeVideoEffects.Editor
         {
             InitializeComponent();
             nodeName.Content = node.Name;
-            foreach (Output output in node.Outputs)
+            _inputs = node.Inputs;
+            _outputs = node.Outputs;
+            foreach (Output output in _outputs)
             {
-                inputsPanel.Children.Add(new OutputPort(output));
+                OutputPort outputPort = new(output);
+                _outputPorts.Add(outputPort);
+                outputsPanel.Children.Add(outputPort);
             }
-            foreach (Input input in node.Inputs)
+
+            foreach (Input input in _inputs)
             {
-                inputsPanel.Children.Add(new InputPort(input));
+                InputPort inputPort = new (input);
+                inputPort.PropertyChanged += Input_PropertyChanged;
+                _inputPorts.Add(inputPort);
+                inputsPanel.Children.Add(inputPort);
             }
             Loaded += (s, e) =>
             {
@@ -43,8 +60,18 @@ namespace NodeVideoEffects.Editor
             };
         }
 
-        private void Node_Loaded(object sender, RoutedEventArgs e) => throw new NotImplementedException();
+        private void Input_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(Input.Value))
+            {
+                foreach (Output output in _outputs)
+                {
+                    output.IsSuccess = false;
+                }
+            }
+        }
 
+        #region Move node
         private void Node_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (sender is Node node)
@@ -77,5 +104,6 @@ namespace NodeVideoEffects.Editor
                 e.Handled = true;
             }
         }
+        #endregion
     }
 }

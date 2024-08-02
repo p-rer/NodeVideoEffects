@@ -34,8 +34,12 @@ namespace NodeVideoEffects.Control
         private bool isEditing = false;
         private Point startPoint;
 
+        public event PropertyChangedEventHandler PropertyChanged;
+
         [DllImport("User32.dll")]
         private static extern bool SetCursorPos(int X, int Y);
+
+        public object? Value { get => _value; set => Update((double?)value ?? _def); }
 
         public NumberPort(double def, double value, double min, double max, int dig)
         {
@@ -47,6 +51,40 @@ namespace NodeVideoEffects.Control
             _max = max;
             _dig = dig;
             box.Text = Math.Round(_value, _dig).ToString("F" + _dig);
+        }
+
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        private void Update()
+        {
+            double v;
+            if (box.Text == "")
+            {
+                v = _def;
+            }
+            try
+            {
+                v = double.Parse(box.Text);
+            }
+            catch (Exception)
+            {
+                v = _value;
+            }
+            Update(v);
+        }
+
+        private void Update(double value)
+        {
+            double v;
+            v = value;
+            if (_min != double.NaN && value < _min) v = _min;
+            if (_max != double.NaN && value > _max) v = _max;
+            _value = Math.Round(v, _dig);
+            box.Text = _value.ToString("F" + _dig);
+            OnPropertyChanged(nameof(Value));
         }
 
         private void box_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -74,9 +112,8 @@ namespace NodeVideoEffects.Control
                     isDragging = true;
 
                     double sensitivity = 0.01;
+                    Update(_value + delta * sensitivity);
                     SetCursorPos((int)startPoint.X, (int)startPoint.Y);
-                    _value = Math.Round(_value += delta * sensitivity, _dig);
-                    box.Text = _value.ToString("F" + _dig);
                 }
                 e.Handled = true;
             }
@@ -133,25 +170,7 @@ namespace NodeVideoEffects.Control
         {
             if (e.Key == Key.Return || e.Key == Key.Enter)
             {
-                if (box.Text == "")
-                {
-                    box.Text = _def.ToString("F" + _dig);
-                    _value = _def;
-                }
-                double value;
-                try
-                {
-                    value = double.Parse(box.Text);
-                    if (_min != double.NaN && value < _min) value = _min;
-                    if (_max != double.NaN && value > _max) value = _max;
-                }
-                catch (Exception)
-                {
-                    value = _value;
-                }
-                _value = Math.Round(value, _dig);
-                box.Text = _value.ToString("F" + _dig);
-
+                Update();
                 Keyboard.ClearFocus();
                 isEditing = false;
             }

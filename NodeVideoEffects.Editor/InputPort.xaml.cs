@@ -1,6 +1,8 @@
-﻿using NodeVideoEffects.Type;
+﻿using NodeVideoEffects.Control;
+using NodeVideoEffects.Type;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,12 +23,32 @@ namespace NodeVideoEffects.Editor
     /// </summary>
     public partial class InputPort : UserControl
     {
+        private IControl? control;
+
+        public event PropertyChangedEventHandler PropertyChanged;
         public InputPort(Input input)
         {
             InitializeComponent();
             
             portName.Content = input.Name;
-            portControl.Content = input.Control;
+            control = input.Control;
+            control.PropertyChanged += OnControlPropertyChanged;
+            portControl.Content = control;            
+        }
+
+        public object? Value
+        {
+            get => control?.Value;
+            set
+            {
+                if (control != null)
+                    control.Value = value;
+            }
+        }
+
+        private void OnControlPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value)));
         }
     }
 }
