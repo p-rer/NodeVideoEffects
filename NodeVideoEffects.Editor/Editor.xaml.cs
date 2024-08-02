@@ -16,6 +16,7 @@ namespace NodeVideoEffects.Editor
         private TranslateTransform translateTransform;
 
         private Point lastPos;
+        private bool isDragging;
         double scale;
         private Rect wrapRect;
 
@@ -117,6 +118,7 @@ namespace NodeVideoEffects.Editor
             if (e.ChangedButton == MouseButton.Middle && e.ButtonState == MouseButtonState.Pressed)
             {
                 lastPos = new(e.GetPosition(this).X, e.GetPosition(this).Y);
+                isDragging = true;
                 this.CaptureMouse();
             }
         }
@@ -124,12 +126,15 @@ namespace NodeVideoEffects.Editor
         private void Canvas_Up(object sender, MouseButtonEventArgs e)
         {
             if (e.ChangedButton == MouseButton.Middle && e.ButtonState == MouseButtonState.Released)
+            {
+                isDragging = false;
                 this.ReleaseMouseCapture();
+            }
         }
 
         private void Canvas_MouseMove(object sender, MouseEventArgs e)
         {
-            if (e.MiddleButton == MouseButtonState.Pressed)
+            if (isDragging)
             {
                 Point p = new(e.GetPosition(this).X, e.GetPosition(this).Y);
                 translateTransform.X += p.X - lastPos.X;
