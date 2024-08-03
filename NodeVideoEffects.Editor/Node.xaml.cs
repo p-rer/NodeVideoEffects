@@ -23,11 +23,6 @@ namespace NodeVideoEffects.Editor
     /// </summary>
     public partial class Node : UserControl
     {
-        private Input[]? _inputs;
-        private Output[]? _outputs;
-        private List<InputPort> _inputPorts = new();
-        private List<OutputPort> _outputPorts = new();
-
         private string _name;
         private string _id;
 
@@ -38,39 +33,21 @@ namespace NodeVideoEffects.Editor
         {
             InitializeComponent();
             nodeName.Content = node.Name;
-            _inputs = node.Inputs;
-            _outputs = node.Outputs;
-            foreach (Output output in _outputs)
+            foreach (Output output in node.Outputs)
             {
                 int index = 0;
-                OutputPort outputPort = new(output, node.Id, index);
-                _outputPorts.Add(outputPort);
-                outputsPanel.Children.Add(outputPort);
+                outputsPanel.Children.Add(new OutputPort(output, node.Id, index));
                 index++;
             }
 
-            foreach (Input input in _inputs)
+            foreach (Input input in node.Inputs)
             {
-                InputPort inputPort = new (input);
-                inputPort.PropertyChanged += Input_PropertyChanged;
-                _inputPorts.Add(inputPort);
-                inputsPanel.Children.Add(inputPort);
+                inputsPanel.Children.Add(new InputPort(input));
             }
             Loaded += (s, e) =>
             {
                 wrapperCanvas = VisualTreeHelper.GetParent(this) as Canvas;
             };
-        }
-
-        private void Input_PropertyChanged(object? sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(Input.Value))
-            {
-                foreach (Output output in _outputs)
-                {
-                    output.IsSuccess = false;
-                }
-            }
         }
 
         #region Move node

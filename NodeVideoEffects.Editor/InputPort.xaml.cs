@@ -25,16 +25,19 @@ namespace NodeVideoEffects.Editor
     {
         private IControl? control;
         private Input? _input;
+        private string _id;
+        private int _index;
 
-        public event PropertyChangedEventHandler PropertyChanged;
-        public InputPort(Input input)
+        public InputPort(Input input, string id, int index)
         {
             InitializeComponent();
             _input = input;
+            _id = id;
+            _index = index;
             portName.Content = input.Name;
             control = input.Control;
             control.PropertyChanged += OnControlPropertyChanged;
-            portControl.Content = control;            
+            portControl.Content = control;
         }
 
         public object? Value
@@ -50,7 +53,6 @@ namespace NodeVideoEffects.Editor
         private void OnControlPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             _input.Value = control.Value;
-            PropertyChanged?.Invoke(_input, new PropertyChangedEventArgs(nameof(Value)));
         }
     }
 }
