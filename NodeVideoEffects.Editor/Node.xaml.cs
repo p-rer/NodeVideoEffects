@@ -42,7 +42,9 @@ namespace NodeVideoEffects.Editor
 
             foreach (Input input in node.Inputs)
             {
-                inputsPanel.Children.Add(new InputPort(input));
+                int index = 0;
+                inputsPanel.Children.Add(new InputPort(input, node.Id, index));
+                index++;
             }
             Loaded += (s, e) =>
             {

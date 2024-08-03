@@ -50,9 +50,29 @@ namespace NodeVideoEffects.Editor
             }
         }
 
+        public string ID => _id;
+        public int Index => _index;
+
         private void OnControlPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             _input.Value = control.Value;
+        }
+
+        public void SetConnection(string id, int index)
+        {
+            _input.SetConnection(_id, _index, id, index);
+            portControl.Visibility = Visibility.Hidden;
+        }
+
+        public void RemoveConnection()
+        {
+            _input.RemoveConnection(_id, _index);
+            portControl.Visibility = Visibility.Visible;
+        }
+
+        private void Port_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            RemoveConnection();
         }
     }
 }

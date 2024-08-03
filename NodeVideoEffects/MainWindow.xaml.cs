@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using NodeVideoEffects.Editor;
+using System.IO;
 using System.Reflection;
 using System.Windows;
 
@@ -33,7 +34,7 @@ namespace NodeVideoEffects
             }
         }
 
-        public void AddChildren(Object obj, double x, double y)
+        public void AddChildren(Node obj, double x, double y)
         {
             EditSpace.AddChildren(obj, x, y);
         }

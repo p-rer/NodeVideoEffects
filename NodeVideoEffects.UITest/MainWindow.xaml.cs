@@ -17,8 +17,11 @@ namespace NodeVideoEffects.UITest
 
             var editor = new NodeEditor();
 
-            var node = new AddNode();
-            editor.AddChildren(new Node(node), 20, 50);
+            var node1 = new AddNode();
+            editor.AddChildren(new Node(node1), 20, 50);
+
+            var node2 = new PowNode();
+            editor.AddChildren(new Node(node2), 80, 90);
 
             editor.ShowDialog();
             this.Close();

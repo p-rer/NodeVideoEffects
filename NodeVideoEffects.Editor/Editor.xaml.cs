@@ -42,6 +42,7 @@ namespace NodeVideoEffects.Editor
             this.Loaded += EditorLoaded;
         }
 
+        #region Draw Editor
         private void EditorLoaded(object sender, RoutedEventArgs e)
         {
             UpdateScrollBar();
@@ -50,10 +51,10 @@ namespace NodeVideoEffects.Editor
             wrapper_canvas.SizeChanged += (s, args) => UpdateScrollBar();
         }
 
-        public void AddChildren(Object obj, double x, double y)
+        public void AddChildren(Node obj, double x, double y)
         {
-            Canvas.SetLeft((UIElement)obj, x);
-            Canvas.SetTop((UIElement)obj, y);
+            Canvas.SetLeft(obj, x);
+            Canvas.SetTop(obj, y);
             canvas.Children.Add((UIElement)obj);
         }
 
@@ -211,6 +212,7 @@ namespace NodeVideoEffects.Editor
                 Keyboard.ClearFocus();
             }
         }
+        #endregion
     }
 
 }

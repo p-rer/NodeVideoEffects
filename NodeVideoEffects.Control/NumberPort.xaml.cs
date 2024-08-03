@@ -92,9 +92,9 @@ namespace NodeVideoEffects.Control
 
         private void box_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
+            startPoint = box.PointToScreen(e.GetPosition(box));
             if (!isEditing)
             {
-                startPoint = box.PointToScreen(e.GetPosition(box));
                 isClicking = true;
                 box.Focusable = false;
                 Mouse.OverrideCursor = Cursors.None;
@@ -137,6 +137,7 @@ namespace NodeVideoEffects.Control
                 box.Focusable = true;
                 box.Focus();
             }
+            SetCursorPos((int)startPoint.X, (int)startPoint.Y);
             Mouse.OverrideCursor = null;
             box.ReleaseMouseCapture();
         }
@@ -144,7 +145,6 @@ namespace NodeVideoEffects.Control
         private void box_LostFocus(object sender, RoutedEventArgs e)
         {
             isEditing = false;
-            SetCursorPos((int)startPoint.X, (int)startPoint.Y);
             Update();
         }
 

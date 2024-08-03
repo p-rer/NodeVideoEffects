@@ -94,8 +94,11 @@ namespace NodeVideoEffects.Type
         /// <param name="index">Index of this port</param>
         public void RemoveConnection(string id, int index)
         {
-            NodesManager.NoticeInputConnectionRemove(id, index, _connection.Value.id, _connection.Value.index);
-            _connection = null;
+            if (_connection != null)
+            {
+                NodesManager.NoticeInputConnectionRemove(id, index, _connection.Value.id, _connection.Value.index);
+                _connection = null;
+            }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
