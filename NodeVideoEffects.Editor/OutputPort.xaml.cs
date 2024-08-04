@@ -24,6 +24,8 @@ namespace NodeVideoEffects.Editor
         Output _output;
         string _id;
         int _index;
+        Editor editor;
+        Point startPos;
 
         private bool isMouseDown = false;
         public OutputPort(Output output, string id, int index)
@@ -35,6 +37,11 @@ namespace NodeVideoEffects.Editor
             portName.Content = output.Name;
             ToolTip = new();
             ToolTipOpening += OutputPort_ToolTipOpening;
+
+            Loaded += (o, args) =>
+            {
+                editor = FindParent<Editor>(this);
+            };
         }
 
         private void OutputPort_ToolTipOpening(object sender, ToolTipEventArgs e)
@@ -64,11 +71,15 @@ namespace NodeVideoEffects.Editor
         {
             isMouseDown = true;
             port.CaptureMouse();
+            startPos = e.GetPosition(editor);
+            editor.PreviewConnection(startPos, startPos);
             e.Handled = true;
         }
 
         private void port_MouseMove(object sender, MouseEventArgs e)
         {
+            if (isMouseDown)
+                editor.PreviewConnection(startPos, e.GetPosition(editor));
             e.Handled = true;
         }
 
@@ -77,8 +88,8 @@ namespace NodeVideoEffects.Editor
             isMouseDown = false;
 
             // Get the control under the mouse pointer
-            Point position = e.GetPosition(FindParent<Editor>(this));
-            HitTestResult result = VisualTreeHelper.HitTest(FindParent<Editor>(this), position);
+            Point position = e.GetPosition(editor);
+            HitTestResult result = VisualTreeHelper.HitTest(editor, position);
 
             if (result != null)
             {
@@ -90,6 +101,7 @@ namespace NodeVideoEffects.Editor
                 }
             }
             port.ReleaseMouseCapture();
+            editor.RemovePreviewConnection();
             e.Handled = true;
         }
 

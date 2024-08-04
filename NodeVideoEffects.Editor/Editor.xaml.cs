@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Shapes;
 
 namespace NodeVideoEffects.Editor
 {
@@ -19,6 +20,8 @@ namespace NodeVideoEffects.Editor
         private bool isDragging;
         double scale;
         private Rect wrapRect;
+
+        private Path? previewPath;
 
         public Editor()
         {
@@ -56,6 +59,29 @@ namespace NodeVideoEffects.Editor
             Canvas.SetLeft(obj, x);
             Canvas.SetTop(obj, y);
             canvas.Children.Add((UIElement)obj);
+        }
+
+        public void PreviewConnection(Point pos1, Point pos2)
+        {
+            if (previewPath != null) canvas.Children.Remove(previewPath);
+            canvas.Children.Add(previewPath = new Path()
+            {
+                Data = new LineGeometry()
+                {
+                    StartPoint = new((pos1.X - translateTransform.X) / scale, (pos1.Y - translateTransform.Y) / scale),
+                    EndPoint = new((pos2.X - translateTransform.X) / scale, (pos2.Y - translateTransform.Y) / scale)
+                },
+                Stroke = SystemColors.GrayTextBrush,
+                StrokeThickness = 1,
+                StrokeDashArray = new([5.0, 5.0]),
+                IsHitTestVisible = false
+            });
+        }
+
+        public void RemovePreviewConnection()
+        {
+            if (previewPath != null) canvas.Children.Remove(previewPath);
+            previewPath = null;
         }
 
         public void UpdateScrollBar()
