@@ -47,7 +47,8 @@
             set
             {
                 _isSuccess = value;
-                if (_connection.Count != 0){
+                if (_connection.Count != 0)
+                {
                     foreach (Connection connection in _connection)
                     {
                         NodesManager.NoticeOutputChanged(connection.id, connection.index);

@@ -1,6 +1,4 @@
 ﻿using NodeVideoEffects.Type;
-using Vortice.Direct2D1;
-using YukkuriMovieMaker.Commons;
 
 namespace NodeVideoEffects.Nodes.Basic
 {
