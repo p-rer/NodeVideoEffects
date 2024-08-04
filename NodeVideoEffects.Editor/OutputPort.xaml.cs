@@ -87,6 +87,8 @@ namespace NodeVideoEffects.Editor
         {
             isMouseDown = false;
 
+            editor.RemovePreviewConnection();
+
             // Get the control under the mouse pointer
             Point position = e.GetPosition(editor);
             HitTestResult result = VisualTreeHelper.HitTest(editor, position);
@@ -101,7 +103,6 @@ namespace NodeVideoEffects.Editor
                 }
             }
             port.ReleaseMouseCapture();
-            editor.RemovePreviewConnection();
             e.Handled = true;
         }
 
