@@ -5,31 +5,41 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:NodeVideoEffects.Editor"
              mc:Ignorable="d"
-             MinHeight="25" Width="250"
-             Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
-             BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
-             BorderThickness="1"
+             MinHeight="25" Width="280"
              MouseLeftButtonDown="Node_MouseLeftButtonDown"
              MouseMove="Node_MouseMove"
              MouseLeftButtonUp="Node_MouseLeftButtonUp">
     <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="15" />
+            <ColumnDefinition Width="1*" />
+            <ColumnDefinition Width="15" />
+        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="25" />
+            <RowDefinition Height="28" />
             <RowDefinition Height="1*" />
         </Grid.RowDefinitions>
-        <Label Name="nodeName" Grid.Row="0" BorderThickness="0,0,0,1" >
-            <Label.BorderBrush>
-                <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.ActiveBorderColorKey}}" />
-            </Label.BorderBrush>
-        </Label>
-        <Ellipse Name="categorySign" Grid.Row="0" Height="15" Width="15" Margin="0,5,5,5" HorizontalAlignment="Right" >
-            <Ellipse.Stroke>
-                <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.ControlTextColorKey}}"/>
-            </Ellipse.Stroke>
-        </Ellipse>
-        <StackPanel Name="portsPanel" Grid.Row="2" VerticalAlignment="Top">
-            <StackPanel Name="outputsPanel" />
-            <StackPanel Name="inputsPanel" />
+        <Border Grid.Column="1" Grid.RowSpan="2" BorderThickness="1" BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}">
+            <Rectangle Fill="{DynamicResource {x:Static SystemColors.WindowBrushKey}}" />
+        </Border>
+        <Border Grid.Row="0" Grid.Column="1" 
+             BorderThickness="0,0,0,1" BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}">
+            <Grid>
+                <Label Name="nodeName" Grid.Row="0" >
+                    <Label.BorderBrush>
+                        <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.ActiveBorderColorKey}}" />
+                    </Label.BorderBrush>
+                </Label>
+                <Ellipse Name="categorySign" Grid.Row="0" Height="15" Width="15" Margin="0,5,5,5" HorizontalAlignment="Right" >
+                    <Ellipse.Stroke>
+                        <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.ControlTextColorKey}}"/>
+                    </Ellipse.Stroke>
+                </Ellipse>
+            </Grid>
+        </Border>
+        <StackPanel Name="portsPanel" Grid.Row="2" Grid.ColumnSpan="3" VerticalAlignment="Top">
+            <StackPanel Name="outputsPanel" HorizontalAlignment="Right" />
+            <StackPanel Name="inputsPanel" HorizontalAlignment="Left" />
         </StackPanel>
     </Grid>
 </UserControl>

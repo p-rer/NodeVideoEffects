@@ -102,8 +102,9 @@ namespace NodeVideoEffects.Editor
                 EndPoint = ConvertToTransform(PointFromScreen(pos2)),
                 StartPort = inputPort,
                 EndPort = outputPort,
-                IsHitTestVisible = false
+                IsHitTestVisible = false                
             });
+            connector.SetValue(Panel.ZIndexProperty, -1);
             connectors.Add((inputPort.id + inputPort.index, outputPort.id + outputPort.index), connector);
         }
 
