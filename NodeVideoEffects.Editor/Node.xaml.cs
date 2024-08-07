@@ -65,6 +65,9 @@ namespace NodeVideoEffects.Editor
             {
                 isDragging = true;
                 lastPos = new(e.GetPosition(wrapperCanvas).X, e.GetPosition(wrapperCanvas).Y);
+                int maxZ = editor.canvas.Children.OfType<UIElement>().Max(Panel.GetZIndex);
+                if (Panel.GetZIndex(this) <= maxZ)
+                    SetValue(Panel.ZIndexProperty, maxZ + 1);
                 node.CaptureMouse();
                 e.Handled = true;
             }
