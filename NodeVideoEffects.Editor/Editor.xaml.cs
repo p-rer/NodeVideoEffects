@@ -1,5 +1,8 @@
+using NodeVideoEffects.Type;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Windows;
+using System.Windows.Automation;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -21,6 +24,8 @@ namespace NodeVideoEffects.Editor
         private Rect wrapRect;
 
         private Path? previewPath;
+
+        Dictionary<(string, string), Connector> connectors = new();
 
         public Editor()
         {
@@ -53,6 +58,11 @@ namespace NodeVideoEffects.Editor
             wrapper_canvas.SizeChanged += (s, args) => UpdateScrollBar();
         }
 
+        private Point ConvertToTransform(Point p)
+        {
+            return new((p.X - translateTransform.X) / scale, (p.Y - translateTransform.Y) / scale);
+        }
+
         public void AddChildren(Node obj, double x, double y)
         {
             Canvas.SetLeft(obj, x);
@@ -67,8 +77,8 @@ namespace NodeVideoEffects.Editor
             {
                 Data = new LineGeometry()
                 {
-                    StartPoint = new((pos1.X - translateTransform.X) / scale, (pos1.Y - translateTransform.Y) / scale),
-                    EndPoint = new((pos2.X - translateTransform.X) / scale, (pos2.Y - translateTransform.Y) / scale)
+                    StartPoint = ConvertToTransform(pos1),
+                    EndPoint = ConvertToTransform(pos2)
                 },
                 Stroke = SystemColors.GrayTextBrush,
                 StrokeThickness = 1,
@@ -81,6 +91,59 @@ namespace NodeVideoEffects.Editor
         {
             if (previewPath != null) canvas.Children.Remove(previewPath);
             previewPath = null;
+        }
+
+        public void AddConnector(Point pos1, Point pos2, Connection inputPort, Connection outputPort)
+        {
+            Connector connector;
+            canvas.Children.Add(connector = new Connector()
+            {
+                StartPoint = ConvertToTransform(PointFromScreen(pos1)),
+                EndPoint = ConvertToTransform(PointFromScreen(pos2)),
+                StartPort = inputPort,
+                EndPort = outputPort,
+                IsHitTestVisible = false
+            });
+            connectors.Add((inputPort.id + inputPort.index, outputPort.id + outputPort.index), connector);
+        }
+
+        public void RemoveConnectorFromInputPort(string id, int index)
+        {
+            try
+            {
+                Connector connector = connectors
+                    .Where(kvp => kvp.Key.Item1 == id + index)
+                    .Select(kvp => kvp.Value)
+                    .ToList()[0];
+                canvas.Children.Remove(connector);
+                connectors.Remove(connectors
+                    .Where(kvp => kvp.Value == connector)
+                    .Select(kvp => kvp.Key)
+                    .ToList()[0]);
+            }
+            catch { }
+        }
+
+        public void MoveConnector(string id, Point d)
+        {
+            try
+            {
+                foreach(Connector connector in connectors
+                    .Where(kvp => kvp.Key.Item1.StartsWith(id))
+                    .Select(kvp => kvp.Value)
+                    .ToList())
+                {
+                    connector.EndPoint = new(connector.EndPoint.X + d.X, connector.EndPoint.Y + d.Y);
+                }
+                foreach (Connector connector in connectors
+                    .Where(kvp => kvp.Key.Item2.StartsWith(id))
+                    .Select(kvp => kvp.Value)
+                    .ToList())
+                {
+                    connector.StartPoint = new(connector.StartPoint.X + d.X, connector.StartPoint.Y + d.Y);
+                }
+            }
+            catch { }
         }
 
         public void UpdateScrollBar()
@@ -239,5 +302,4 @@ namespace NodeVideoEffects.Editor
         }
         #endregion
     }
-
 }

@@ -43,13 +43,10 @@ namespace NodeVideoEffects.Editor
 
         public static T FindParent<T>(DependencyObject child) where T : DependencyObject
         {
-            //get parent item
             DependencyObject parentObject = VisualTreeHelper.GetParent(child);
 
-            //we've reached the end of the tree
             if (parentObject == null) return null;
 
-            //check if the parent matches the type we're looking for
             T parent = parentObject as T;
             if (parent != null)
                 return parent;
@@ -89,20 +86,21 @@ namespace NodeVideoEffects.Editor
 
                 if (element != null)
                 {
-                    SetConnectionToInputPort(element);
+                    SetConnectionToInputPort(element, port.PointToScreen(new(5, 5)), position);
                 }
             }
             port.ReleaseMouseCapture();
             e.Handled = true;
         }
 
-        private bool SetConnectionToInputPort(DependencyObject element)
+        private bool SetConnectionToInputPort(DependencyObject element, Point pos1, Point pos2)
         {
             InputPort? inputPort = FindParent<InputPort>(element);
             if (inputPort != null)
             {
                 inputPort.SetConnection(_id, _index);
                 _output.AddConnection(inputPort.ID, inputPort.Index);
+                editor.AddConnector(pos1, inputPort.port.PointToScreen(new(5, 5)), new(inputPort.ID, inputPort.Index), new(_id, _index));
                 return true;
             }
             return false;

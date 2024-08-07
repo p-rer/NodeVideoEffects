@@ -16,28 +16,46 @@ namespace NodeVideoEffects.Editor
 
         private bool isDragging;
         private Canvas wrapperCanvas;
+        private Editor editor;
         private Point lastPos;
         public Node(INode node)
         {
             InitializeComponent();
-            nodeName.Content = node.Name;
-            foreach (Output output in node.Outputs)
+            nodeName.Content = _name = node.Name;
+            _id = node.Id;
             {
                 int index = 0;
-                outputsPanel.Children.Add(new OutputPort(output, node.Id, index));
-                index++;
+                foreach (Output output in node.Outputs)
+                {
+                    outputsPanel.Children.Add(new OutputPort(output, node.Id, index));
+                    index++;
+                }
             }
-
-            foreach (Input input in node.Inputs)
             {
                 int index = 0;
-                inputsPanel.Children.Add(new InputPort(input, node.Id, index));
-                index++;
+                foreach (Input input in node.Inputs)
+                {
+                    inputsPanel.Children.Add(new InputPort(input, node.Id, index));
+                    index++;
+                }
             }
             Loaded += (s, e) =>
             {
-                wrapperCanvas = VisualTreeHelper.GetParent(this) as Canvas;
+                wrapperCanvas = FindParent<Canvas>(this);
+                editor = FindParent<Editor>(this);
             };
+        }
+
+        public static T FindParent<T>(DependencyObject child) where T : DependencyObject
+        {
+            DependencyObject parentObject = VisualTreeHelper.GetParent(child);
+
+            if (parentObject == null) return null;
+
+            if (parentObject is T parent)
+                return parent;
+            else
+                return FindParent<T>(parentObject);
         }
 
         #region Move node
@@ -59,6 +77,7 @@ namespace NodeVideoEffects.Editor
                 Point p = new(e.GetPosition(wrapperCanvas).X, e.GetPosition(wrapperCanvas).Y);
                 Canvas.SetLeft(node, Canvas.GetLeft(node) + p.X - lastPos.X);
                 Canvas.SetTop(node, Canvas.GetTop(node) + p.Y - lastPos.Y);
+                editor.MoveConnector(_id, new(p.X - lastPos.X, p.Y - lastPos.Y));
                 lastPos = p;
                 e.Handled = true;
             }

@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace NodeVideoEffects.Editor
 {
@@ -17,6 +18,8 @@ namespace NodeVideoEffects.Editor
         private string _id;
         private int _index;
 
+        Editor editor;
+
         public InputPort(Input input, string id, int index)
         {
             InitializeComponent();
@@ -27,6 +30,26 @@ namespace NodeVideoEffects.Editor
             control = input.Control;
             control.PropertyChanged += OnControlPropertyChanged;
             portControl.Content = control;
+            Loaded += (o, args) =>
+            {
+                editor = FindParent<Editor>(this);
+            };
+        }
+
+        public static T FindParent<T>(DependencyObject child) where T : DependencyObject
+        {
+            //get parent item
+            DependencyObject parentObject = VisualTreeHelper.GetParent(child);
+
+            //we've reached the end of the tree
+            if (parentObject == null) return null;
+
+            //check if the parent matches the type we're looking for
+            T parent = parentObject as T;
+            if (parent != null)
+                return parent;
+            else
+                return FindParent<T>(parentObject);
         }
 
         public object? Value
@@ -56,6 +79,7 @@ namespace NodeVideoEffects.Editor
         public void RemoveConnection()
         {
             _input.RemoveConnection(_id, _index);
+            editor.RemoveConnectorFromInputPort(_id, _index);
             portControl.Visibility = Visibility.Visible;
         }
 
