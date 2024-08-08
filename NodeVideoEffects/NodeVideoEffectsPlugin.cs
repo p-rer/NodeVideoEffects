@@ -13,7 +13,7 @@ namespace NodeVideoEffects
 
         [Display(Name = nameof(Translate.NodeEditor), GroupName = nameof(Translate.NodeVideoEffects), ResourceType = typeof(Translate))]
         [OpenNodeEditor]
-        public String Blur { get; } = "";
+        public string Nodes { get; } = "";
 
         public override IEnumerable<string> CreateExoVideoFilters(int keyFrameIndex, ExoOutputDescription exoOutputDescription)
         {
