@@ -27,6 +27,10 @@ namespace NodeVideoEffects.Editor
 
         Dictionary<(string, string), Connector> connectors = new();
 
+        public string Nodes {  get; set; }
+        private string cache;
+        private List<Node> nodes = new List<Node>();
+
         public Editor()
         {
             InitializeComponent();
@@ -190,10 +194,10 @@ namespace NodeVideoEffects.Editor
             }
 
             horizontalScrollBar.Width = (wrapper_canvas.ActualWidth * wrapper_canvas.ActualWidth) / wrapRect.Width;
-            horizontalScrollBar.Margin = new Thickness(-wrapRect.Left * wrapper_canvas.ActualWidth / wrapRect.Width, 0, 0, 0);
+            Canvas.SetLeft(horizontalScrollBar, -wrapRect.Left * wrapper_canvas.ActualWidth / wrapRect.Width);
 
             verticalScrollBar.Height = (wrapper_canvas.ActualHeight * wrapper_canvas.ActualHeight) / wrapRect.Height;
-            verticalScrollBar.Margin = new Thickness(0, -wrapRect.Top * wrapper_canvas.ActualHeight / wrapRect.Height, 0, 0);
+            Canvas.SetTop(verticalScrollBar, -wrapRect.Top * wrapper_canvas.ActualHeight / wrapRect.Height);
         }
 
         private void Canvas_MouseWheel(object sender, MouseWheelEventArgs e)

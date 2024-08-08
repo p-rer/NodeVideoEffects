@@ -19,12 +19,12 @@
             <RowDefinition Height="5" />
         </Grid.RowDefinitions>
         <Canvas Name="wrapper_canvas" Grid.ColumnSpan="3" Grid.RowSpan="3" Background="{Binding BackGround}" ClipToBounds="True">
+            <Rectangle x:Name="horizontalScrollBar" Height="5" Fill="{DynamicResource {x:Static SystemColors.ScrollBarBrushKey}}" Canvas.Bottom="0" />
+            <Rectangle x:Name="verticalScrollBar" Width="5" Fill="{DynamicResource {x:Static SystemColors.ScrollBarBrushKey}}" Canvas.Right="0" />
             <Canvas Name="canvas" Focusable="True" />
         </Canvas>
         <Grid Grid.Row="1" Grid.Column="1" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
             <TextBox Name="zoomValue" PreviewTextInput="PreviewTextInput" KeyDown="zoomValueSubmit" DataObject.Pasting="TextBoxPasting" Margin="2,2,2,2" />
         </Grid>
-        <Rectangle x:Name="horizontalScrollBar" Fill="{DynamicResource {x:Static SystemColors.ScrollBarBrushKey}}" Grid.ColumnSpan="2" Grid.Row="2" HorizontalAlignment="Left" />
-        <Rectangle x:Name="verticalScrollBar" Fill="{DynamicResource {x:Static SystemColors.ScrollBarBrushKey}}" Grid.RowSpan="2" Grid.Column="2" VerticalAlignment="Top" />
     </Grid>
 </UserControl>
