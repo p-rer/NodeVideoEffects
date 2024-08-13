@@ -1,4 +1,5 @@
-﻿using NodeVideoEffects.Type;
+﻿using NodeVideoEffects.Nodes.Basic;
+using NodeVideoEffects.Type;
 using System.Reflection;
 using Vortice.Direct2D1;
 using YukkuriMovieMaker.Commons;
@@ -19,13 +20,49 @@ namespace NodeVideoEffects
 
         public NodeProcessor(IGraphicsDevicesAndContext context, NodeVideoEffectsPlugin item)
         {
-            _context = context.DeviceContext;
-            inputNode = new();
-            outputNode = new();
-            outputNode.SetInputConnection(0, new(inputNode.Id, 0));
-            item.Nodes.Add(new(inputNode.Id, inputNode.GetType(), [], 100, 100, []));
-            item.Nodes.Add(new(outputNode.Id, outputNode.GetType(), [], 500, 100, [new(inputNode.Id, 0)]));
-            
+            _context = context.DeviceContext;            
+            if (item.Nodes.Count == 0)
+            {
+                inputNode = new();
+                outputNode = new();
+                outputNode.SetInputConnection(0, new(inputNode.Id, 0));
+                item.Nodes.Add(new(inputNode.Id, inputNode.GetType(), [], 100, 100, []));
+                item.Nodes.Add(new(outputNode.Id, outputNode.GetType(), [], 500, 100, [new(inputNode.Id, 0)]));
+            }
+            else
+            {
+                foreach (NodeInfo info in item.Nodes)
+                {
+                    INode? node;
+                    if ((node = NodesManager.GetNode(info.ID)) == null)
+                    {
+                        System.Type? type = System.Type.GetType(info.Type);
+                        if (type != null)
+                        {
+                            object? obj = Activator.CreateInstance(type, [info.ID]);
+
+                            node = obj as INode;
+                        }
+                    }
+
+                    if (node != null)
+                    {
+                        if (node.GetType() == typeof(InputNode))
+                            inputNode = (InputNode)node;
+                        if (node.GetType() == typeof(OutputNode))
+                            outputNode = (OutputNode)node;
+                    }
+                }
+                foreach (NodeInfo info in item.Nodes)
+                {
+                    INode node = NodesManager.GetNode(info.ID);
+                    for (int i = 0; i < info.Connections.Count; i++)
+                    {
+                        node.SetInputConnection(i, info.Connections[i]);
+                    }
+                }
+            }
+        
             this.item = item;
         }
 
@@ -57,7 +94,6 @@ namespace NodeVideoEffects
             {
 
             }
-            isFirst = false;
 
             return effectDescription.DrawDescription;
         }
