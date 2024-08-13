@@ -1,5 +1,6 @@
 ﻿using NodeVideoEffects.Control;
 using System.ComponentModel;
+using System.Windows.Media;
 
 namespace NodeVideoEffects.Type
 {
@@ -53,6 +54,8 @@ namespace NodeVideoEffects.Type
         /// Type of input value
         /// </summary>
         public System.Type Type { get { return _value.Type; } }
+
+        public Color Color { get => _value.Color; }
 
         /// <summary>
         /// Name of this input port

@@ -12,22 +12,30 @@ namespace NodeVideoEffects.Editor
     public partial class Node : UserControl
     {
         private string _name;
-        private string _id;
 
         private bool isDragging;
         private Canvas wrapperCanvas;
         private Editor editor;
         private Point lastPos;
+
+        public string ID { get; }
+        public System.Type Type { get; }
+        public List<object> Values { get; private set; } = new();
+        public List<Color> InputColors { get; private set; } = new();
+        public List<Color> OutputColors { get; private set; } = new();
+
         public Node(INode node)
         {
             InitializeComponent();
             nodeName.Content = _name = node.Name;
-            _id = node.Id;
+            ID = node.Id;
+            Type = node.GetType();
             {
                 int index = 0;
                 foreach (Output output in node.Outputs)
                 {
                     outputsPanel.Children.Add(new OutputPort(output, node.Id, index));
+                    OutputColors.Add(output.Color);
                     index++;
                 }
             }
@@ -36,6 +44,8 @@ namespace NodeVideoEffects.Editor
                 foreach (Input input in node.Inputs)
                 {
                     inputsPanel.Children.Add(new InputPort(input, node.Id, index));
+                    Values.Add(input.Value);
+                    InputColors.Add(input.Color);
                     index++;
                 }
             }
@@ -56,6 +66,24 @@ namespace NodeVideoEffects.Editor
                 return parent;
             else
                 return FindParent<T>(parentObject);
+        }
+
+        internal Point GetPortPoint(PortType type, int index)
+        {
+            if (type == PortType.Input)
+            {
+                return (inputsPanel.Children[index] as InputPort).port.PointToScreen(new(5, 5));
+            }
+            else
+            {
+                return (outputsPanel.Children[index] as OutputPort).port.PointToScreen(new(5, 5));
+            }
+        }
+
+        internal enum PortType
+        {
+            Input,
+            Output
         }
 
         #region Move node
@@ -80,7 +108,7 @@ namespace NodeVideoEffects.Editor
                 Point p = new(e.GetPosition(wrapperCanvas).X, e.GetPosition(wrapperCanvas).Y);
                 Canvas.SetLeft(node, Canvas.GetLeft(node) + p.X - lastPos.X);
                 Canvas.SetTop(node, Canvas.GetTop(node) + p.Y - lastPos.Y);
-                editor.MoveConnector(_id, new(p.X - lastPos.X, p.Y - lastPos.Y));
+                editor.MoveConnector(ID, new(p.X - lastPos.X, p.Y - lastPos.Y));
                 lastPos = p;
                 e.Handled = true;
             }

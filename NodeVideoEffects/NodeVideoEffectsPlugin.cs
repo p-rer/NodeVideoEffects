@@ -1,4 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using NodeVideoEffects.Nodes.Basic;
+using NodeVideoEffects.Type;
+using System.Collections.Immutable;
+using System.ComponentModel.DataAnnotations;
+using System.Windows.Ink;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Exo;
 using YukkuriMovieMaker.Player.Video;
@@ -13,7 +17,8 @@ namespace NodeVideoEffects
 
         [Display(Name = nameof(Translate.NodeEditor), GroupName = nameof(Translate.NodeVideoEffects), ResourceType = typeof(Translate))]
         [OpenNodeEditor]
-        public string Nodes { get; } = "";
+        public List<NodeInfo> Nodes { get => nodes; set => Set(ref nodes, value); }
+        private List<NodeInfo> nodes = new();
 
         public override IEnumerable<string> CreateExoVideoFilters(int keyFrameIndex, ExoOutputDescription exoOutputDescription)
         {

@@ -1,4 +1,6 @@
-﻿namespace NodeVideoEffects.Type
+﻿using System.Windows.Media;
+
+namespace NodeVideoEffects.Type
 {
     /// <summary>
     /// Output port
@@ -27,6 +29,8 @@
         /// </summary>
         /// <exception cref="TypeMismatchException">Type of set value is wrong.</exception>
         public Object? Value { get { return _isSuccess ? _result : null; } set { _value.SetValue(value); _result = _value.Value; IsSuccess = true; } }
+
+        public Color Color { get => _value.Color; }
 
         /// <summary>
         /// Name of this output port

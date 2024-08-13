@@ -28,7 +28,9 @@ namespace NodeVideoEffects.Editor
             _index = index;
             portName.Content = input.Name;
             control = input.Control;
-            control.PropertyChanged += OnControlPropertyChanged;
+            port.Fill = new SolidColorBrush(input.Color);
+            if (control is System.Windows.Controls.Control)
+                ((System.Windows.Controls.Control)control).Loaded += (s, e) => { control.PropertyChanged += OnControlPropertyChanged; };
             portControl.Content = control;
             Loaded += (o, args) =>
             {
@@ -79,7 +81,7 @@ namespace NodeVideoEffects.Editor
         public void RemoveConnection()
         {
             _input.RemoveConnection(_id, _index);
-            editor.RemoveConnectorFromInputPort(_id, _index);
+            editor.RemoveConnector(_id, _index);
             portControl.Visibility = Visibility.Visible;
         }
 

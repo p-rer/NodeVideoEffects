@@ -1,5 +1,8 @@
+using NodeVideoEffects.Nodes.Basic;
 using NodeVideoEffects.Type;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Automation;
@@ -7,6 +10,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using System.Xml.Linq;
 
 namespace NodeVideoEffects.Editor
 {
@@ -26,10 +30,22 @@ namespace NodeVideoEffects.Editor
         private Path? previewPath;
 
         Dictionary<(string, string), Connector> connectors = new();
+        Dictionary<string, NodeInfo> infos = new();
+        Dictionary<string, Node> nodes = new();
+        bool isFirst = true;
 
-        public string Nodes {  get; set; }
-        private string cache;
-        private List<Node> nodes = new List<Node>();
+        public List<NodeInfo> Nodes { get 
+            {
+                return infos.Values.ToList();
+            }
+            set 
+            {
+                value.ForEach(value =>
+                {
+                    infos.Add(value.ID, value);
+                });
+            }
+        }
 
         public Editor()
         {
@@ -60,6 +76,40 @@ namespace NodeVideoEffects.Editor
 
             canvas.LayoutUpdated += (s, args) => UpdateScrollBar();
             wrapper_canvas.SizeChanged += (s, args) => UpdateScrollBar();
+
+            BuildNodes();
+        }
+
+        private void BuildNodes()
+        {
+            if(isFirst){
+                foreach(NodeInfo info in Nodes)
+                {
+                    INode node = NodesManager.GetNode(info.ID);
+                    AddChildren(new(node), info.X, info.Y);
+                }
+                foreach (NodeInfo info in Nodes)
+                {
+                    nodes[info.ID].Loaded += (s, e) =>
+                    {
+                        for (int i = 0; i < info.Connections.Count; i++)
+                        {
+                            if (info.Connections[i].id != null)
+                            {
+                                Point inputPoint = nodes[info.ID].GetPortPoint(Node.PortType.Input, i);
+                                Point outputPoint = nodes[info.Connections[i].id].GetPortPoint(Node.PortType.Output, info.Connections[i].index);
+                                INode node = NodesManager.GetNode(info.ID);
+                                Color inputColor = node.Inputs[i].Color;
+                                Color outputColor = NodesManager.GetNode(node.Inputs[i].Connection.Value.id).Outputs[node.Inputs[i].Connection.Value.index].Color;
+                                AddConnector(outputPoint, inputPoint,
+                                    inputColor, outputColor,
+                                    new(info.ID, i), new(info.Connections[i].id, info.Connections[i].index));
+                            }
+                        }
+                    };
+                }
+                isFirst = false;
+            }
         }
 
         private Point ConvertToTransform(Point p)
@@ -67,11 +117,20 @@ namespace NodeVideoEffects.Editor
             return new((p.X - translateTransform.X) / scale, (p.Y - translateTransform.Y) / scale);
         }
 
-        public void AddChildren(Node obj, double x, double y)
+        public void AddChildren(Node node, double x, double y)
         {
-            Canvas.SetLeft(obj, x);
-            Canvas.SetTop(obj, y);
-            canvas.Children.Add((UIElement)obj);
+            Canvas.SetLeft(node, x);
+            Canvas.SetTop(node, y);
+            canvas.Children.Add(node);
+            Input[] inputs = NodesManager.GetNode(node.ID).Inputs??[];
+            List<Connection> connections = new();
+            for(int i = 0; i < inputs.Length; i++)
+            {
+                connections.Add(inputs[i].Connection??new());
+            }
+            if (!infos.ContainsKey(node.ID))
+                infos.Add(node.ID, new(node.ID, node.Type, node.Values, x, y, connections));
+            nodes.Add(node.ID, node);
         }
 
         public void PreviewConnection(Point pos1, Point pos2)
@@ -97,22 +156,23 @@ namespace NodeVideoEffects.Editor
             previewPath = null;
         }
 
-        public void AddConnector(Point pos1, Point pos2, Connection inputPort, Connection outputPort)
+        public void AddConnector(Point pos1, Point pos2, Color col1, Color col2, Connection inputPort, Connection outputPort)
         {
             Connector connector;
             canvas.Children.Add(connector = new Connector()
             {
                 StartPoint = ConvertToTransform(PointFromScreen(pos1)),
                 EndPoint = ConvertToTransform(PointFromScreen(pos2)),
-                StartPort = inputPort,
-                EndPort = outputPort,
-                IsHitTestVisible = false                
+                StartColor = col1,
+                EndColor = col2,
+                IsHitTestVisible = false
             });
             connector.SetValue(Panel.ZIndexProperty, -1);
             connectors.Add((inputPort.id + inputPort.index, outputPort.id + outputPort.index), connector);
+            infos[inputPort.id].Connections[inputPort.index] = outputPort;
         }
 
-        public void RemoveConnectorFromInputPort(string id, int index)
+        public void RemoveConnector(string id, int index)
         {
             try
             {
@@ -125,6 +185,7 @@ namespace NodeVideoEffects.Editor
                     .Where(kvp => kvp.Value == connector)
                     .Select(kvp => kvp.Key)
                     .ToList()[0]);
+                infos[id].Connections[index] = new();
             }
             catch { }
         }

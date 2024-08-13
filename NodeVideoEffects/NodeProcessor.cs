@@ -13,15 +13,19 @@ namespace NodeVideoEffects
         public ID2D1Image Output { set; get; }
 
         bool isFirst = true;
-        string nodes;
 
-        Nodes.Basic.InputNode inputNode = new();
-        Nodes.Basic.OutputNode outputNode = new();
+        Nodes.Basic.InputNode inputNode;
+        Nodes.Basic.OutputNode outputNode;
 
         public NodeProcessor(IGraphicsDevicesAndContext context, NodeVideoEffectsPlugin item)
         {
             _context = context.DeviceContext;
+            inputNode = new();
+            outputNode = new();
             outputNode.SetInputConnection(0, new(inputNode.Id, 0));
+            item.Nodes.Add(new(inputNode.Id, inputNode.GetType(), [], 100, 100, []));
+            item.Nodes.Add(new(outputNode.Id, outputNode.GetType(), [], 500, 100, [new(inputNode.Id, 0)]));
+            
             this.item = item;
         }
 

@@ -9,6 +9,7 @@
 	
   <ItemGroup>
     <ProjectReference Include="..\NodeVideoEffects.Control\NodeVideoEffects.Control.csproj" />
+    <ProjectReference Include="..\NodeVideoEffects.Nodes\NodeVideoEffects.Nodes.csproj" />
     <ProjectReference Include="..\NodeVideoEffects.Type\NodeVideoEffects.Type.csproj" />
   </ItemGroup>
 

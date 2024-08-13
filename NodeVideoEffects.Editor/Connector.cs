@@ -41,9 +41,23 @@ namespace NodeVideoEffects.Editor
         public static readonly DependencyProperty EndPointProperty =
             DependencyProperty.Register("EndPoint", typeof(Point), typeof(Connector), new PropertyMetadata(new Point(100, 100), OnPropertyChanged));
 
-        public Connection StartPort { get; set; }
+        public Color StartColor
+        {
+            get { return (Color)GetValue(StartColorProperty); }
+            set { SetValue(StartColorProperty, value); }
+        }
 
-        public Connection EndPort { get; set; }
+        public static readonly DependencyProperty StartColorProperty =
+            DependencyProperty.Register("StartColor", typeof(Color), typeof(Connector), new PropertyMetadata(new Color(), OnPropertyChanged));
+
+        public Color EndColor
+        {
+            get { return (Color)GetValue(EndColorProperty); }
+            set { SetValue(EndColorProperty, value); }
+        }
+
+        public static readonly DependencyProperty EndColorProperty =
+            DependencyProperty.Register("EndColor", typeof(Color), typeof(Connector), new PropertyMetadata(new Color(), OnPropertyChanged));
 
         private static void OnPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -54,7 +68,12 @@ namespace NodeVideoEffects.Editor
         {
             base.OnRender(drawingContext);
 
-            Pen pen = new(SystemColors.ControlTextBrush, 2);
+            Pen pen = new(new LinearGradientBrush(
+                    StartColor,
+                    EndColor,
+                    StartPoint,
+                    EndPoint
+                ), 2);
 
             Point startPoint = StartPoint;
             Point endPoint = EndPoint;

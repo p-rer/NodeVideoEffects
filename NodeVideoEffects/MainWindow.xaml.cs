@@ -1,4 +1,6 @@
 ﻿using NodeVideoEffects.Editor;
+using NodeVideoEffects.Type;
+using System.Collections.Immutable;
 using System.IO;
 using System.Reflection;
 using System.Windows;
@@ -10,6 +12,12 @@ namespace NodeVideoEffects
     /// </summary>
     public partial class NodeEditor : Window
     {
+        public List<NodeInfo> Nodes
+        {
+            get => EditSpace.Nodes;
+            set => EditSpace.Nodes = value;
+        }
+
         string tag;
         string commit;
         public NodeEditor()

@@ -25,6 +25,7 @@ namespace NodeVideoEffects.Editor
             _id = id;
             _index = index;
             portName.Content = output.Name;
+            port.Fill = new SolidColorBrush(output.Color);
             ToolTip = new();
             ToolTipOpening += OutputPort_ToolTipOpening;
 
@@ -100,7 +101,10 @@ namespace NodeVideoEffects.Editor
             {
                 inputPort.SetConnection(_id, _index);
                 _output.AddConnection(inputPort.ID, inputPort.Index);
-                editor.AddConnector(pos1, inputPort.port.PointToScreen(new(5, 5)), new(inputPort.ID, inputPort.Index), new(_id, _index));
+                editor.AddConnector(pos1, inputPort.port.PointToScreen(new(5, 5)),
+                    ((SolidColorBrush)port.Fill).Color,
+                    ((SolidColorBrush)inputPort.port.Fill).Color,
+                    new(inputPort.ID, inputPort.Index), new(_id, _index));
                 return true;
             }
             return false;
