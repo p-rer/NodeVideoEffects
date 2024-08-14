@@ -40,6 +40,7 @@ namespace NodeVideoEffects
             {
                 BeginEdit?.Invoke(this, EventArgs.Empty);
                 ((NodeVideoEffectsPlugin)ItemProperties[0].Item).Nodes = window.Nodes;
+                EndEdit?.Invoke(this, EventArgs.Empty);
             };
 
             EndEdit?.Invoke(this, EventArgs.Empty);
