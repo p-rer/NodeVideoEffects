@@ -37,6 +37,9 @@ jobs:
         extra_dictionary_limit: 20
         extra_dictionaries:
           cspell:software-terms/dict/softwareTerms.txt
+          cspell:filetypes/filetypes.txt
+          cspell:csharp/csharp.txt
+          cspell:dotnet/dict/dotnet.txt
 
   comment-push:
     name: Report (Push)

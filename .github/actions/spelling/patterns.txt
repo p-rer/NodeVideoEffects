@@ -42,3 +42,26 @@
 
 # Ignore commonly used acronyms in C#
 \b(?:ID|UI|API|XML|JSON|HTTP|FTP|TCP|UDP|IP|SQL|URI|URL|IO|GUID|DLL|PDF|CSV|TXT|HTML|CSS|WPF|XAML|MVVM|PRISM|DI|IOC|TDD|BDD|DIP|SOLID|KISS|DRY|YAGNI|WYSIWYG|CRUD|SDK|IDE|JIT|CLR|IL|LINQ|EF|ORM|DLL|EXE|CLI|UX|NPM|YARN|GIT|SVN|CI|CD|REST|SOAP|OOP|OOC|UML|UWP|XAF|XPO|MVU|GDI|GDI+|DXGI|DPI|PNG|JPEG|BMP|GIF|TIFF|ICO|OGG|MP3|WAV|FLAC|AAC|MIDI|MP4|AVI|MKV|WEBM|MOV|FLV|SWF|RTF|DOC|DOCX|PPT|PPTX|XLS|XLSX|ODT|ODS|ODP|ZIP|RAR|TAR|GZ|7Z|ISO|DMG|EXE|MSI|DMG|PKG|APP|SYS|TMP|LOG)\b
+
+# uuid:
+\b[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}\b
+
+# hit-count: 57 file-count: 20
+# https/http/file urls
+(?:\b(?:https?|ftp|file)://)[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]
+
+# hit-count: 22 file-count: 14
+# IServiceProvider / isAThing
+\b(?:I|isA)(?=(?:[A-Z][a-z]{2,})+\b)
+
+# hit-count: 16 file-count: 8
+# hex runs
+\b[0-9a-fA-F]{16,}\b
+
+# hit-count: 8 file-count: 8
+# w3
+\bw3\.org/[-0-9a-zA-Z/#.]+
+
+# hit-count: 1 file-count: 1
+# proto
+^\s*(\w+)\s\g{-1} =

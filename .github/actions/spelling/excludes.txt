@@ -21,6 +21,7 @@ ignore$
 \.crl$
 \.crt$
 \.csr$
+\.csv$
 \.dll$
 \.docx?$
 \.drawio$
@@ -61,6 +62,7 @@ ignore$
 \.pyc$
 \.pylintrc$
 \.qm$
+\.resx$
 \.s$
 \.sig$
 \.so$
