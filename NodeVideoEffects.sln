@@ -22,7 +22,27 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YukkuriMovieMaker.Generator
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NodeVideoEffects.Nodes", "NodeVideoEffects.Nodes\NodeVideoEffects.Nodes.csproj", "{7F1EEFCC-84F4-488F-8386-3F9DEFE83047}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NodeVideoEffects.Control", "NodeVideoEffects.Control\NodeVideoEffects.Control.csproj", "{30C6F0EA-23AC-4AE1-BEA0-611A102ACF68}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NodeVideoEffects.Control", "NodeVideoEffects.Control\NodeVideoEffects.Control.csproj", "{30C6F0EA-23AC-4AE1-BEA0-611A102ACF68}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{613B51B8-9633-4E12-96E1-350E407BA50E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{2D5D76B1-0F23-4D4A-9F31-E47A660246EE}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\check-spelling.yml = .github\workflows\check-spelling.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "actions", "actions", "{4B885EFE-C7B0-4430-AAE3-0721B1019127}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "spelling", "spelling", "{AE86A24E-6B4C-4C1F-857C-76997DA42BDB}"
+	ProjectSection(SolutionItems) = preProject
+		.github\actions\spelling\allow.txt = .github\actions\spelling\allow.txt
+		.github\actions\spelling\candidate.patterns = .github\actions\spelling\candidate.patterns
+		.github\actions\spelling\excludes.txt = .github\actions\spelling\excludes.txt
+		.github\actions\spelling\expect.txt = .github\actions\spelling\expect.txt
+		.github\actions\spelling\line_forbidden.patterns = .github\actions\spelling\line_forbidden.patterns
+		.github\actions\spelling\patterns.txt = .github\actions\spelling\patterns.txt
+		.github\actions\spelling\reject.txt = .github\actions\spelling\reject.txt
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -65,6 +85,12 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{613B51B8-9633-4E12-96E1-350E407BA50E} = {499DAC14-04C5-4431-8899-BD5FBDD5EDB7}
+		{2D5D76B1-0F23-4D4A-9F31-E47A660246EE} = {613B51B8-9633-4E12-96E1-350E407BA50E}
+		{4B885EFE-C7B0-4430-AAE3-0721B1019127} = {613B51B8-9633-4E12-96E1-350E407BA50E}
+		{AE86A24E-6B4C-4C1F-857C-76997DA42BDB} = {4B885EFE-C7B0-4430-AAE3-0721B1019127}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {102CD60A-E74B-46EA-9ACA-371175FA8C6E}
