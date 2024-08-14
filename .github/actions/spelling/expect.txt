@@ -3,6 +3,7 @@ ACA
 Acerca
 actualizaciones
 AEFBE
+animatable
 Animatables
 Archivo
 ayuda
@@ -16,6 +17,7 @@ cref
 csproj
 DECCDBC
 DEFE
+dotnet
 EDB
 Editar
 EEA
