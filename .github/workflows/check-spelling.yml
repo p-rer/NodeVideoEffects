@@ -1,0 +1,9 @@
+name: Check Spelling
+on: [push, pull_request]
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Spelling
+        uses: check-spelling/check-spelling@v0.0.22
