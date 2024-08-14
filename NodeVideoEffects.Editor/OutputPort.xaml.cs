@@ -29,7 +29,7 @@ namespace NodeVideoEffects.Editor
             ToolTip = new();
             ToolTipOpening += OutputPort_ToolTipOpening;
 
-            Loaded += (o, args) =>
+            Loaded += (s, e) =>
             {
                 editor = FindParent<Editor>(this);
             };

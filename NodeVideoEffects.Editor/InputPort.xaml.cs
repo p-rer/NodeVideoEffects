@@ -32,7 +32,7 @@ namespace NodeVideoEffects.Editor
             if (control is System.Windows.Controls.Control)
                 ((System.Windows.Controls.Control)control).Loaded += (s, e) => { control.PropertyChanged += OnControlPropertyChanged; };
             portControl.Content = control;
-            Loaded += (o, args) =>
+            Loaded += (s, e) =>
             {
                 editor = FindParent<Editor>(this);
             };

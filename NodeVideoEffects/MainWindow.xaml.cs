@@ -1,6 +1,7 @@
 ﻿using NodeVideoEffects.Editor;
 using NodeVideoEffects.Type;
 using System.Collections.Immutable;
+using System.ComponentModel;
 using System.IO;
 using System.Reflection;
 using System.Windows;
@@ -50,6 +51,13 @@ namespace NodeVideoEffects
         private void ShowAbout(object sender, RoutedEventArgs e)
         {
             new About(tag, commit) { Owner = this }.ShowDialog();
+        }
+
+        internal event PropertyChangedEventHandler NodesUpdated;
+
+        private void EditSpace_NodesUpdated(object sender, PropertyChangedEventArgs e)
+        {
+            NodesUpdated?.Invoke(this, new PropertyChangedEventArgs(Title));
         }
     }
 }

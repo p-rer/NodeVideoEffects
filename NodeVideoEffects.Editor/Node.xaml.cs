@@ -1,4 +1,5 @@
 ﻿using NodeVideoEffects.Type;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -87,6 +88,7 @@ namespace NodeVideoEffects.Editor
         }
 
         #region Move node
+        public event PropertyChangedEventHandler Moved;
         private void Node_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (sender is Node node)
@@ -120,6 +122,7 @@ namespace NodeVideoEffects.Editor
             {
                 isDragging = false;
                 node.ReleaseMouseCapture();
+                Moved?.Invoke(this, new PropertyChangedEventArgs(_name));
                 e.Handled = true;
             }
         }

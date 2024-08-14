@@ -2,6 +2,7 @@ using NodeVideoEffects.Nodes.Basic;
 using NodeVideoEffects.Type;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.ComponentModel;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -69,13 +70,20 @@ namespace NodeVideoEffects.Editor
             this.Loaded += EditorLoaded;
         }
 
+        public event PropertyChangedEventHandler NodesUpdated;
+
+        private void OnNodesUpdated()
+        {
+            NodesUpdated?.Invoke(this, new PropertyChangedEventArgs(nameof(Editor)));
+        }
+
         #region Draw Editor
         private void EditorLoaded(object sender, RoutedEventArgs e)
         {
             UpdateScrollBar();
 
-            canvas.LayoutUpdated += (s, args) => UpdateScrollBar();
-            wrapper_canvas.SizeChanged += (s, args) => UpdateScrollBar();
+            canvas.LayoutUpdated += (s, e) => UpdateScrollBar();
+            wrapper_canvas.SizeChanged += (s, e) => UpdateScrollBar();
 
             BuildNodes();
         }
@@ -131,6 +139,12 @@ namespace NodeVideoEffects.Editor
             if (!infos.ContainsKey(node.ID))
                 infos.Add(node.ID, new(node.ID, node.Type, node.Values, x, y, connections));
             nodes.Add(node.ID, node);
+            node.Moved += (s, e) =>
+            {
+                infos[node.ID].X = Canvas.GetLeft(node);
+                infos[node.ID].Y = Canvas.GetTop(node);
+                OnNodesUpdated();
+            };
         }
 
         public void PreviewConnection(Point pos1, Point pos2)
@@ -158,18 +172,22 @@ namespace NodeVideoEffects.Editor
 
         public void AddConnector(Point pos1, Point pos2, Color col1, Color col2, Connection inputPort, Connection outputPort)
         {
-            Connector connector;
-            canvas.Children.Add(connector = new Connector()
+            if (!connectors.ContainsKey((inputPort.id + inputPort.index, outputPort.id + outputPort.index)))
             {
-                StartPoint = ConvertToTransform(PointFromScreen(pos1)),
-                EndPoint = ConvertToTransform(PointFromScreen(pos2)),
-                StartColor = col1,
-                EndColor = col2,
-                IsHitTestVisible = false
-            });
-            connector.SetValue(Panel.ZIndexProperty, -1);
-            connectors.Add((inputPort.id + inputPort.index, outputPort.id + outputPort.index), connector);
-            infos[inputPort.id].Connections[inputPort.index] = outputPort;
+                Connector connector;
+                canvas.Children.Add(connector = new Connector()
+                {
+                    StartPoint = ConvertToTransform(PointFromScreen(pos1)),
+                    EndPoint = ConvertToTransform(PointFromScreen(pos2)),
+                    StartColor = col1,
+                    EndColor = col2,
+                    IsHitTestVisible = false
+                });
+                connector.SetValue(Panel.ZIndexProperty, -1);
+                connectors.Add((inputPort.id + inputPort.index, outputPort.id + outputPort.index), connector);
+                infos[inputPort.id].Connections[inputPort.index] = outputPort;
+                OnNodesUpdated();
+            }
         }
 
         public void RemoveConnector(string id, int index)
@@ -186,6 +204,7 @@ namespace NodeVideoEffects.Editor
                     .Select(kvp => kvp.Key)
                     .ToList()[0]);
                 infos[id].Connections[index] = new();
+                OnNodesUpdated();
             }
             catch { }
         }
