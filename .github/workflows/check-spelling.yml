@@ -1,7 +1,10 @@
 name: Check Spelling
 on: [push, pull_request]
+permissions:
+  contents: write
+  pull-requests: write
 
-jobs:
+jobs:  
   run:
     runs-on: ubuntu-latest
     steps:
