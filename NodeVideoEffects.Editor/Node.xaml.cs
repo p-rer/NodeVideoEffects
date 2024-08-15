@@ -25,6 +25,8 @@ namespace NodeVideoEffects.Editor
         public List<Color> InputColors { get; private set; } = new();
         public List<Color> OutputColors { get; private set; } = new();
 
+        public event PropertyChangedEventHandler ValueChanged;
+
         public Node(INode node)
         {
             InitializeComponent();
@@ -47,6 +49,7 @@ namespace NodeVideoEffects.Editor
                     inputsPanel.Children.Add(new InputPort(input, node.Id, index));
                     Values.Add(input.Value);
                     InputColors.Add(input.Color);
+                    input.PropertyChanged += (s, e) => ValueChanged?.Invoke(this, new(_name));
                     index++;
                 }
             }

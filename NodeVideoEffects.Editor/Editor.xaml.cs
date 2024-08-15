@@ -145,6 +145,20 @@ namespace NodeVideoEffects.Editor
                 infos[node.ID].Y = Canvas.GetTop(node);
                 OnNodesUpdated();
             };
+            node.ValueChanged += (s, e) =>
+            {
+                try
+                {
+                    List<object?> value = new();
+                    foreach (object input in node.inputsPanel.Children)
+                    {
+                        value.Add((input as InputPort)?.Value);
+                    }
+                    infos[node.ID].Values = value;
+                    OnNodesUpdated();
+                }
+                catch { }
+            };
         }
 
         public void PreviewConnection(Point pos1, Point pos2)

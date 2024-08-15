@@ -67,9 +67,12 @@ namespace NodeVideoEffects.Editor
         public string ID => _id;
         public int Index => _index;
 
+        public event PropertyChangedEventHandler PropertyChanged;
+
         private void OnControlPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             _input.Value = control.Value;
+            PropertyChanged?.Invoke(this, new(Name));
         }
 
         public void SetConnection(string id, int index)
