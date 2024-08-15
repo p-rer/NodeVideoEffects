@@ -1,4 +1,5 @@
 ﻿using NodeVideoEffects.Control;
+using System.Windows.Media;
 
 namespace NodeVideoEffects.Type
 {
@@ -12,6 +13,7 @@ namespace NodeVideoEffects.Type
         /// Value of port
         /// </summary>
         public object Value { get; }
+        public Color Color { get; }
         public void SetValue(object? value)
         {
             _SetValue(value);

@@ -1,4 +1,7 @@
 ﻿using NodeVideoEffects.Editor;
+using NodeVideoEffects.Type;
+using System.Collections.Immutable;
+using System.ComponentModel;
 using System.IO;
 using System.Reflection;
 using System.Windows;
@@ -10,6 +13,12 @@ namespace NodeVideoEffects
     /// </summary>
     public partial class NodeEditor : Window
     {
+        public List<NodeInfo> Nodes
+        {
+            get => EditSpace.Nodes;
+            set => EditSpace.Nodes = value;
+        }
+
         string tag;
         string commit;
         public NodeEditor()
@@ -42,6 +51,13 @@ namespace NodeVideoEffects
         private void ShowAbout(object sender, RoutedEventArgs e)
         {
             new About(tag, commit) { Owner = this }.ShowDialog();
+        }
+
+        internal event PropertyChangedEventHandler NodesUpdated;
+
+        private void EditSpace_NodesUpdated(object sender, PropertyChangedEventArgs e)
+        {
+            NodesUpdated?.Invoke(this, new PropertyChangedEventArgs(Title));
         }
     }
 }

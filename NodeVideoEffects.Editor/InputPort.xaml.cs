@@ -1,20 +1,10 @@
 ﻿using NodeVideoEffects.Control;
 using NodeVideoEffects.Type;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace NodeVideoEffects.Editor
 {
@@ -28,6 +18,8 @@ namespace NodeVideoEffects.Editor
         private string _id;
         private int _index;
 
+        Editor editor;
+
         public InputPort(Input input, string id, int index)
         {
             InitializeComponent();
@@ -36,8 +28,30 @@ namespace NodeVideoEffects.Editor
             _index = index;
             portName.Content = input.Name;
             control = input.Control;
-            control.PropertyChanged += OnControlPropertyChanged;
+            port.Fill = new SolidColorBrush(input.Color);
+            if (control is System.Windows.Controls.Control)
+                ((System.Windows.Controls.Control)control).Loaded += (s, e) => { control.PropertyChanged += OnControlPropertyChanged; };
             portControl.Content = control;
+            Loaded += (s, e) =>
+            {
+                editor = FindParent<Editor>(this);
+            };
+        }
+
+        public static T FindParent<T>(DependencyObject child) where T : DependencyObject
+        {
+            //get parent item
+            DependencyObject parentObject = VisualTreeHelper.GetParent(child);
+
+            //we've reached the end of the tree
+            if (parentObject == null) return null;
+
+            //check if the parent matches the type we're looking for
+            T parent = parentObject as T;
+            if (parent != null)
+                return parent;
+            else
+                return FindParent<T>(parentObject);
         }
 
         public object? Value
@@ -53,9 +67,12 @@ namespace NodeVideoEffects.Editor
         public string ID => _id;
         public int Index => _index;
 
+        public event PropertyChangedEventHandler PropertyChanged;
+
         private void OnControlPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             _input.Value = control.Value;
+            PropertyChanged?.Invoke(this, new(Name));
         }
 
         public void SetConnection(string id, int index)
@@ -67,6 +84,7 @@ namespace NodeVideoEffects.Editor
         public void RemoveConnection()
         {
             _input.RemoveConnection(_id, _index);
+            editor.RemoveConnector(_id, _index);
             portControl.Visibility = Visibility.Visible;
         }
 

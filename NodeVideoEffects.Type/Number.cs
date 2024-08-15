@@ -1,4 +1,5 @@
 ﻿using NodeVideoEffects.Control;
+using System.Windows.Media;
 
 namespace NodeVideoEffects.Type
 {
@@ -27,6 +28,8 @@ namespace NodeVideoEffects.Type
         }
 
         public System.Type Type { get => typeof(double); }
+
+        public Color Color { get => Colors.Coral; }
 
         /// <summary>
         /// Double value

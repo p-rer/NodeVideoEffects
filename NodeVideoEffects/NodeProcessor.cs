@@ -1,6 +1,11 @@
-﻿using NodeVideoEffects.Type;
+﻿using NodeVideoEffects.Nodes.Basic;
+using NodeVideoEffects.Type;
+using System.Numerics;
 using System.Reflection;
+using Vortice.DCommon;
 using Vortice.Direct2D1;
+using Vortice.DXGI;
+using Vortice.Mathematics;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
 
@@ -13,29 +18,95 @@ namespace NodeVideoEffects
         public ID2D1Image Output { set; get; }
 
         bool isFirst = true;
-        string nodes;
 
-        Nodes.Basic.InputNode inputNode = new();
-        Nodes.Basic.OutputNode outputNode = new();
+        Nodes.Basic.InputNode inputNode;
+        Nodes.Basic.OutputNode outputNode;
 
         public NodeProcessor(IGraphicsDevicesAndContext context, NodeVideoEffectsPlugin item)
         {
-            _context = context.DeviceContext;
-            outputNode.SetInputConnection(0, new(inputNode.Id, 0));
+            _context = context.DeviceContext;            
+            if (item.Nodes.Count == 0)
+            {
+                inputNode = new();
+                outputNode = new();
+                outputNode.SetInputConnection(0, new(inputNode.Id, 0));
+                item.Nodes.Add(new(inputNode.Id, inputNode.GetType(), [], 100, 100, []));
+                item.Nodes.Add(new(outputNode.Id, outputNode.GetType(), [], 500, 100, [new(inputNode.Id, 0)]));
+            }
+            else
+            {
+                foreach (NodeInfo info in item.Nodes)
+                {
+                    INode? node;
+                    if ((node = NodesManager.GetNode(info.ID)) == null)
+                    {
+                        System.Type? type = System.Type.GetType(info.Type);
+                        if (type != null)
+                        {
+                            object? obj = Activator.CreateInstance(type, [info.ID]);
+
+                            node = obj as INode;
+                        }
+                    }
+
+                    if (node != null)
+                    {
+                        if (node.GetType() == typeof(InputNode))
+                            inputNode = (InputNode)node;
+                        if (node.GetType() == typeof(OutputNode))
+                        {
+                            outputNode = (OutputNode)node;
+                        }
+                        for (int i = 0; i < info.Values.Count; i++)
+                        {
+                            node.SetInput(i, info.Values[i]);
+                        }
+                    }
+                }
+                foreach (NodeInfo info in item.Nodes)
+                {
+                    INode node = NodesManager.GetNode(info.ID);
+                    for (int i = 0; i < info.Connections.Count; i++)
+                    {
+                        node.SetInputConnection(i, info.Connections[i]);
+                    }
+                }
+            }
+        
             this.item = item;
         }
 
         public void SetInput(ID2D1Image input)
         {
             inputNode.Outputs[0].Value = new ImageAndContext(input, _context);
-            ID2D1Image _output = ((ImageAndContext)outputNode.Inputs[0].Value).Image;
+            ID2D1Image? _output = ((ImageAndContext?)outputNode.Inputs[0].Value)?.Image ?? null;
+            if (_output == null)
+            {
+                BitmapProperties1 bitmapProperties = new BitmapProperties1(
+                    new PixelFormat(Format.B8G8R8A8_UNorm, AlphaMode.Premultiplied),
+                    96,
+                    96,
+                    BitmapOptions.Target
+                );
+
+                ID2D1Bitmap1 bitmap = _context.CreateBitmap(
+                    new SizeI(1, 1),
+                    IntPtr.Zero,
+                    0,
+                    bitmapProperties
+                );
+
+                _context.Target = bitmap;
+                _context.BeginDraw();
+                _context.Clear(new Color(0, 0, 0, 0));
+                _context.EndDraw();
+
+                _output = bitmap;
+            }
             Output = _output;
         }
 
-        public void ClearInput()
-        {
-            inputNode.Outputs[0].Value = null;
-        }
+        public void ClearInput() { }
 
         public DrawDescription Update(EffectDescription effectDescription)
         {
@@ -48,12 +119,36 @@ namespace NodeVideoEffects
                     .GetMethod("SetInfo",
                     BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
                     .Invoke(null, [effectDescription]);
+                ID2D1Image? _output = ((ImageAndContext?)outputNode.Inputs[0].Value)?.Image??null;
+                if (_output == null)
+                {
+                    BitmapProperties1 bitmapProperties = new BitmapProperties1(
+                        new PixelFormat(Format.B8G8R8A8_UNorm, AlphaMode.Premultiplied),
+                        96,
+                        96,
+                        BitmapOptions.Target
+                    );
+
+                    ID2D1Bitmap1 bitmap = _context.CreateBitmap(
+                        new SizeI(1, 1),
+                        IntPtr.Zero,
+                        0,
+                        bitmapProperties
+                    );
+
+                    _context.Target = bitmap;
+                    _context.BeginDraw();
+                    _context.Clear(new Color(0, 0, 0, 0));
+                    _context.EndDraw();
+
+                    _output = bitmap;
+                }
+                Output = _output;
             }
             catch (NullReferenceException e)
             {
 
             }
-            isFirst = false;
 
             return effectDescription.DrawDescription;
         }

@@ -1,14 +1,20 @@
 ﻿using NodeVideoEffects.Type;
+using System.ComponentModel;
 
 namespace NodeVideoEffects.Nodes.Basic
 {
     public class OutputNode : INode
     {
         public OutputNode(string? id = null) : base(
-            [new(new Image(null), "Input")],
+            [new(new Image(null), "Output")],
             [],
-            "Input", id)
+            "Output", id)
         {
+            Inputs[0].PropertyChanged += (s, e) => 
+            {
+                if (Inputs[0].Value != null)
+                    PropertyChanged?.Invoke(this, new(Name));
+            };
         }
 
         public override object? GetOutput(int index)
@@ -20,6 +26,8 @@ namespace NodeVideoEffects.Nodes.Basic
         {
             return;
         }
+
+        public event PropertyChangedEventHandler PropertyChanged;
     }
 }
 

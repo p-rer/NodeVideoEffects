@@ -25,6 +25,14 @@ namespace NodeVideoEffects.Type
             return node.GetOutput(index);
         }
 
+        public static INode? GetNode(string id)
+        {
+            INode? node;
+            if(_dictionary.TryGetValue(id, out node))
+                return node;
+            return null;
+        }
+
         public static void NoticeOutputChanged(string id, int index)
         {
             _dictionary[id].Inputs[index].UpdatedConnectionValue();

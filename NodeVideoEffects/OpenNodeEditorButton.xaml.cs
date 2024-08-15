@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using NodeVideoEffects.Type;
+using System.Collections.Immutable;
+using System.Windows;
 using System.Windows.Controls;
 using YukkuriMovieMaker.Commons;
 
@@ -30,8 +32,16 @@ namespace NodeVideoEffects
             var window = new NodeEditor
             {
                 Owner = Window.GetWindow(this),
+                Nodes = ((NodeVideoEffectsPlugin)ItemProperties[0].Item).Nodes
             };
             window.Show();
+
+            window.NodesUpdated += (s, e) =>
+            {
+                BeginEdit?.Invoke(this, EventArgs.Empty);
+                ((NodeVideoEffectsPlugin)ItemProperties[0].Item).Nodes = window.Nodes;
+                EndEdit?.Invoke(this, EventArgs.Empty);
+            };
 
             EndEdit?.Invoke(this, EventArgs.Empty);
         }

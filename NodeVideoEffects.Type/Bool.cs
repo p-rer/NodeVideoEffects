@@ -1,4 +1,5 @@
 ﻿using NodeVideoEffects.Control;
+using System.Windows.Media;
 
 namespace NodeVideoEffects.Type
 {
@@ -15,6 +16,7 @@ namespace NodeVideoEffects.Type
         }
 
         public System.Type Type { get => typeof(bool); }
+        public Color Color { get => Colors.Purple; }
 
         /// <summary>
         /// Value

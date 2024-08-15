@@ -1,5 +1,7 @@
 ﻿using NodeVideoEffects.Control;
 using System.ComponentModel;
+using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace NodeVideoEffects.Type
 {
@@ -33,9 +35,16 @@ namespace NodeVideoEffects.Type
             {
                 if (_connection != null)
                 {
-                    Task<object> task = NodesManager.GetOutputValue(_connection.Value.id, _connection.Value.index);
-                    task.Wait();
-                    return task.Result;
+                    try
+                    {
+                        Task<object> task = NodesManager.GetOutputValue(_connection.Value.id, _connection.Value.index);
+                        task.Wait();
+                        return task.Result;
+                    }
+                    catch
+                    {
+                        return null;
+                    }
                 }
                 return _value.Value;
             }
@@ -53,6 +62,8 @@ namespace NodeVideoEffects.Type
         /// Type of input value
         /// </summary>
         public System.Type Type { get { return _value.Type; } }
+
+        public Color Color { get => _value.Color; }
 
         /// <summary>
         /// Name of this input port
@@ -84,7 +95,8 @@ namespace NodeVideoEffects.Type
         public void SetConnection(string iid, int iindex, string oid, int oindex)
         {
             _connection = new(oid, oindex);
-            NodesManager.NoticeInputConnectionAdd(iid, iindex, oid, oindex);
+            if (oid != null)
+                NodesManager.NoticeInputConnectionAdd(iid, iindex, oid, oindex);
         }
 
         /// <summary>

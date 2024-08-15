@@ -1,18 +1,8 @@
 ﻿using NodeVideoEffects.Type;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace NodeVideoEffects.Editor
 {
@@ -24,6 +14,8 @@ namespace NodeVideoEffects.Editor
         Output _output;
         string _id;
         int _index;
+        Editor editor;
+        Point startPos;
 
         private bool isMouseDown = false;
         public OutputPort(Output output, string id, int index)
@@ -33,8 +25,14 @@ namespace NodeVideoEffects.Editor
             _id = id;
             _index = index;
             portName.Content = output.Name;
+            port.Fill = new SolidColorBrush(output.Color);
             ToolTip = new();
             ToolTipOpening += OutputPort_ToolTipOpening;
+
+            Loaded += (s, e) =>
+            {
+                editor = FindParent<Editor>(this);
+            };
         }
 
         private void OutputPort_ToolTipOpening(object sender, ToolTipEventArgs e)
@@ -46,13 +44,10 @@ namespace NodeVideoEffects.Editor
 
         public static T FindParent<T>(DependencyObject child) where T : DependencyObject
         {
-            //get parent item
             DependencyObject parentObject = VisualTreeHelper.GetParent(child);
 
-            //we've reached the end of the tree
             if (parentObject == null) return null;
 
-            //check if the parent matches the type we're looking for
             T parent = parentObject as T;
             if (parent != null)
                 return parent;
@@ -64,11 +59,15 @@ namespace NodeVideoEffects.Editor
         {
             isMouseDown = true;
             port.CaptureMouse();
+            startPos = e.GetPosition(editor);
+            editor.PreviewConnection(startPos, startPos);
             e.Handled = true;
         }
 
         private void port_MouseMove(object sender, MouseEventArgs e)
         {
+            if (isMouseDown)
+                editor.PreviewConnection(startPos, e.GetPosition(editor));
             e.Handled = true;
         }
 
@@ -76,9 +75,11 @@ namespace NodeVideoEffects.Editor
         {
             isMouseDown = false;
 
+            editor.RemovePreviewConnection();
+
             // Get the control under the mouse pointer
-            Point position = e.GetPosition(FindParent<Editor>(this));
-            HitTestResult result = VisualTreeHelper.HitTest(FindParent<Editor>(this), position);
+            Point position = e.GetPosition(editor);
+            HitTestResult result = VisualTreeHelper.HitTest(editor, position);
 
             if (result != null)
             {
@@ -86,20 +87,24 @@ namespace NodeVideoEffects.Editor
 
                 if (element != null)
                 {
-                    SetConnectionToInputPort(element);
+                    SetConnectionToInputPort(element, port.PointToScreen(new(5, 5)), position);
                 }
             }
             port.ReleaseMouseCapture();
             e.Handled = true;
         }
 
-        private bool SetConnectionToInputPort(DependencyObject element)
+        private bool SetConnectionToInputPort(DependencyObject element, Point pos1, Point pos2)
         {
             InputPort? inputPort = FindParent<InputPort>(element);
             if (inputPort != null)
             {
                 inputPort.SetConnection(_id, _index);
                 _output.AddConnection(inputPort.ID, inputPort.Index);
+                editor.AddConnector(pos1, inputPort.port.PointToScreen(new(5, 5)),
+                    ((SolidColorBrush)port.Fill).Color,
+                    ((SolidColorBrush)inputPort.port.Fill).Color,
+                    new(inputPort.ID, inputPort.Index), new(_id, _index));
                 return true;
             }
             return false;
