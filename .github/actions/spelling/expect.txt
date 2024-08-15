@@ -4,7 +4,6 @@ Acerca
 actualizaciones
 AEFBE
 animatable
-Animatables
 Archivo
 ayuda
 BBF
