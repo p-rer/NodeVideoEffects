@@ -102,7 +102,7 @@ namespace NodeVideoEffects.Editor
                     {
                         for (int i = 0; i < info.Connections.Count; i++)
                         {
-                            if (info.Connections[i].id != null)
+                            if (info.Connections[i].id != "")
                             {
                                 Point inputPoint = nodes[info.ID].GetPortPoint(Node.PortType.Input, i);
                                 Point outputPoint = nodes[info.Connections[i].id].GetPortPoint(Node.PortType.Output, info.Connections[i].index);

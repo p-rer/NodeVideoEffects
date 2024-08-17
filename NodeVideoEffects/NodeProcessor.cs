@@ -44,7 +44,6 @@ namespace NodeVideoEffects
                         if (type != null)
                         {
                             object? obj = Activator.CreateInstance(type, [info.ID]);
-
                             node = obj as INode;
                         }
                     }
@@ -65,10 +64,11 @@ namespace NodeVideoEffects
                 }
                 foreach (NodeInfo info in item.Nodes)
                 {
-                    INode node = NodesManager.GetNode(info.ID);
+                    INode? node = NodesManager.GetNode(info.ID);
                     for (int i = 0; i < info.Connections.Count; i++)
                     {
-                        node.SetInputConnection(i, info.Connections[i]);
+                        if(info.Connections[i].id != "")
+                            node?.SetInputConnection(i, info.Connections[i]);
                     }
                 }
             }

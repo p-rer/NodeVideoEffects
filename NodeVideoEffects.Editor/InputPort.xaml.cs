@@ -14,7 +14,7 @@ namespace NodeVideoEffects.Editor
     public partial class InputPort : UserControl
     {
         private IControl? control;
-        private Input? _input;
+        private Input _input;
         private string _id;
         private int _index;
 
@@ -66,6 +66,7 @@ namespace NodeVideoEffects.Editor
 
         public string ID => _id;
         public int Index => _index;
+        public System.Type Type => _input.Type;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
