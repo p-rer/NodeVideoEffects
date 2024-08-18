@@ -4,7 +4,7 @@ namespace NodeVideoEffects.Nodes.Math
 {
     public class RootNode : INode
     {
-        public RootNode(string? id = null) : base(
+        public RootNode() : base(
             [
                 new(new Number(0, null, null, null), "Radicand"),
                 new(new Number(1, null, null, null), "Degree"),
@@ -13,7 +13,7 @@ namespace NodeVideoEffects.Nodes.Math
             [
                 new (new Number(0, null, null, null), "Result")
             ],
-            "Root", id)
+            "Root")
         { }
 
         public override async Task Calculate()

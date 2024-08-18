@@ -8,7 +8,7 @@ namespace NodeVideoEffects.Type
 {
     public record NodeInfo
     {
-        public string ID { get; }
+        public string ID { get; set; }
         public string Type {  get; }
         public List<object> Values { get; set; }
         public double X { get; set; }

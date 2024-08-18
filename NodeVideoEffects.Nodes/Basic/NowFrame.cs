@@ -5,10 +5,10 @@ namespace NodeVideoEffects.Nodes.Basic
 {
     public class NowFrame : INode
     {
-        public NowFrame(string? id = null) : base(
+        public NowFrame(string id) : base(
             [],
             [new(new Number(0, 0, null, 0), "Input")],
-            "Frame", id)
+            "Frame")
         {
             NodesManager.FrameChanged += FPS_PropertyChanged;
         }

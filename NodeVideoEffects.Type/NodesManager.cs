@@ -6,6 +6,7 @@ namespace NodeVideoEffects.Type
     public static class NodesManager
     {
         private static Dictionary<string, INode> _dictionary = new();
+        private static List<string> _items = new();
         private static int _frame;
         private static int _length;
         private static int _fps;
@@ -39,14 +40,28 @@ namespace NodeVideoEffects.Type
         }
         public static void NoticeInputConnectionAdd(string iid, int iindex, string oid, int oindex)
         {
-            _dictionary[oid].Outputs[oindex].AddConnection(iid, iindex);
+            try
+            {
+                _dictionary[oid].Outputs[oindex].AddConnection(iid, iindex);
+            }
+            catch { }
         }
         public static void NoticeInputConnectionRemove(string iid, int iindex, string oid, int oindex)
         {
-            _dictionary[oid].Outputs[oindex].RemoveConnection(iid, iindex);
+            try
+            {
+                _dictionary[oid].Outputs[oindex].RemoveConnection(iid, iindex);
+            }
+            catch { }
         }
         public static void AddNode(string id, INode node) => _dictionary.Add(id, node);
         public static void RemoveNode(string id) => _dictionary.Remove(id);
+        public static bool AddItem(string id)
+        {
+            if(_items.Contains(id)) return false;
+            _items.Add(id);
+            return true;            
+        }
 
         /// <summary>
         /// Now frame

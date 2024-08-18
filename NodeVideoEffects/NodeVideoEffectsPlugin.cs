@@ -15,6 +15,8 @@ namespace NodeVideoEffects
     {
         public override string Label => "NodeVideoEffects";
 
+        public string ID { get; set; } = "";
+
         [Display(Name = nameof(Translate.NodeEditor), GroupName = nameof(Translate.NodeVideoEffects), ResourceType = typeof(Translate))]
         [OpenNodeEditor]
         public List<NodeInfo> Nodes { get => nodes; set => Set(ref nodes, value); }

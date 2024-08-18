@@ -4,7 +4,7 @@ namespace NodeVideoEffects.Nodes.Math
 {
     public class MulNode : INode
     {
-        public MulNode(string? id = null) : base(
+        public MulNode() : base(
             [
                 new(new Number(0, null, null, null), "Value1"),
                 new(new Number(0, null, null, null), "Value2")
@@ -12,7 +12,7 @@ namespace NodeVideoEffects.Nodes.Math
             [
                 new (new Number(0, null, null, null), "Result")
             ],
-            "Mul", id)
+            "Mul")
         { }
 
         public override async Task Calculate()

@@ -32,6 +32,8 @@ namespace NodeVideoEffects.Type
 
         public Color Color { get => _value.Color; }
 
+        public System.Type Type { get => _value.Type; }
+
         /// <summary>
         /// Name of this output port
         /// </summary>

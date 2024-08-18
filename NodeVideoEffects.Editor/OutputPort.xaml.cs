@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Navigation;
 
 namespace NodeVideoEffects.Editor
 {
@@ -34,6 +35,8 @@ namespace NodeVideoEffects.Editor
                 editor = FindParent<Editor>(this);
             };
         }
+
+        public System.Type Type => _output.Type;
 
         private void OutputPort_ToolTipOpening(object sender, ToolTipEventArgs e)
         {
@@ -99,13 +102,16 @@ namespace NodeVideoEffects.Editor
             InputPort? inputPort = FindParent<InputPort>(element);
             if (inputPort != null)
             {
-                inputPort.SetConnection(_id, _index);
-                _output.AddConnection(inputPort.ID, inputPort.Index);
-                editor.AddConnector(pos1, inputPort.port.PointToScreen(new(5, 5)),
-                    ((SolidColorBrush)port.Fill).Color,
-                    ((SolidColorBrush)inputPort.port.Fill).Color,
-                    new(inputPort.ID, inputPort.Index), new(_id, _index));
-                return true;
+                if (inputPort.Type.IsAssignableFrom(Type))
+                {
+                    inputPort.SetConnection(_id, _index);
+                    _output.AddConnection(inputPort.ID, inputPort.Index);
+                    editor.AddConnector(pos1, inputPort.port.PointToScreen(new(5, 5)),
+                        ((SolidColorBrush)port.Fill).Color,
+                        ((SolidColorBrush)inputPort.port.Fill).Color,
+                        new(inputPort.ID, inputPort.Index), new(_id, _index));
+                    return true;
+                }
             }
             return false;
         }

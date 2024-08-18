@@ -6,10 +6,10 @@ namespace NodeVideoEffects.Nodes.Basic
     {
         private ImageAndContext? _image;
 
-        public InputNode(string? id = null) : base(
+        public InputNode() : base(
             [],
             [new(new Image(null), "Input")],
-            "Input", id)
+            "Input")
         {
         }
 

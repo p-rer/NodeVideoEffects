@@ -8,11 +8,11 @@
         /// <summary>
         /// Node ID
         /// </summary>
-        public string id;
+        public string id = "";
         /// <summary>
         /// Port index
         /// </summary>
-        public int index;
+        public int index = 0;
 
         /// <summary>
         /// Initialization

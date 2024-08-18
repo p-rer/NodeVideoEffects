@@ -36,6 +36,7 @@
             </MenuItem>
         </Menu>
         <Rectangle Grid.Column="1" Grid.Row="1" Fill="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" />
+        <NodeVideoEffects.Editor:NodeExplorer Grid.Column="0" Grid.Row="1" />
         <NodeVideoEffects.Editor:Editor Grid.Column="2"  Grid.Row="1" Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}" x:Name="EditSpace"
                                         NodesUpdated="EditSpace_NodesUpdated"/>
     </Grid>
