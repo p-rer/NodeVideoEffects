@@ -7,7 +7,7 @@ namespace NodeVideoEffects.Nodes.Effect
     public class GaussianBlurNode : INode
     {
         GaussianBlur blur;
-        public GaussianBlurNode(string? id = null) : base(
+        public GaussianBlurNode() : base(
             [
                 new(new Image(null), "In"),
                 new(new Number(10, 0, 250,4), "Level")
@@ -15,7 +15,7 @@ namespace NodeVideoEffects.Nodes.Effect
             [
                 new(new Image(null), "Out")
             ],
-            "Gaussian Blur", id)
+            "Gaussian Blur")
         {
         }
 

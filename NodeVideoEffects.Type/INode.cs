@@ -28,7 +28,7 @@ namespace NodeVideoEffects.Type
         /// </summary>
         public string Name { get => _name; }
 
-        public string Id { get => _id; }
+        public string Id { get => _id; set => _id = value; }
         /// <summary>
         /// Create new node object
         /// </summary>
@@ -36,14 +36,11 @@ namespace NodeVideoEffects.Type
         /// <param name="outputs">Output ports</param>
         /// <param name="name">Name of this node</param>
         /// <param name="id">ID of this node(Set this null)</param>
-        public INode(Input[]? inputs, Output[]? outputs, string name, string? id)
+        public INode(Input[]? inputs, Output[]? outputs, string name)
         {
             _inputs = inputs;
             _outputs = outputs;
             _name = name;
-
-            _id = id ?? Guid.NewGuid().ToString("N");
-            NodesManager.AddNode(_id, this);
 
             SubscribeToInputChanges();
         }

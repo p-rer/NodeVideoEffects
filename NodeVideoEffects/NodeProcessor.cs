@@ -1,7 +1,10 @@
-﻿using NodeVideoEffects.Nodes.Basic;
+﻿using NodeVideoEffects.Editor;
+using NodeVideoEffects.Nodes.Basic;
 using NodeVideoEffects.Type;
+using System;
 using System.Numerics;
 using System.Reflection;
+using System.Security.Cryptography;
 using Vortice.DCommon;
 using Vortice.Direct2D1;
 using Vortice.DXGI;
@@ -24,11 +27,20 @@ namespace NodeVideoEffects
 
         public NodeProcessor(IGraphicsDevicesAndContext context, NodeVideoEffectsPlugin item)
         {
-            _context = context.DeviceContext;            
+            _context = context.DeviceContext;
+            if (item.ID == "" ^ !NodesManager.AddItem(item.ID))
+            {
+                item.ID = Guid.NewGuid().ToString("N");
+                NodesManager.AddItem(item.ID);
+            }
             if (item.Nodes.Count == 0)
             {
                 inputNode = new();
                 outputNode = new();
+                inputNode.Id = item.ID + "-" + Guid.NewGuid().ToString("N");
+                outputNode.Id = item.ID + "-" + Guid.NewGuid().ToString("N");
+                NodesManager.AddNode(inputNode.Id, inputNode);
+                NodesManager.AddNode(outputNode.Id, outputNode);
                 outputNode.SetInputConnection(0, new(inputNode.Id, 0));
                 item.Nodes.Add(new(inputNode.Id, inputNode.GetType(), [], 100, 100, []));
                 item.Nodes.Add(new(outputNode.Id, outputNode.GetType(), [], 500, 100, [new(inputNode.Id, 0)]));
@@ -37,15 +49,16 @@ namespace NodeVideoEffects
             {
                 foreach (NodeInfo info in item.Nodes)
                 {
-                    INode? node;
-                    if ((node = NodesManager.GetNode(info.ID)) == null)
+                    INode? node = NodesManager.GetNode(info.ID);
+                    int index = info.ID.IndexOf('-');
+                    if (info.ID[0..index] != item.ID) info.ID = item.ID + "-" + info.ID[(index + 1)..^0];
+                    System.Type? type = System.Type.GetType(info.Type);
+                    if (type != null)
                     {
-                        System.Type? type = System.Type.GetType(info.Type);
-                        if (type != null)
-                        {
-                            object? obj = Activator.CreateInstance(type, [info.ID]);
-                            node = obj as INode;
-                        }
+                        object? obj = Activator.CreateInstance(type, []);
+                        node = obj as INode ?? throw new Exception("Unable to create node instance.");
+                        node.Id = info.ID;
+                        NodesManager.AddNode(info.ID, node);
                     }
 
                     if (node != null)
@@ -68,7 +81,17 @@ namespace NodeVideoEffects
                     for (int i = 0; i < info.Connections.Count; i++)
                     {
                         if(info.Connections[i].id != "")
+                        {
+                            int index = info.ID.IndexOf('-');
+                            if (info.Connections[i].id[0..index] != item.ID)
+                            {
+                                info.Connections[i] = new(item.ID
+                                                          + "-"
+                                                          + info.Connections[i].id[(index + 1)..^0], info.Connections[i].index);
+                            }
+
                             node?.SetInputConnection(i, info.Connections[i]);
+                        }
                     }
                 }
             }
