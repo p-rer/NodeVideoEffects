@@ -25,10 +25,10 @@ namespace NodeVideoEffects.UITest
             node1.Id = Guid.NewGuid().ToString("N");
             node2.Id = Guid.NewGuid().ToString("N");
 
-            node2.SetInputConnection(1, new(node1.Id, 0));
-
             NodesManager.AddNode(node1.Id, node1);
             NodesManager.AddNode(node2.Id, node2);
+
+            node2.SetInputConnection(1, new(node1.Id, 0));
 
             nodes.Add(new(node1.Id, node1.GetType(), [], 100, 100, [new(), new()]));
             nodes.Add(new(node2.Id, node2.GetType(), [], 500, 100, [new(), new(node1.Id, 0)]));

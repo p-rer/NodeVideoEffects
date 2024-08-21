@@ -104,13 +104,16 @@ namespace NodeVideoEffects.Editor
             {
                 if (inputPort.Type.IsAssignableFrom(Type))
                 {
-                    inputPort.SetConnection(_id, _index);
-                    _output.AddConnection(inputPort.ID, inputPort.Index);
-                    editor.AddConnector(pos1, inputPort.port.PointToScreen(new(5, 5)),
+                    if(NodesManager.CheckConnection(inputPort.ID, _id))
+                    {
+                        inputPort.SetConnection(_id, _index);
+                        _output.AddConnection(inputPort.ID, inputPort.Index);
+                        editor.AddConnector(pos1, inputPort.port.PointToScreen(new(5, 5)),
                         ((SolidColorBrush)port.Fill).Color,
                         ((SolidColorBrush)inputPort.port.Fill).Color,
                         new(inputPort.ID, inputPort.Index), new(_id, _index));
-                    return true;
+                        return true;
+                    }
                 }
             }
             return false;

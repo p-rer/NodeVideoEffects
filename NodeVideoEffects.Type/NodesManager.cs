@@ -34,6 +34,32 @@ namespace NodeVideoEffects.Type
             return null;
         }
 
+        public static bool CheckConnection(string iid, string oid)
+        {
+            bool result = true;
+            if (!(_dictionary[iid].Outputs == null || _dictionary[iid].Outputs?.Length == 0))
+            {
+                foreach (Output output in _dictionary[iid].Outputs)
+                {
+                    if (!result)
+                        break;
+                    if (output.Connection.Count == 0)
+                        break;
+                    foreach (Connection connection in output.Connection)
+                    {
+                        if (connection.id == oid)
+                        {
+                            result = false;
+                            break;
+                        }
+                        if (result)
+                            result = CheckConnection(connection.id, oid);
+                    }
+                }
+            }
+            return result;
+        }
+
         public static void NoticeOutputChanged(string id, int index)
         {
             _dictionary[id].Inputs[index].UpdatedConnectionValue();
