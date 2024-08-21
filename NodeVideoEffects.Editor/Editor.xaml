@@ -6,7 +6,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:NodeVideoEffects.Editor"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="450" d:DesignWidth="800"
+             Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*" />
@@ -18,7 +19,7 @@
             <RowDefinition Height="20" />
             <RowDefinition Height="5" />
         </Grid.RowDefinitions>
-        <Canvas Name="wrapper_canvas" Grid.ColumnSpan="3" Grid.RowSpan="3" Background="{Binding BackGround}" ClipToBounds="True">
+        <Canvas Name="wrapper_canvas" Grid.ColumnSpan="3" Grid.RowSpan="3" ClipToBounds="True">
             <Rectangle x:Name="horizontalScrollBar" Height="5" Fill="{DynamicResource {x:Static SystemColors.ScrollBarBrushKey}}" Canvas.Bottom="0" />
             <Rectangle x:Name="verticalScrollBar" Width="5" Fill="{DynamicResource {x:Static SystemColors.ScrollBarBrushKey}}" Canvas.Right="0" />
             <Canvas Name="canvas" Focusable="True" />

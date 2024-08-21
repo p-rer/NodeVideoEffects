@@ -11,7 +11,7 @@ namespace NodeVideoEffects.Type
     public class Input : INotifyPropertyChanged
     {
         private PortValue _value;
-        private Connection? _connection;
+        private Connection _connection = new();
         private String _name;
 
         /// <summary>
@@ -33,11 +33,11 @@ namespace NodeVideoEffects.Type
         {
             get
             {
-                if (_connection != null)
+                if (_connection.id != "")
                 {
                     try
                     {
-                        Task<object> task = NodesManager.GetOutputValue(_connection.Value.id, _connection.Value.index);
+                        Task<object> task = NodesManager.GetOutputValue(_connection.id, _connection.index);
                         task.Wait();
                         return task.Result;
                     }
@@ -106,10 +106,10 @@ namespace NodeVideoEffects.Type
         /// <param name="index">Index of this port</param>
         public void RemoveConnection(string id, int index)
         {
-            if (_connection != null)
+            if (_connection.id != "")
             {
-                NodesManager.NoticeInputConnectionRemove(id, index, _connection.Value.id, _connection.Value.index);
-                _connection = null;
+                NodesManager.NoticeInputConnectionRemove(id, index, _connection.id, _connection.index);
+                _connection.id = "";
             }
         }
 

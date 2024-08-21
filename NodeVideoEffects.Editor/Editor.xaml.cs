@@ -112,6 +112,7 @@ namespace NodeVideoEffects.Editor
                                 AddConnector(outputPoint, inputPoint,
                                     inputColor, outputColor,
                                     new(info.ID, i), new(info.Connections[i].id, info.Connections[i].index));
+                                (nodes[info.ID].inputsPanel.Children[i] as InputPort).portControl.Visibility = Visibility.Hidden;
                             }
                         }
                     };

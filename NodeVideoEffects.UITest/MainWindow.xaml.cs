@@ -3,6 +3,7 @@ using NodeVideoEffects.Nodes.Basic;
 using NodeVideoEffects.Nodes.Math;
 using NodeVideoEffects.Type;
 using System.Windows;
+using System.Windows.Input;
 
 namespace NodeVideoEffects.UITest
 {
@@ -20,10 +21,17 @@ namespace NodeVideoEffects.UITest
 
             var node1 = new AddNode();
             var node2 = new PowNode();
+
+            node1.Id = Guid.NewGuid().ToString("N");
+            node2.Id = Guid.NewGuid().ToString("N");
+
             node2.SetInputConnection(1, new(node1.Id, 0));
 
+            NodesManager.AddNode(node1.Id, node1);
+            NodesManager.AddNode(node2.Id, node2);
+
             nodes.Add(new(node1.Id, node1.GetType(), [], 100, 100, [new(), new()]));
-            nodes.Add(new(node2.Id, node2.GetType(), [], 500, 100, [new(), new()]));
+            nodes.Add(new(node2.Id, node2.GetType(), [], 500, 100, [new(), new(node1.Id, 0)]));
 
             editor.Nodes = nodes;
 
