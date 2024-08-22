@@ -15,7 +15,10 @@
             </TreeView.Resources>
             <TreeView.ItemTemplate>
                 <HierarchicalDataTemplate DataType="{x:Type local:NodesTree}" ItemsSource="{Binding Children}">
-                    <TextBlock Text="{Binding Text}"/>
+                    <TextBlock Text="{Binding Text}" Padding="0,5,0,5"
+                               PreviewMouseLeftButtonDown="TextBlock_MouseLeftButtonDown"
+                               MouseMove="TextBlock_MouseMove"
+                               PreviewMouseLeftButtonUp="TextBlock_MouseLeftButtonUp"/>
                 </HierarchicalDataTemplate>
             </TreeView.ItemTemplate>
         </TreeView>

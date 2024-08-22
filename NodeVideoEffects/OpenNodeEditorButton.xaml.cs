@@ -32,7 +32,8 @@ namespace NodeVideoEffects
             var window = new NodeEditor
             {
                 Owner = Window.GetWindow(this),
-                Nodes = ((NodeVideoEffectsPlugin)ItemProperties[0].Item).Nodes
+                Nodes = ((NodeVideoEffectsPlugin)ItemProperties[0].Item).Nodes,
+                ItemID = ((NodeVideoEffectsPlugin)ItemProperties[0].Item).ID
             };
             window.Show();
 

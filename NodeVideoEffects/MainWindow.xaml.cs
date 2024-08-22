@@ -22,6 +22,12 @@ namespace NodeVideoEffects
             set => EditSpace.Nodes = value;
         }
 
+        public string ItemID
+        {
+            get => EditSpace.ItemID;
+            set => EditSpace.ItemID = value;
+        }
+
         string tag;
         string commit;
         public NodeEditor()

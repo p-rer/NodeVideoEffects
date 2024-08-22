@@ -48,6 +48,8 @@ namespace NodeVideoEffects.Editor
             }
         }
 
+        public string ItemID { get; set; }
+
         public Editor()
         {
             InitializeComponent();
@@ -128,8 +130,8 @@ namespace NodeVideoEffects.Editor
 
         public void AddChildren(Node node, double x, double y)
         {
-            Canvas.SetLeft(node, x);
-            Canvas.SetTop(node, y);
+            Canvas.SetLeft(node, (x - translateTransform.X) / scale);
+            Canvas.SetTop(node, (y - translateTransform.Y) / scale);
             canvas.Children.Add(node);
             Input[] inputs = NodesManager.GetNode(node.ID).Inputs??[];
             List<Connection> connections = new();
