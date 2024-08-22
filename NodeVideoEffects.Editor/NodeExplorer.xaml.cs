@@ -1,8 +1,10 @@
-﻿using System;
+﻿using NodeVideoEffects.Type;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -26,7 +28,52 @@ namespace NodeVideoEffects.Editor
         public NodeExplorer()
         {
             InitializeComponent();
-            
+
+            System.Type baseType = typeof(INode);
+
+            Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+
+            foreach (Assembly assembly in assemblies)
+            {
+                IEnumerable<System.Type> types = assembly.GetTypes()
+                                    .Where(t => t.IsClass && !t.IsAbstract && t.IsSubclassOf(baseType));
+
+                foreach (System.Type type in types)
+                {
+                    AddTypeToExplorerRoot(type);
+                }
+            }
+
+            void AddTypeToExplorerRoot(System.Type type)
+            {
+                string[] namespaces = type.Namespace?.Split('.') ?? Array.Empty<string>();
+                NodesTree? currentNode = null;
+
+                foreach (string ns in namespaces)
+                {
+                    NodesTree? node = currentNode?.Children?.FirstOrDefault(n => n.Text == ns)
+                               ?? Root.FirstOrDefault(n => n.Text == ns);
+
+                    if (node == null)
+                    {
+                        node = new NodesTree { Text = ns };
+                        if (currentNode == null)
+                        {
+                            Root.Add(node);
+                        }
+                        else
+                        {
+                            currentNode.Add(node);
+                        }
+                    }
+
+                    currentNode = node;
+                }
+
+                NodesTree typeNode = new NodesTree { Text = type.Name, Type = type };
+                currentNode?.Add(typeNode);
+            }
+
             DataContext = this;
         }
     }

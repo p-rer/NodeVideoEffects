@@ -7,6 +7,7 @@ using System.IO;
 using System.Reflection;
 using System.Security.AccessControl;
 using System.Windows;
+using System.Windows.Threading;
 
 namespace NodeVideoEffects
 {
@@ -27,53 +28,16 @@ namespace NodeVideoEffects
         {
             InitializeComponent();
 
-            System.Type baseType = typeof(INode);
-
-            Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
-
-            foreach (Assembly assembly in assemblies)
-            {
-                IEnumerable<System.Type> types = assembly.GetTypes()
-                                    .Where(t => t.IsClass && !t.IsAbstract && t.IsSubclassOf(baseType));
-
-                foreach (System.Type type in types)
-                {
-                    AddTypeToExplorerRoot(type);
-                }
-            }
-
             tag = FileLoad("git_tag.txt");
             commit = FileLoad("git_id.txt");
 
-            void AddTypeToExplorerRoot(System.Type type)
+            Task.Run(() =>
             {
-                string[] namespaces = type.Namespace?.Split('.') ?? Array.Empty<string>();
-                NodesTree? currentNode = null;
-
-                foreach (string ns in namespaces)
+                Explorer.Dispatcher.Invoke(() =>
                 {
-                    NodesTree? node = currentNode?.Children?.FirstOrDefault(n => n.Text == ns)
-                               ?? Explorer.Root.FirstOrDefault(n => n.Text == ns);
-
-                    if (node == null)
-                    {
-                        node = new NodesTree { Text = ns };
-                        if (currentNode == null)
-                        {
-                            Explorer.Root.Add(node);
-                        }
-                        else
-                        {
-                            currentNode.Add(node);
-                        }
-                    }
-
-                    currentNode = node;
-                }
-
-                NodesTree typeNode = new NodesTree { Text = type.Name, Type = type };
-                currentNode?.Add(typeNode);
-            }
+                    Explorer.Content = new NodeExplorer();
+                });
+            });
 
             string FileLoad(string file_name)
             {
