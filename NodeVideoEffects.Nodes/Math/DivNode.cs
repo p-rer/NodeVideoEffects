@@ -13,7 +13,7 @@ namespace NodeVideoEffects.Nodes.Math
             [
                 new (new Number(0, null, null, null), "Result")
             ],
-            "Mul")
+            "Div")
         { }
 
         public override async Task Calculate()

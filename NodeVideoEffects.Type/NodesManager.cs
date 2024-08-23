@@ -107,23 +107,23 @@ namespace NodeVideoEffects.Type
             if (_frame != (_frame = info.ItemPosition.Frame))
                 OnFrameChanged(nameof(_FRAME));
             if (_length != (_length = info.ItemDuration.Frame))
-                OnFrameChanged(nameof(_LENGTH));
+                OnLengthChanged(nameof(_LENGTH));
             if (_fps != (_fps = info.FPS))
-                OnFrameChanged(nameof(_FPS));
+                OnFPSChanged(nameof(_FPS));
         }
 
         /// <summary>
         /// Now frame has changed
         /// </summary>
-        public static event PropertyChangedEventHandler FrameChanged;
+        public static event PropertyChangedEventHandler FrameChanged = delegate { };
         /// <summary>
         /// Length of the item has changed
         /// </summary>
-        public static event PropertyChangedEventHandler LengthChanged;
+        public static event PropertyChangedEventHandler LengthChanged = delegate { };
         /// <summary>
         /// FPS of the YMM4 project has changed
         /// </summary>
-        public static event PropertyChangedEventHandler FPSChanged;
+        public static event PropertyChangedEventHandler FPSChanged = delegate { };
 
         private static void OnFrameChanged(string propertyName)
         {

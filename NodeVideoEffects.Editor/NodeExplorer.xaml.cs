@@ -1,4 +1,5 @@
-﻿using NodeVideoEffects.Type;
+﻿using NodeVideoEffects.Nodes.Basic;
+using NodeVideoEffects.Type;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -108,8 +109,12 @@ namespace NodeVideoEffects.Editor
 
                 if (dataContext != null)
                 {
-                    type = dataContext.Type;
-                    textBlock.CaptureMouse();
+                    if (dataContext.Type != typeof(InputNode) || dataContext.Type != typeof(OutputNode))
+                    {
+                        type = dataContext.Type;
+                        if (type != null)
+                            textBlock.CaptureMouse();
+                    }
                 }
             }
         }

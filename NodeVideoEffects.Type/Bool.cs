@@ -28,6 +28,6 @@ namespace NodeVideoEffects.Type
             _value = (bool)value;
         }
 
-        public IControl? Control => null;
+        public IControl? Control => new BoolPort(_value);
     }
 }
