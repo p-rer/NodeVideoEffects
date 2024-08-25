@@ -17,13 +17,20 @@ namespace NodeVideoEffects.Type
         /// <param name="id">Node id</param>
         /// <param name="index">Port index</param>
         /// <returns>Task of getting value (result is the value)</returns>
-        public static async Task<Object> GetOutputValue(string id, int index)
+        public static async Task<object?> GetOutputValue(string id, int index)
         {
-            INode node = _dictionary[id];
-            if (node.Outputs[index].IsSuccess == true)
+            try
+            {
+                INode node = _dictionary[id];
+                if (node.Outputs[index].IsSuccess == true)
+                    return node.GetOutput(index);
+                await node.Calculate();
                 return node.GetOutput(index);
-            await node.Calculate();
-            return node.GetOutput(index);
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         public static INode? GetNode(string id)

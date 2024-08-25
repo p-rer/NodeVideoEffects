@@ -42,7 +42,7 @@ namespace NodeVideoEffects.Editor
         {
             Task<object> @object = NodesManager.GetOutputValue(_id, _index);
             @object.Wait();
-            ToolTip = @object.Result;
+            ToolTip = @object.Result?.ToString()??"(Null)";
         }
 
         public static T FindParent<T>(DependencyObject child) where T : DependencyObject
