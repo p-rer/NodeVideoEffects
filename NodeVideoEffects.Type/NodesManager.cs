@@ -104,12 +104,20 @@ namespace NodeVideoEffects.Type
 
         internal static void SetInfo(EffectDescription info)
         {
-            if (_frame != (_frame = info.ItemPosition.Frame))
+            if (info.ItemPosition.Frame != _frame)
+            {
+                _frame = info.ItemPosition.Frame;
                 OnFrameChanged(nameof(_FRAME));
-            if (_length != (_length = info.ItemDuration.Frame))
+            }
+            if (_length != info.ItemDuration.Frame) {
+                _length = info.ItemDuration.Frame;
                 OnLengthChanged(nameof(_LENGTH));
-            if (_fps != (_fps = info.FPS))
+            }
+            if (_fps != info.FPS)
+            {
+                _fps = info.FPS;
                 OnFPSChanged(nameof(_FPS));
+            }
         }
 
         /// <summary>

@@ -109,12 +109,13 @@ namespace NodeVideoEffects.Editor
 
                 if (dataContext != null)
                 {
-                    if (dataContext.Type != typeof(InputNode) || dataContext.Type != typeof(OutputNode))
+                    if (dataContext.Type == typeof(InputNode) || dataContext.Type == typeof(OutputNode))
                     {
-                        type = dataContext.Type;
-                        if (type != null)
-                            textBlock.CaptureMouse();
+                        return;
                     }
+                    type = dataContext.Type;
+                    if (type != null)
+                        textBlock.CaptureMouse();
                 }
             }
         }
