@@ -19,6 +19,9 @@ namespace NodeVideoEffects.Editor
         private int _index;
 
         Editor editor;
+        Point startPos;
+
+        private bool isMouseDown = false;
 
         public InputPort(Input input, string id, int index)
         {
@@ -92,6 +95,69 @@ namespace NodeVideoEffects.Editor
         private void Port_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             RemoveConnection();
+        }
+
+        private void port_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            isMouseDown = true;
+            port.CaptureMouse();
+            startPos = e.GetPosition(editor);
+            editor.PreviewConnection(startPos, startPos);
+            e.Handled = true;
+        }
+
+        private void port_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (isMouseDown)
+                editor.PreviewConnection(startPos, e.GetPosition(editor));
+            e.Handled = true;
+        }
+
+        private void port_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            isMouseDown = false;
+
+            editor.RemovePreviewConnection();
+
+            // Get the control under the mouse pointer
+            Point position = e.GetPosition(editor);
+            HitTestResult result = VisualTreeHelper.HitTest(editor, position);
+
+            if (result != null)
+            {
+                var element = result.VisualHit as FrameworkElement;
+
+                if (element != null)
+                {
+                    AddConnectionToOutputPort(element, port.PointToScreen(new(5, 5)), position);
+                }
+            }
+            port.ReleaseMouseCapture();
+            e.Handled = true;
+        }
+
+        private bool AddConnectionToOutputPort(DependencyObject element, Point pos1, Point pos2)
+        {
+            OutputPort? outputPort = FindParent<OutputPort>(element);
+            if (outputPort != null)
+            {
+                if (outputPort.Type.IsAssignableFrom(Type))
+                {
+                    if (NodesManager.CheckConnection(_id, outputPort.ID))
+                    {
+                        SetConnection(outputPort.ID, outputPort.Index);
+                        outputPort.AddConnection(ID, Index);
+                        editor.AddConnector(outputPort.port.PointToScreen(new(5, 5)),
+                        pos1,
+                        ((SolidColorBrush)outputPort.port.Fill).Color,
+                        ((SolidColorBrush)port.Fill).Color,
+                        new(_id, _index),
+                        new(outputPort.ID, outputPort.Index));
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
     }
 }

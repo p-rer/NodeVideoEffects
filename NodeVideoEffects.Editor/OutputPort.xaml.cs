@@ -37,6 +37,8 @@ namespace NodeVideoEffects.Editor
         }
 
         public System.Type Type => _output.Type;
+        public string ID => _id;
+        public int Index => _index;
 
         private void OutputPort_ToolTipOpening(object sender, ToolTipEventArgs e)
         {
@@ -118,5 +120,7 @@ namespace NodeVideoEffects.Editor
             }
             return false;
         }
+
+        public void AddConnection(string id, int index) => _output.AddConnection(id, index);
     }
 }
