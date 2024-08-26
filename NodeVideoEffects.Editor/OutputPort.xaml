@@ -12,9 +12,12 @@
             <ColumnDefinition Width="30" />
         </Grid.ColumnDefinitions>
         <Label Name="portName" Grid.Column="0" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
-        <Ellipse Fill="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" Name="port" Grid.Column="1" Margin="10"
-                 PreviewMouseLeftButtonDown="port_PreviewMouseLeftButtonDown"
-                 MouseMove="port_MouseMove"
-                 PreviewMouseLeftButtonUp="port_PreviewMouseLeftButtonUp" />
+        <ContentControl Grid.Column="1"
+                        MouseDoubleClick="port_MouseDoubleClick">
+            <Ellipse Fill="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" Name="port" Margin="10"
+                     MouseLeftButtonDown="port_PreviewMouseLeftButtonDown"
+                     MouseMove="port_MouseMove"
+                     MouseLeftButtonUp="port_PreviewMouseLeftButtonUp" />
+        </ContentControl>
     </Grid>
 </UserControl>

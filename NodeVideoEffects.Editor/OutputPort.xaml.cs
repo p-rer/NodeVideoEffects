@@ -122,5 +122,10 @@ namespace NodeVideoEffects.Editor
         }
 
         public void AddConnection(string id, int index) => _output.AddConnection(id, index);
+
+        private void port_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            editor.RemoveOutputConnector(_id, _index);
+        }
     }
 }

@@ -190,7 +190,14 @@ namespace NodeVideoEffects.Editor
         public void AddConnector(Point pos1, Point pos2, Color col1, Color col2, Connection inputPort, Connection outputPort)
         {
             if (!connectors.ContainsKey((inputPort.id + inputPort.index, outputPort.id + outputPort.index)))
-            {
+            {                
+                if ((connectors.Where(kvp => kvp.Key.Item1 == inputPort.id + inputPort.index).ToList().Count) > 0)
+                {
+                    NodesManager.GetNode(infos[inputPort.id].Connections[inputPort.index].id)
+                        ?.Outputs[infos[inputPort.id].Connections[inputPort.index].index]
+                        .RemoveConnection(inputPort.id, inputPort.index);
+                    RemoveInputConnector(inputPort.id, inputPort.index);
+                }
                 Connector connector;
                 canvas.Children.Add(connector = new Connector()
                 {
@@ -207,7 +214,7 @@ namespace NodeVideoEffects.Editor
             }
         }
 
-        public void RemoveConnector(string id, int index)
+        public void RemoveInputConnector(string id, int index)
         {
             try
             {
@@ -222,6 +229,26 @@ namespace NodeVideoEffects.Editor
                     .ToList()[0]);
                 infos[id].Connections[index] = new();
                 OnNodesUpdated();
+            }
+            catch { }
+        }
+
+        public void RemoveOutputConnector(string id, int index)
+        {
+            try
+            {
+                List<Connector> connectors = this.connectors
+                    .Where(kvp => kvp.Key.Item2 == id + index)
+                    .Select(kvp => kvp.Value)
+                    .ToList();
+                foreach(Connector connector in connectors)
+                {
+                    (string, string) key = this.connectors
+                        .Where(kvp => kvp.Value == connector)
+                        .Select(kvp => kvp.Key)
+                        .ToList()[0];
+                    (nodes[key.Item1[..32]].inputsPanel.Children[int.Parse(key.Item1[^1..])] as InputPort)?.RemoveConnection();
+                }
             }
             catch { }
         }

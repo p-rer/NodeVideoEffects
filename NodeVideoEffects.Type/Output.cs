@@ -71,6 +71,7 @@ namespace NodeVideoEffects.Type
         public void AddConnection(string id, int index)
         {
             _connection.Add(new(id, index));
+            IsSuccess = false;
         }
 
         /// <summary>
@@ -81,6 +82,7 @@ namespace NodeVideoEffects.Type
         public void RemoveConnection(string id, int index)
         {
             _connection.Remove(new(id, index));
+            IsSuccess = false;
         }
     }
 }

@@ -88,7 +88,7 @@ namespace NodeVideoEffects.Editor
         public void RemoveConnection()
         {
             _input.RemoveConnection(_id, _index);
-            editor.RemoveConnector(_id, _index);
+            editor.RemoveInputConnector(_id, _index);
             portControl.Visibility = Visibility.Visible;
         }
 
