@@ -130,7 +130,7 @@ namespace NodeVideoEffects.Editor
         }
 
         private void port_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-        {
+         {
             RemoveAllConnection();
         }
     }

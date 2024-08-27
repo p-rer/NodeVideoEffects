@@ -189,9 +189,9 @@ namespace NodeVideoEffects.Editor
 
         public void AddConnector(Point pos1, Point pos2, Color col1, Color col2, Connection inputPort, Connection outputPort)
         {
-            if (!connectors.ContainsKey((inputPort.id + inputPort.index, outputPort.id + outputPort.index)))
+            if (!connectors.ContainsKey((inputPort.id + ";" + inputPort.index, outputPort.id + ";" + outputPort.index)))
             {                
-                if ((connectors.Where(kvp => kvp.Key.Item1 == inputPort.id + inputPort.index).ToList().Count) > 0)
+                if ((connectors.Where(kvp => kvp.Key.Item1 == inputPort.id + ";" + inputPort.index).ToList().Count) > 0)
                 {
                     NodesManager.GetNode(infos[inputPort.id].Connections[inputPort.index].id)
                         ?.Outputs[infos[inputPort.id].Connections[inputPort.index].index]
@@ -208,7 +208,7 @@ namespace NodeVideoEffects.Editor
                     IsHitTestVisible = false
                 });
                 connector.SetValue(Panel.ZIndexProperty, -1);
-                connectors.Add((inputPort.id + inputPort.index, outputPort.id + outputPort.index), connector);
+                connectors.Add((inputPort.id + ";" + inputPort.index, outputPort.id + ";" + outputPort.index), connector);
                 infos[inputPort.id].Connections[inputPort.index] = outputPort;
                 OnNodesUpdated();
             }
@@ -219,7 +219,7 @@ namespace NodeVideoEffects.Editor
             try
             {
                 Connector connector = connectors
-                    .Where(kvp => kvp.Key.Item1 == id + index)
+                    .Where(kvp => kvp.Key.Item1 == id + ";" + index)
                     .Select(kvp => kvp.Value)
                     .ToList()[0];
                 canvas.Children.Remove(connector);
@@ -238,7 +238,7 @@ namespace NodeVideoEffects.Editor
             try
             {
                 List<Connector> connectors = this.connectors
-                    .Where(kvp => kvp.Key.Item2 == id + index)
+                    .Where(kvp => kvp.Key.Item2 == id + ";" + index)
                     .Select(kvp => kvp.Value)
                     .ToList();
                 foreach(Connector connector in connectors)
@@ -247,7 +247,8 @@ namespace NodeVideoEffects.Editor
                         .Where(kvp => kvp.Value == connector)
                         .Select(kvp => kvp.Key)
                         .ToList()[0];
-                    (nodes[key.Item1[..32]].inputsPanel.Children[int.Parse(key.Item1[^1..])] as InputPort)?.RemoveConnection();
+                    int sepIndex = key.Item1.IndexOf(";");
+                    (nodes[key.Item1[0..sepIndex]].inputsPanel.Children[int.Parse(key.Item1[(sepIndex + 1)..^0])] as InputPort)?.RemoveConnection();
                 }
             }
             catch { }
