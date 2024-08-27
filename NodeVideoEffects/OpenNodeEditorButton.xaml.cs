@@ -35,6 +35,8 @@ namespace NodeVideoEffects
                 Nodes = ((NodeVideoEffectsPlugin)ItemProperties[0].Item).Nodes,
                 ItemID = ((NodeVideoEffectsPlugin)ItemProperties[0].Item).ID
             };
+            var parentWindow = Window.GetWindow(this);
+            window.CommandBindings.AddRange(parentWindow.CommandBindings);
             window.Show();
 
             window.NodesUpdated += (s, e) =>
