@@ -13,7 +13,8 @@
         </Grid.ColumnDefinitions>
         <Label Name="portName" Grid.Column="0" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
         <ContentControl Grid.Column="1"
-                        MouseDoubleClick="port_MouseDoubleClick">
+                        MouseDoubleClick="port_MouseDoubleClick"
+                        Focusable="False">
             <Ellipse Fill="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" Name="port" Margin="10"
                      MouseLeftButtonDown="port_PreviewMouseLeftButtonDown"
                      MouseMove="port_MouseMove"
