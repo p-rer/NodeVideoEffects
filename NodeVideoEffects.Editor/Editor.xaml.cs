@@ -12,6 +12,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Xml.Linq;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace NodeVideoEffects.Editor
 {
@@ -24,9 +25,12 @@ namespace NodeVideoEffects.Editor
         private TranslateTransform translateTransform;
 
         private Point lastPos;
+        private Point nowPos;
         private bool isDragging;
+        private bool isSelecting;
         double scale;
         private Rect wrapRect;
+        private Rectangle selectingRect = new();
 
         private Path? previewPath;
 
@@ -162,6 +166,14 @@ namespace NodeVideoEffects.Editor
                 }
                 catch { }
             };
+        }
+
+        public void RestoreChild(Node node)
+        {
+            double x = Canvas.GetLeft(node);
+            double y = Canvas.GetTop(node);
+            canvas.Children.Remove(node);
+            canvas.Children.Add(node);
         }
 
         public void PreviewConnection(Point pos1, Point pos2)
@@ -336,8 +348,51 @@ namespace NodeVideoEffects.Editor
         {
             if (e.ChangedButton == MouseButton.Middle && e.ButtonState == MouseButtonState.Pressed)
             {
-                lastPos = new(e.GetPosition(this).X, e.GetPosition(this).Y);
+                lastPos = e.GetPosition(this);
                 isDragging = true;
+                this.CaptureMouse();
+            }
+            else if(e.ChangedButton == MouseButton.Left && e.ButtonState == MouseButtonState.Pressed)
+            {
+                lastPos = e.GetPosition(this);
+                isSelecting = true;
+                selectingRect = CreateSelectingRectangleFromPoints(ConvertToTransform(lastPos), ConvertToTransform(lastPos));
+                canvas.Children.Add(selectingRect);
+                _ = Task.Run(() =>
+                {
+                    while (isSelecting)
+                    {
+                        int f = GetDirectionIfOutside(nowPos);
+                        this.Dispatcher.Invoke(() =>
+                        {
+                            const int step = 15;
+                            if ((f & 1) != 0)
+                            {
+                                translateTransform.Y += step;
+                                lastPos.Y += step;
+                            }
+                            if ((f & 2) != 0)
+                            {
+                                translateTransform.X -= step;
+                                lastPos.X -= step;
+                            }
+                            if ((f & 4) != 0)
+                            {
+                                translateTransform.Y -= step;
+                                lastPos.Y -= step;
+                            }
+                            if ((f & 8) != 0)
+                            {
+                                translateTransform.X += step;
+                                lastPos.X += step;
+                            }
+                            canvas.Children.Remove(selectingRect);
+                            selectingRect = CreateSelectingRectangleFromPoints(ConvertToTransform(lastPos), ConvertToTransform(nowPos));
+                            canvas.Children.Add(selectingRect);
+                        });
+                        Task.Delay(50).Wait();
+                    }
+                });
                 this.CaptureMouse();
             }
         }
@@ -349,19 +404,74 @@ namespace NodeVideoEffects.Editor
                 isDragging = false;
                 this.ReleaseMouseCapture();
             }
+            if (e.ChangedButton == MouseButton.Left && e.ButtonState == MouseButtonState.Released)
+            {
+                isSelecting = false;
+                canvas.Children.Remove(selectingRect);
+                selectingRect = new();
+                this.ReleaseMouseCapture();
+            }
         }
 
         private void Canvas_MouseMove(object sender, MouseEventArgs e)
         {
+            nowPos = e.GetPosition(this);
             if (isDragging)
             {
-                Point p = new(e.GetPosition(this).X, e.GetPosition(this).Y);
-                translateTransform.X += p.X - lastPos.X;
-                translateTransform.Y += p.Y - lastPos.Y;
-                lastPos = p;
+                translateTransform.X += nowPos.X - lastPos.X;
+                translateTransform.Y += nowPos.Y - lastPos.Y;
+                lastPos = nowPos;
 
                 UpdateScrollBar();
             }
+            else if (isSelecting)
+            {
+                canvas.Children.Remove(selectingRect);
+                selectingRect = CreateSelectingRectangleFromPoints(ConvertToTransform(lastPos), ConvertToTransform(nowPos));
+                canvas.Children.Add(selectingRect);
+            }
+        }
+
+        private Rectangle CreateSelectingRectangleFromPoints(Point p1, Point p2)
+        {
+            double x = Math.Min(p1.X, p2.X);
+            double y = Math.Min(p1.Y, p2.Y);
+            double width = Math.Abs(p2.X - p1.X);
+            double height = Math.Abs(p2.Y - p1.Y);
+
+            Rectangle rectangle = new Rectangle
+            {
+                Width = width,
+                Height = height,
+                Fill = null,
+                Stroke = SystemColors.GrayTextBrush,
+                StrokeThickness = 1,
+                StrokeDashArray = new([5.0, 5.0]),
+                IsHitTestVisible = false
+            };
+
+            Canvas.SetLeft(rectangle, x);
+            Canvas.SetTop(rectangle, y);
+
+            return rectangle;
+        }
+
+        public int GetDirectionIfOutside(Point p)
+        {
+            double left = 0;
+            double top = 0;
+            double right = ActualWidth;
+            double bottom = ActualHeight;
+            int n = 0;
+            if (p.X < left)
+                n += 8;
+            if (p.X > right)
+                n += 2;
+            if (p.Y < top)
+                n += 1;
+            if (p.Y > bottom)
+                n += 4;
+            return n;
         }
 
         private void Canvas_Zoom(double zoom)
@@ -397,9 +507,9 @@ namespace NodeVideoEffects.Editor
 
         private void TextBoxPasting(object sender, DataObjectPastingEventArgs e)
         {
-            if (e.DataObject.GetDataPresent(typeof(String)))
+            if (e.DataObject.GetDataPresent(typeof(string)))
             {
-                String text = (String)e.DataObject.GetData(typeof(String));
+                string text = (string)e.DataObject.GetData(typeof(string));
                 if (new Regex("[^0-9]").IsMatch(text))
                 {
                     e.CancelCommand();
