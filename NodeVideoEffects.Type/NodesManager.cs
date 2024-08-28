@@ -22,7 +22,7 @@ namespace NodeVideoEffects.Type
             try
             {
                 INode node = _dictionary[id];
-                if (node.Outputs[index].IsSuccess == true)
+                if (node.Outputs[index].IsSuccess )
                     return node.GetOutput(index);
                 await node.Calculate();
                 return node.GetOutput(index);
