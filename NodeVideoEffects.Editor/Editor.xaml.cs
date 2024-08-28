@@ -84,12 +84,51 @@ namespace NodeVideoEffects.Editor
         }
 
         #region Draw Editor
+        private void DrawDotPattern(Canvas canvas, double dotSpacingX, double dotSpacingY, double dotSize, double scale, Point offset)
+        {
+            DrawingVisual drawingVisual = new DrawingVisual();
+            using (DrawingContext dc = drawingVisual.RenderOpen())
+            {
+                for (double x = 0; x < dotSpacingX * 10; x += dotSpacingX)
+                {
+                    for (double y = 0; y < dotSpacingY * 10; y += dotSpacingY)
+                    {
+                        dc.DrawEllipse(SystemColors.GrayTextBrush, null, new Point(x, y), dotSize, dotSize);
+                    }
+                }
+            }
+
+            VisualBrush dotBrush = new VisualBrush(drawingVisual)
+            {
+                TileMode = TileMode.Tile,
+                Viewport = new Rect(0, 0, dotSpacingX, dotSpacingY),
+                ViewportUnits = BrushMappingMode.Absolute,
+                Stretch = Stretch.None
+            };
+
+            TransformGroup transformGroup = new TransformGroup();
+            transformGroup.Children.Add(new ScaleTransform(scale, scale));
+            transformGroup.Children.Add(new TranslateTransform(offset.X, offset.Y));
+            dotBrush.Transform = transformGroup;
+
+            canvas.Background = dotBrush;
+        }
+
         private void EditorLoaded(object sender, RoutedEventArgs e)
         {
             UpdateScrollBar();
+            DrawDotPattern(wrapper_canvas, 50, 50, 1, scale, new Point(translateTransform.X, translateTransform.Y));
 
-            canvas.LayoutUpdated += (s, e) => UpdateScrollBar();
-            wrapper_canvas.SizeChanged += (s, e) => UpdateScrollBar();
+            canvas.LayoutUpdated += (s, e) =>
+            {
+                UpdateScrollBar();
+                DrawDotPattern(wrapper_canvas, 50, 50, 1, scale, new Point(translateTransform.X, translateTransform.Y));
+            };
+            wrapper_canvas.SizeChanged += (s, e) =>
+            {
+                UpdateScrollBar();
+                DrawDotPattern(wrapper_canvas, 50, 50, 1, scale, new Point(translateTransform.X, translateTransform.Y));
+            };
 
             BuildNodes();
         }
