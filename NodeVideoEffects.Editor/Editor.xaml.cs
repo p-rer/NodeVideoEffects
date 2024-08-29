@@ -11,6 +11,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using System.Xml.Linq;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -399,7 +400,7 @@ namespace NodeVideoEffects.Editor
                 isSelecting = true;
                 selectingRect = CreateSelectingRectangleFromPoints(ConvertToTransform(lastPos), ConvertToTransform(lastPos));
                 canvas.Children.Add(selectingRect);
-                _ = Task.Run(() =>
+                Task.Run(() =>
                 {
                     while (isSelecting)
                     {
@@ -451,13 +452,16 @@ namespace NodeVideoEffects.Editor
                 canvas.Children.Remove(selectingRect);
                 foreach (Node node in selectingNodes)
                 {
-                    node.Width -= 8;
-                    node.Height -= 8;
-                    Canvas.SetLeft(node, Canvas.GetLeft(node) + 4);
-                    Canvas.SetTop(node, Canvas.GetTop(node) + 4);
-                    node.Padding = new(0);
-                    node.BorderThickness = new(0);
-                    node.BorderBrush = null;
+                    Task.Run(() => Dispatcher.Invoke(() =>
+                    {
+                        node.Width -= 8;
+                        node.Height -= 8;
+                        Canvas.SetLeft(node, Canvas.GetLeft(node) + 4);
+                        Canvas.SetTop(node, Canvas.GetTop(node) + 4);
+                        node.Padding = new(0);
+                        node.BorderThickness = new(0);
+                        node.BorderBrush = null;
+                    }));
                 }
                 selectingNodes = GetElementsInsideRect(canvas,
                                                        new(Canvas.GetLeft(selectingRect),
@@ -467,13 +471,16 @@ namespace NodeVideoEffects.Editor
                 selectingRect = new();
                 foreach (Node node in selectingNodes)
                 {
-                    node.Width += 8;
-                    node.Height += 8;
-                    Canvas.SetLeft(node, Canvas.GetLeft(node) - 4);
-                    Canvas.SetTop(node, Canvas.GetTop(node) - 4);
-                    node.Padding = new(2.0);
-                    node.BorderThickness = new(2.0);
-                    node.BorderBrush = SystemColors.HighlightBrush;
+                    Task.Run(() => Dispatcher.Invoke(() =>
+                    {
+                        node.Width += 8;
+                        node.Height += 8;
+                        Canvas.SetLeft(node, Canvas.GetLeft(node) - 4);
+                        Canvas.SetTop(node, Canvas.GetTop(node) - 4);
+                        node.Padding = new(2.0);
+                        node.BorderThickness = new(2.0);
+                        node.BorderBrush = SystemColors.HighlightBrush;
+                    }));
                 }
                 this.ReleaseMouseCapture();
             }
@@ -500,44 +507,59 @@ namespace NodeVideoEffects.Editor
 
         internal void ToggleSelection(Node selectNode, bool multiple)
         {
-            if (!multiple)
+            Task.Run(() =>
             {
-                foreach (Node node in selectingNodes)
+                if (!multiple)
                 {
-                    node.Width -= 8;
-                    node.Height -= 8;
-                    Canvas.SetLeft(node, Canvas.GetLeft(node) + 4);
-                    Canvas.SetTop(node, Canvas.GetTop(node) + 4);
-                    node.Padding = new(0);
-                    node.BorderThickness = new(0);
-                    node.BorderBrush = null;
-                }
-                selectingNodes = [selectNode];
-            }
-            else
-            {
-                if (selectingNodes.Contains(selectNode))
-                {
-                    selectingNodes.Remove(selectNode);
-                    selectNode.Width -= 8;
-                    selectNode.Height -= 8;
-                    Canvas.SetLeft(selectNode, Canvas.GetLeft(selectNode) + 4);
-                    Canvas.SetTop(selectNode, Canvas.GetTop(selectNode) + 4);
-                    selectNode.Padding = new(0);
-                    selectNode.BorderThickness = new(0);
-                    selectNode.BorderBrush = null;
-                    return;
+                    foreach (Node node in selectingNodes)
+                    {
+                        Task.Run(() =>
+                        {
+                            Dispatcher.Invoke(() =>
+                            {
+                                node.Width -= 8;
+                                node.Height -= 8;
+                                Canvas.SetLeft(node, Canvas.GetLeft(node) + 4);
+                                Canvas.SetTop(node, Canvas.GetTop(node) + 4);
+                                node.Padding = new(0);
+                                node.BorderThickness = new(0);
+                                node.BorderBrush = null;
+                            });
+                        });
+                    }
+                    selectingNodes = [selectNode];
                 }
                 else
-                    selectingNodes.Add(selectNode);
-            }
-            selectNode.Width += 8;
-            selectNode.Height += 8;
-            Canvas.SetLeft(selectNode, Canvas.GetLeft(selectNode) - 4);
-            Canvas.SetTop(selectNode, Canvas.GetTop(selectNode) - 4);
-            selectNode.Padding = new(2.0);
-            selectNode.BorderThickness = new(2.0);
-            selectNode.BorderBrush = SystemColors.HighlightBrush;
+                {
+                    if (selectingNodes.Contains(selectNode))
+                    {
+                        Dispatcher.Invoke(() =>
+                        {
+                            selectingNodes.Remove(selectNode);
+                            selectNode.Width -= 8;
+                            selectNode.Height -= 8;
+                            Canvas.SetLeft(selectNode, Canvas.GetLeft(selectNode) + 4);
+                            Canvas.SetTop(selectNode, Canvas.GetTop(selectNode) + 4);
+                            selectNode.Padding = new(0);
+                            selectNode.BorderThickness = new(0);
+                            selectNode.BorderBrush = null;
+                        });
+                        return;
+                    }
+                    else
+                        selectingNodes.Add(selectNode);
+                }
+                Dispatcher.Invoke(() =>
+                {
+                    selectNode.Width += 8;
+                    selectNode.Height += 8;
+                    Canvas.SetLeft(selectNode, Canvas.GetLeft(selectNode) - 4);
+                    Canvas.SetTop(selectNode, Canvas.GetTop(selectNode) - 4);
+                    selectNode.Padding = new(2.0);
+                    selectNode.BorderThickness = new(2.0);
+                    selectNode.BorderBrush = SystemColors.HighlightBrush;
+                });
+            });
         }
 
         private Rectangle CreateSelectingRectangleFromPoints(Point p1, Point p2)
@@ -572,9 +594,7 @@ namespace NodeVideoEffects.Editor
             {
                 foreach (Node selectedNode in selectingNodes)
                 {
-                    if (selectedNode == node)
-                        continue;
-                    selectedNode.Move(dx, dy);
+                    Task.Run(()=>Dispatcher.Invoke(()=>selectedNode.Move(dx, dy)));
                 }
             }
         }
@@ -583,8 +603,6 @@ namespace NodeVideoEffects.Editor
         {
             foreach (Node selectedNode in selectingNodes)
             {
-                if (selectedNode == node)
-                    continue;
                 selectedNode.SubmitMoving();
             }
         }

@@ -120,7 +120,6 @@ namespace NodeVideoEffects.Editor
                 if (isDragging)
                 {
                     Point p = e.GetPosition(wrapperCanvas);
-                    Move(p.X - lastPos.X, p.Y - lastPos.Y);
                     editor.MoveNode(this, p.X - lastPos.X, p.Y - lastPos.Y);
                     lastPos = p;
                     e.Handled = true;
@@ -137,7 +136,6 @@ namespace NodeVideoEffects.Editor
                 isClicking = false;
                 isDragging = false;
                 node.ReleaseMouseCapture();
-                SubmitMoving();
                 editor.SubmitMoving(this);
                 e.Handled = true;
             }
