@@ -498,6 +498,48 @@ namespace NodeVideoEffects.Editor
             }
         }
 
+        internal void ToggleSelection(Node selectNode, bool multiple)
+        {
+            if (!multiple)
+            {
+                foreach (Node node in selectingNodes)
+                {
+                    node.Width -= 8;
+                    node.Height -= 8;
+                    Canvas.SetLeft(node, Canvas.GetLeft(node) + 4);
+                    Canvas.SetTop(node, Canvas.GetTop(node) + 4);
+                    node.Padding = new(0);
+                    node.BorderThickness = new(0);
+                    node.BorderBrush = null;
+                }
+                selectingNodes = [selectNode];
+            }
+            else
+            {
+                if (selectingNodes.Contains(selectNode))
+                {
+                    selectingNodes.Remove(selectNode);
+                    selectNode.Width -= 8;
+                    selectNode.Height -= 8;
+                    Canvas.SetLeft(selectNode, Canvas.GetLeft(selectNode) + 4);
+                    Canvas.SetTop(selectNode, Canvas.GetTop(selectNode) + 4);
+                    selectNode.Padding = new(0);
+                    selectNode.BorderThickness = new(0);
+                    selectNode.BorderBrush = null;
+                    return;
+                }
+                else
+                    selectingNodes.Add(selectNode);
+            }
+            selectNode.Width += 8;
+            selectNode.Height += 8;
+            Canvas.SetLeft(selectNode, Canvas.GetLeft(selectNode) - 4);
+            Canvas.SetTop(selectNode, Canvas.GetTop(selectNode) - 4);
+            selectNode.Padding = new(2.0);
+            selectNode.BorderThickness = new(2.0);
+            selectNode.BorderBrush = SystemColors.HighlightBrush;
+        }
+
         private Rectangle CreateSelectingRectangleFromPoints(Point p1, Point p2)
         {
             double x = Math.Min(p1.X, p2.X);

@@ -99,6 +99,7 @@ namespace NodeVideoEffects.Editor
                 isDragging = true;
                 lastPos = new(e.GetPosition(wrapperCanvas).X, e.GetPosition(wrapperCanvas).Y);
                 editor.RestoreChild(this);
+                editor.ToggleSelection(this, Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl));
                 node.CaptureMouse();
                 e.Handled = true;
             }
