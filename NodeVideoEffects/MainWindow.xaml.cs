@@ -7,6 +7,7 @@ using System.IO;
 using System.Reflection;
 using System.Security.AccessControl;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Threading;
 
 namespace NodeVideoEffects
@@ -28,6 +29,8 @@ namespace NodeVideoEffects
             set => EditSpace.ItemID = value;
         }
 
+        public static readonly RoutedCommand AllSelectCommand = new RoutedCommand();
+
         string tag;
         string commit;
         public NodeEditor()
@@ -44,6 +47,14 @@ namespace NodeVideoEffects
                     Explorer.Content = new NodeExplorer();
                 });
             });
+
+            CommandBindings.Add(new CommandBinding(
+                AllSelectCommand,
+                (s, e) => EditSpace.AllSelect()));
+
+            InputBindings.Add(new KeyBinding(
+                AllSelectCommand,
+                new KeyGesture(Key.A, ModifierKeys.Control)));
 
             string FileLoad(string file_name)
             {

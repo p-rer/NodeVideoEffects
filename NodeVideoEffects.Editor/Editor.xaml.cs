@@ -3,6 +3,7 @@ using NodeVideoEffects.Type;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel;
+using System.Net.Sockets;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -502,6 +503,40 @@ namespace NodeVideoEffects.Editor
                 canvas.Children.Remove(selectingRect);
                 selectingRect = CreateSelectingRectangleFromPoints(ConvertToTransform(lastPos), ConvertToTransform(nowPos));
                 canvas.Children.Add(selectingRect);
+            }
+        }
+
+        public void AllSelect()
+        {
+            foreach (Node node in selectingNodes)
+            {
+                Task.Run(() => Dispatcher.Invoke(() =>
+                {
+                    node.Width -= 8;
+                    node.Height -= 8;
+                    Canvas.SetLeft(node, Canvas.GetLeft(node) + 4);
+                    Canvas.SetTop(node, Canvas.GetTop(node) + 4);
+                    node.Padding = new(0);
+                    node.BorderThickness = new(0);
+                    node.BorderBrush = null;
+                }));
+            }
+            selectingNodes = nodes.Select((kvp) => kvp.Value).ToList();
+            foreach(Node node in selectingNodes)
+            {
+                Task.Run(() =>
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        node.Width += 8;
+                        node.Height += 8;
+                        Canvas.SetLeft(node, Canvas.GetLeft(node) - 4);
+                        Canvas.SetTop(node, Canvas.GetTop(node) - 4);
+                        node.Padding = new(2.0);
+                        node.BorderThickness = new(2.0);
+                        node.BorderBrush = SystemColors.HighlightBrush;
+                    });
+                });
             }
         }
 
