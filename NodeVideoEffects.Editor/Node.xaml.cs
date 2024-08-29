@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Xml.Linq;
 
 namespace NodeVideoEffects.Editor
 {
@@ -14,7 +15,8 @@ namespace NodeVideoEffects.Editor
     {
         private string _name;
 
-        private bool isDragging;
+        private bool isDragging = false;
+        private bool isClicking = false;
         private Canvas wrapperCanvas;
         private Editor editor;
         private Point lastPos;
@@ -96,10 +98,10 @@ namespace NodeVideoEffects.Editor
         {
             if (sender is Node node)
             {
-                isDragging = true;
-                lastPos = new(e.GetPosition(wrapperCanvas).X, e.GetPosition(wrapperCanvas).Y);
+                isDragging = false;
+                isClicking = true;
+                lastPos = e.GetPosition(wrapperCanvas);
                 editor.RestoreChild(this);
-                editor.ToggleSelection(this, Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl));
                 node.CaptureMouse();
                 e.Handled = true;
             }
@@ -107,26 +109,50 @@ namespace NodeVideoEffects.Editor
 
         private void Node_MouseMove(object sender, MouseEventArgs e)
         {
-            if (isDragging && sender is Node node)
+            if (sender is Node node && isClicking)
             {
-                Point p = new(e.GetPosition(wrapperCanvas).X, e.GetPosition(wrapperCanvas).Y);
-                Canvas.SetLeft(node, Canvas.GetLeft(node) + p.X - lastPos.X);
-                Canvas.SetTop(node, Canvas.GetTop(node) + p.Y - lastPos.Y);
-                editor.MoveConnector(ID, new(p.X - lastPos.X, p.Y - lastPos.Y));
-                lastPos = p;
-                e.Handled = true;
+                if (!isDragging)
+                {
+                    if (Math.Abs(lastPos.X - e.GetPosition(wrapperCanvas).X) > SystemParameters.MinimumHorizontalDragDistance
+                        || Math.Abs(lastPos.Y - e.GetPosition(wrapperCanvas).Y) > SystemParameters.MinimumHorizontalDragDistance)
+                    isDragging = true;
+                }
+                if (isDragging)
+                {
+                    Point p = e.GetPosition(wrapperCanvas);
+                    Move(p.X - lastPos.X, p.Y - lastPos.Y);
+                    editor.MoveNode(this, p.X - lastPos.X, p.Y - lastPos.Y);
+                    lastPos = p;
+                    e.Handled = true;
+                }
             }
         }
 
         private void Node_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            if (isDragging && sender is Node node)
+            if (isClicking && sender is Node node)
             {
+                if (!isDragging)
+                    editor.ToggleSelection(this, Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl));
+                isClicking = false;
                 isDragging = false;
                 node.ReleaseMouseCapture();
-                Moved?.Invoke(this, new PropertyChangedEventArgs(_name));
+                SubmitMoving();
+                editor.SubmitMoving(this);
                 e.Handled = true;
             }
+        }
+
+        internal void Move(double dx, double dy)
+        {
+            Canvas.SetLeft(this, Canvas.GetLeft(this) + dx);
+            Canvas.SetTop(this, Canvas.GetTop(this) + dy);
+            editor.MoveConnector(ID, new(dx, dy));
+        }
+
+        internal void SubmitMoving()
+        {
+            Moved?.Invoke(this, new PropertyChangedEventArgs(_name));
         }
         #endregion
     }

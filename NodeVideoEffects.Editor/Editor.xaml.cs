@@ -564,6 +564,31 @@ namespace NodeVideoEffects.Editor
             return rectangle;
         }
 
+        internal void MoveNode(Node node, double dx, double dy)
+        {
+            if (!selectingNodes.Contains(node))
+                ToggleSelection(node, false);
+            else
+            {
+                foreach (Node selectedNode in selectingNodes)
+                {
+                    if (selectedNode == node)
+                        continue;
+                    selectedNode.Move(dx, dy);
+                }
+            }
+        }
+
+        internal void SubmitMoving(Node node)
+        {
+            foreach (Node selectedNode in selectingNodes)
+            {
+                if (selectedNode == node)
+                    continue;
+                selectedNode.SubmitMoving();
+            }
+        }
+
         public List<Node> GetElementsInsideRect(Canvas canvas, Rect rect)
         {
             var elementsInsideRect = new List<Node>();
