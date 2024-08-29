@@ -39,6 +39,8 @@ namespace NodeVideoEffects.Editor
         Dictionary<string, Node> nodes = new();
         bool isFirst = true;
 
+        List<Node> selectingNodes = new();
+
         public List<NodeInfo> Nodes { get 
             {
                 return infos.Values.ToList();
@@ -447,7 +449,32 @@ namespace NodeVideoEffects.Editor
             {
                 isSelecting = false;
                 canvas.Children.Remove(selectingRect);
+                foreach (Node node in selectingNodes)
+                {
+                    node.Width -= 8;
+                    node.Height -= 8;
+                    Canvas.SetLeft(node, Canvas.GetLeft(node) + 4);
+                    Canvas.SetTop(node, Canvas.GetTop(node) + 4);
+                    node.Padding = new(0);
+                    node.BorderThickness = new(0);
+                    node.BorderBrush = null;
+                }
+                selectingNodes = GetElementsInsideRect(canvas,
+                                                       new(Canvas.GetLeft(selectingRect),
+                                                                    Canvas.GetTop(selectingRect),
+                                                                    selectingRect.ActualWidth,
+                                                                    selectingRect.ActualHeight));
                 selectingRect = new();
+                foreach (Node node in selectingNodes)
+                {
+                    node.Width += 8;
+                    node.Height += 8;
+                    Canvas.SetLeft(node, Canvas.GetLeft(node) - 4);
+                    Canvas.SetTop(node, Canvas.GetTop(node) - 4);
+                    node.Padding = new(2.0);
+                    node.BorderThickness = new(2.0);
+                    node.BorderBrush = SystemColors.HighlightBrush;
+                }
                 this.ReleaseMouseCapture();
             }
         }
@@ -493,6 +520,31 @@ namespace NodeVideoEffects.Editor
             Canvas.SetTop(rectangle, y);
 
             return rectangle;
+        }
+
+        public List<Node> GetElementsInsideRect(Canvas canvas, Rect rect)
+        {
+            var elementsInsideRect = new List<Node>();
+
+            foreach (UIElement element in canvas.Children)
+            {
+                if (element is not Node)
+                    continue;
+                double left = Canvas.GetLeft(element);
+                double top = Canvas.GetTop(element);
+
+                double width = element.RenderSize.Width;
+                double height = element.RenderSize.Height;
+
+                Rect elementRect = new Rect(new Point(left, top), new Size(width, height));
+
+                if (rect.Contains(elementRect))
+                {
+                    elementsInsideRect.Add((Node)element);
+                }
+            }
+
+            return elementsInsideRect;
         }
 
         public int GetDirectionIfOutside(Point p)
