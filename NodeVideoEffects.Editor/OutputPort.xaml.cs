@@ -114,6 +114,7 @@ namespace NodeVideoEffects.Editor
                         ((SolidColorBrush)port.Fill).Color,
                         ((SolidColorBrush)inputPort.port.Fill).Color,
                         new(inputPort.ID, inputPort.Index), new(_id, _index));
+                        editor.OnNodesUpdated();
                         return true;
                     }
                 }

@@ -89,6 +89,7 @@ namespace NodeVideoEffects.Editor
         {
             _input.RemoveConnection(_id, _index);
             editor.RemoveInputConnector(_id, _index);
+            editor.OnNodesUpdated();
             portControl.Visibility = Visibility.Visible;
         }
 
@@ -153,6 +154,8 @@ namespace NodeVideoEffects.Editor
                         ((SolidColorBrush)port.Fill).Color,
                         new(_id, _index),
                         new(outputPort.ID, outputPort.Index));
+
+                        editor.OnNodesUpdated();
                         return true;
                     }
                 }

@@ -180,6 +180,7 @@ namespace NodeVideoEffects.Editor
                                     }
                                     NodesManager.AddNode(node.Id, node);
                                     editor.AddChildren(new(node), e.GetPosition(editor).X, e.GetPosition(editor).Y);
+                                    editor.OnNodesUpdated();
                                 }
                             }
                         }

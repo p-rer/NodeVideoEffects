@@ -82,7 +82,7 @@ namespace NodeVideoEffects.Editor
 
         public event PropertyChangedEventHandler NodesUpdated;
 
-        private void OnNodesUpdated()
+        public void OnNodesUpdated()
         {
             NodesUpdated?.Invoke(this, new PropertyChangedEventArgs(nameof(Editor)));
         }
@@ -193,7 +193,6 @@ namespace NodeVideoEffects.Editor
             {
                 infos[node.ID].X = Canvas.GetLeft(node);
                 infos[node.ID].Y = Canvas.GetTop(node);
-                OnNodesUpdated();
             };
             node.ValueChanged += (s, e) =>
             {
@@ -209,6 +208,36 @@ namespace NodeVideoEffects.Editor
                 }
                 catch { }
             };
+        }
+
+        public void RemoveChildren()
+        {
+            if (selectingNodes.Count > 0)
+            {
+                foreach (Node node in selectingNodes)
+                {
+                    Dispatcher.InvokeAsync(() =>
+                    {
+                        if (node.Type != typeof(InputNode) && node.Type != typeof(OutputNode))
+                        {
+                            canvas.Children.Remove(node);
+                            foreach (OutputPort output in node.outputsPanel.Children)
+                            {
+                                output.RemoveAllConnection();
+                            }
+                            foreach (InputPort input in node.inputsPanel.Children)
+                            {
+                                input.RemoveConnection();
+                            }
+                            infos.Remove(node.ID);
+                            nodes.Remove(node.ID);
+                            NodesManager.RemoveNode(node.ID);
+                        }
+                    });
+                }
+                selectingNodes.Clear();
+                OnNodesUpdated();
+            }
         }
 
         public void RestoreChild(Node node)
@@ -265,7 +294,6 @@ namespace NodeVideoEffects.Editor
                 connector.SetValue(Panel.ZIndexProperty, -1);
                 connectors.Add((inputPort.id + ";" + inputPort.index, outputPort.id + ";" + outputPort.index), connector);
                 infos[inputPort.id].Connections[inputPort.index] = outputPort;
-                OnNodesUpdated();
             }
         }
 
@@ -283,7 +311,6 @@ namespace NodeVideoEffects.Editor
                     .Select(kvp => kvp.Key)
                     .ToList()[0]);
                 infos[id].Connections[index] = new();
-                OnNodesUpdated();
             }
             catch { }
         }
@@ -304,6 +331,7 @@ namespace NodeVideoEffects.Editor
                         .ToList()[0];
                     int sepIndex = key.Item1.IndexOf(";");
                     (nodes[key.Item1[0..sepIndex]].inputsPanel.Children[int.Parse(key.Item1[(sepIndex + 1)..^0])] as InputPort)?.RemoveConnection();
+                    this.connectors.Remove(key);
                 }
             }
             catch { }
@@ -640,6 +668,7 @@ namespace NodeVideoEffects.Editor
             {
                 selectedNode.SubmitMoving();
             }
+            OnNodesUpdated();
         }
 
         public List<Node> GetElementsInsideRect(Canvas canvas, Rect rect)

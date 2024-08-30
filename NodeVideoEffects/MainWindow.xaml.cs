@@ -30,6 +30,7 @@ namespace NodeVideoEffects
         }
 
         public static readonly RoutedCommand AllSelectCommand = new RoutedCommand();
+        public static readonly RoutedCommand RemoveCommand = new RoutedCommand();
 
         string tag;
         string commit;
@@ -55,6 +56,14 @@ namespace NodeVideoEffects
             InputBindings.Add(new KeyBinding(
                 AllSelectCommand,
                 new KeyGesture(Key.A, ModifierKeys.Control)));
+
+            CommandBindings.Add(new CommandBinding(
+                RemoveCommand,
+                (s, e) => EditSpace.RemoveChildren()));
+
+            InputBindings.Add(new KeyBinding(
+                RemoveCommand,
+                new KeyGesture(Key.Delete)));
 
             string FileLoad(string file_name)
             {
