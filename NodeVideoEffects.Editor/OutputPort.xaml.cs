@@ -92,7 +92,8 @@ namespace NodeVideoEffects.Editor
 
                 if (element != null)
                 {
-                    SetConnectionToInputPort(element, port.PointToScreen(new(5, 5)), position);
+                    if(SetConnectionToInputPort(element, port.PointToScreen(new(5, 5)), position))
+                        editor.OnNodesUpdated();
                 }
             }
             port.ReleaseMouseCapture();
@@ -114,7 +115,6 @@ namespace NodeVideoEffects.Editor
                         ((SolidColorBrush)port.Fill).Color,
                         ((SolidColorBrush)inputPort.port.Fill).Color,
                         new(inputPort.ID, inputPort.Index), new(_id, _index));
-                        editor.OnNodesUpdated();
                         return true;
                     }
                 }

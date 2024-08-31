@@ -49,6 +49,7 @@ namespace NodeVideoEffects.Editor
             }
             set 
             {
+                infos.Clear();
                 value.ForEach(value =>
                 {
                     infos.Add(value.ID, value);

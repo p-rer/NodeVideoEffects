@@ -89,13 +89,13 @@ namespace NodeVideoEffects.Editor
         {
             _input.RemoveConnection(_id, _index);
             editor.RemoveInputConnector(_id, _index);
-            editor.OnNodesUpdated();
             portControl.Visibility = Visibility.Visible;
         }
 
         private void Port_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             RemoveConnection();
+            editor.OnNodesUpdated();
         }
 
         private void port_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -130,7 +130,8 @@ namespace NodeVideoEffects.Editor
 
                 if (element != null)
                 {
-                    AddConnectionToOutputPort(element, port.PointToScreen(new(5, 5)), position);
+                    if (AddConnectionToOutputPort(element, port.PointToScreen(new(5, 5)), position))
+                        editor.OnNodesUpdated();
                 }
             }
             port.ReleaseMouseCapture();
@@ -155,7 +156,6 @@ namespace NodeVideoEffects.Editor
                         new(_id, _index),
                         new(outputPort.ID, outputPort.Index));
 
-                        editor.OnNodesUpdated();
                         return true;
                     }
                 }
