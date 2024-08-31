@@ -27,9 +27,11 @@ namespace NodeVideoEffects
                 throw new InvalidOperationException("EditorInfo is not set.");
             if (ItemProperties is null)
                 throw new InvalidOperationException("ItemProperties is not set.");
+            if (((NodeVideoEffectsPlugin)ItemProperties[0].Item).window != null)
+                return;
             BeginEdit?.Invoke(this, EventArgs.Empty);
 
-            var window = new NodeEditor
+            var window = ((NodeVideoEffectsPlugin)ItemProperties[0].Item).window = new NodeEditor
             {
                 Owner = Window.GetWindow(this),
                 Nodes = ((NodeVideoEffectsPlugin)ItemProperties[0].Item).Nodes,
@@ -45,6 +47,8 @@ namespace NodeVideoEffects
                 ((NodeVideoEffectsPlugin)ItemProperties[0].Item).Nodes = window.Nodes;
                 EndEdit?.Invoke(this, EventArgs.Empty);
             };
+
+            window.Closed += (s, e) => ((NodeVideoEffectsPlugin)ItemProperties[0].Item).window = null;
 
             EndEdit?.Invoke(this, EventArgs.Empty);
         }

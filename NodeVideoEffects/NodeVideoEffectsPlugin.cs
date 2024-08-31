@@ -22,6 +22,8 @@ namespace NodeVideoEffects
         public List<NodeInfo> Nodes { get => nodes; set => Set(ref nodes, value); }
         private List<NodeInfo> nodes = new();
 
+        internal NodeEditor? window = null;
+
         public override IEnumerable<string> CreateExoVideoFilters(int keyFrameIndex, ExoOutputDescription exoOutputDescription)
         {
             return [];
