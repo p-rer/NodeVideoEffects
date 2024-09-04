@@ -44,7 +44,7 @@ namespace NodeVideoEffects
             window.NodesUpdated += (s, e) =>
             {
                 BeginEdit?.Invoke(this, EventArgs.Empty);
-                ((NodeVideoEffectsPlugin)ItemProperties[0].Item).Nodes = window.Nodes;
+                ((NodeVideoEffectsPlugin)ItemProperties[0].Item).EditorNodes = window.Nodes;
                 EndEdit?.Invoke(this, EventArgs.Empty);
             };
 

@@ -43,11 +43,13 @@ namespace NodeVideoEffects.Editor
 
         List<Node> selectingNodes = new();
 
-        public List<NodeInfo> Nodes { get 
+        public List<NodeInfo> Nodes
+        {
+            get
             {
                 return infos.Values.ToList();
             }
-            set 
+            set
             {
                 infos.Clear();
                 value.ForEach(value =>
@@ -140,8 +142,9 @@ namespace NodeVideoEffects.Editor
 
         private void BuildNodes()
         {
-            if(isFirst){
-                foreach(NodeInfo info in Nodes)
+            if (isFirst)
+            {
+                foreach (NodeInfo info in Nodes)
                 {
                     INode node = NodesManager.GetNode(info.ID);
                     AddChildren(new(node), info.X, info.Y);
@@ -171,6 +174,21 @@ namespace NodeVideoEffects.Editor
             }
         }
 
+        public async void RebuildNodes(List<NodeInfo> infos)
+        {
+            await Task.WhenAll(infos.Select(info => Task.Run(() =>
+            {
+                if (nodes.ContainsKey(info.ID))
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        Canvas.SetLeft(nodes[info.ID], info.X);
+                        Canvas.SetTop(nodes[info.ID], info.Y);                        
+                    });
+                }
+            })));
+        }
+
         private Point ConvertToTransform(Point p)
         {
             return new((p.X - translateTransform.X) / scale, (p.Y - translateTransform.Y) / scale);
@@ -181,11 +199,11 @@ namespace NodeVideoEffects.Editor
             Canvas.SetLeft(node, (x - translateTransform.X) / scale);
             Canvas.SetTop(node, (y - translateTransform.Y) / scale);
             canvas.Children.Add(node);
-            Input[] inputs = NodesManager.GetNode(node.ID).Inputs??[];
+            Input[] inputs = NodesManager.GetNode(node.ID).Inputs ?? [];
             List<Connection> connections = new();
-            for(int i = 0; i < inputs.Length; i++)
+            for (int i = 0; i < inputs.Length; i++)
             {
-                connections.Add(inputs[i].Connection??new());
+                connections.Add(inputs[i].Connection ?? new());
             }
             if (!infos.ContainsKey(node.ID))
                 infos.Add(node.ID, new(node.ID, node.Type, node.Values, x, y, connections));
@@ -275,7 +293,7 @@ namespace NodeVideoEffects.Editor
         public void AddConnector(Point pos1, Point pos2, Color col1, Color col2, Connection inputPort, Connection outputPort)
         {
             if (!connectors.ContainsKey((inputPort.id + ";" + inputPort.index, outputPort.id + ";" + outputPort.index)))
-            {                
+            {
                 if ((connectors.Where(kvp => kvp.Key.Item1 == inputPort.id + ";" + inputPort.index).ToList().Count) > 0)
                 {
                     NodesManager.GetNode(infos[inputPort.id].Connections[inputPort.index].id)
@@ -324,7 +342,7 @@ namespace NodeVideoEffects.Editor
                     .Where(kvp => kvp.Key.Item2 == id + ";" + index)
                     .Select(kvp => kvp.Value)
                     .ToList();
-                foreach(Connector connector in connectors)
+                foreach (Connector connector in connectors)
                 {
                     (string, string) key = this.connectors
                         .Where(kvp => kvp.Value == connector)
@@ -342,7 +360,7 @@ namespace NodeVideoEffects.Editor
         {
             try
             {
-                foreach(Connector connector in connectors
+                foreach (Connector connector in connectors
                     .Where(kvp => kvp.Key.Item1.StartsWith(id))
                     .Select(kvp => kvp.Value)
                     .ToList())
@@ -424,7 +442,7 @@ namespace NodeVideoEffects.Editor
                 isDragging = true;
                 this.CaptureMouse();
             }
-            else if(e.ChangedButton == MouseButton.Left && e.ButtonState == MouseButtonState.Pressed)
+            else if (e.ChangedButton == MouseButton.Left && e.ButtonState == MouseButtonState.Pressed)
             {
                 lastPos = e.GetPosition(this);
                 isSelecting = true;
@@ -551,7 +569,7 @@ namespace NodeVideoEffects.Editor
                 }));
             }
             selectingNodes = nodes.Select((kvp) => kvp.Value).ToList();
-            foreach(Node node in selectingNodes)
+            foreach (Node node in selectingNodes)
             {
                 Task.Run(() =>
                 {
@@ -658,7 +676,7 @@ namespace NodeVideoEffects.Editor
             {
                 foreach (Node selectedNode in selectingNodes)
                 {
-                    Task.Run(()=>Dispatcher.Invoke(()=>selectedNode.Move(dx, dy)));
+                    Task.Run(() => Dispatcher.Invoke(() => selectedNode.Move(dx, dy)));
                 }
             }
         }
