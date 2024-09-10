@@ -172,21 +172,94 @@ namespace NodeVideoEffects.Editor
                 }
                 isFirst = false;
             }
+            else
+            {
+                foreach (NodeInfo info in Nodes)
+                {
+                    INode node = NodesManager.GetNode(info.ID);
+                    AddChildren(new(node), info.X, info.Y);
+                }
+                foreach (NodeInfo info in Nodes)
+                {
+                    nodes[info.ID].Loaded += (s, e) =>
+                    {
+                        for (int i = 0; i < info.Connections.Count; i++)
+                        {
+                            if (info.Connections[i].id != "")
+                            {
+                                Point inputPoint = nodes[info.ID].GetPortPoint(Node.PortType.Input, i);
+                                Point outputPoint = nodes[info.Connections[i].id].GetPortPoint(Node.PortType.Output, info.Connections[i].index);
+                                INode node = NodesManager.GetNode(info.ID);
+                                Color inputColor = node.Inputs[i].Color;
+                                Color outputColor = NodesManager.GetNode(node.Inputs[i].Connection.Value.id).Outputs[node.Inputs[i].Connection.Value.index].Color;
+                                AddConnector(outputPoint, inputPoint,
+                                    inputColor, outputColor,
+                                    new(info.ID, i), new(info.Connections[i].id, info.Connections[i].index));
+                                (nodes[info.ID].inputsPanel.Children[i] as InputPort).portControl.Visibility = Visibility.Hidden;
+                            }
+                            else
+                            {
+
+                            }
+                        }
+                    };
+                }
+            }
         }
 
-        public async void RebuildNodes(List<NodeInfo> infos)
+        public void RebuildNodes(List<NodeInfo> infos)
         {
-            await Task.WhenAll(infos.Select(info => Task.Run(() =>
+
+            Dispatcher.Invoke(() =>
             {
-                if (nodes.ContainsKey(info.ID))
+                // Remove deleted nodes
+                this.infos
+                .Where(kvp => !infos.Contains(kvp.Value))
+                .Select(kvp => kvp.Key)
+                .ToList()
+                .ForEach(id =>
                 {
-                    Dispatcher.Invoke(() =>
+                    canvas.Children.Remove(nodes[id]);
+                    selectingNodes.Remove(nodes[id]);
+                    foreach (OutputPort output in nodes[id].outputsPanel.Children)
                     {
-                        Canvas.SetLeft(nodes[info.ID], info.X);
-                        Canvas.SetTop(nodes[info.ID], info.Y);                        
-                    });
-                }
-            })));
+                        output.RemoveAllConnection();
+                    }
+                    foreach (InputPort input in nodes[id].inputsPanel.Children)
+                    {
+                        input.RemoveConnection();
+                    }
+                    this.infos.Remove(id);
+                    nodes.Remove(id);
+                    NodesManager.RemoveNode(id);
+                });
+
+                // Create new node
+                infos.ForEach(info =>
+                {
+                    if (!nodes.ContainsKey(info.ID))
+                    {
+                        System.Type? type = System.Type.GetType(info.Type);
+                        if (type != null)
+                        {
+                            INode? obj = Activator.CreateInstance(type) as INode;
+                            if (obj != null)
+                            {
+                                obj.Id = info.ID;
+                                NodesManager.AddNode(info.ID, obj);
+                                for (int i = 0; i < info.Values.Count; i++)
+                                {
+                                    obj.SetInputConnection(i, info.Connections[i]);
+                                }
+                            }
+                        }
+                    }
+                });
+
+                Nodes = infos;
+
+                BuildNodes();
+            });
         }
 
         private Point ConvertToTransform(Point p)
@@ -199,15 +272,16 @@ namespace NodeVideoEffects.Editor
             Canvas.SetLeft(node, (x - translateTransform.X) / scale);
             Canvas.SetTop(node, (y - translateTransform.Y) / scale);
             canvas.Children.Add(node);
-            Input[] inputs = NodesManager.GetNode(node.ID).Inputs ?? [];
+            Input[] inputs = NodesManager.GetNode(node.ID)?.Inputs ?? [];
             List<Connection> connections = new();
             for (int i = 0; i < inputs.Length; i++)
             {
                 connections.Add(inputs[i].Connection ?? new());
             }
-            if (!infos.ContainsKey(node.ID))
-                infos.Add(node.ID, new(node.ID, node.Type, node.Values, x, y, connections));
-            nodes.Add(node.ID, node);
+            if (!infos.TryAdd(node.ID, new(node.ID, node.Type, node.Values, x, y, connections)))
+                infos[node.ID] = new(node.ID, node.Type, node.Values, x, y, connections);
+            if (!nodes.TryAdd(node.ID, node))
+                nodes[node.ID] = node;
             node.Moved += (s, e) =>
             {
                 infos[node.ID].X = Canvas.GetLeft(node);
