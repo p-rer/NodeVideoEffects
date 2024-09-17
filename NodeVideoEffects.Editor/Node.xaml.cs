@@ -48,9 +48,12 @@ namespace NodeVideoEffects.Editor
                 int index = 0;
                 foreach (Input input in node.Inputs)
                 {
-                    inputsPanel.Children.Add(new InputPort(input, node.Id, index));
+                    InputPort inputPort = new InputPort(input, node.Id, index);
+                    inputsPanel.Children.Add(inputPort);
                     Values.Add(input.Value);
                     InputColors.Add(input.Color);
+                    if (input.Connection.Value.id != "")
+                        inputPort.Loaded += (s, e) => inputPort.portControl.Visibility = Visibility.Hidden;
                     input.PropertyChanged += (s, e) => ValueChanged?.Invoke(this, new(_name));
                     index++;
                 }

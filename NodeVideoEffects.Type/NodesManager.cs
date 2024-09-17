@@ -27,8 +27,12 @@ namespace NodeVideoEffects.Type
                 await node.Calculate();
                 return node.GetOutput(index);
             }
-            catch
+            catch (Exception e)
             {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.Write("[Error]\t");
+                Console.ResetColor();
+                Console.Write($"An error has occurred during getting node's value: {e.Message}\n");
                 return null;
             }
         }

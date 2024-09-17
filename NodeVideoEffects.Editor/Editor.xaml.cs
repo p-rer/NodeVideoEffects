@@ -1,5 +1,6 @@
 using NodeVideoEffects.Nodes.Basic;
 using NodeVideoEffects.Type;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel;
@@ -179,31 +180,6 @@ namespace NodeVideoEffects.Editor
                     INode node = NodesManager.GetNode(info.ID);
                     AddChildren(new(node), info.X, info.Y);
                 }
-                foreach (NodeInfo info in Nodes)
-                {
-                    nodes[info.ID].Loaded += (s, e) =>
-                    {
-                        for (int i = 0; i < info.Connections.Count; i++)
-                        {
-                            if (info.Connections[i].id != "")
-                            {
-                                Point inputPoint = nodes[info.ID].GetPortPoint(Node.PortType.Input, i);
-                                Point outputPoint = nodes[info.Connections[i].id].GetPortPoint(Node.PortType.Output, info.Connections[i].index);
-                                INode node = NodesManager.GetNode(info.ID);
-                                Color inputColor = node.Inputs[i].Color;
-                                Color outputColor = NodesManager.GetNode(node.Inputs[i].Connection.Value.id).Outputs[node.Inputs[i].Connection.Value.index].Color;
-                                AddConnector(outputPoint, inputPoint,
-                                    inputColor, outputColor,
-                                    new(info.ID, i), new(info.Connections[i].id, info.Connections[i].index));
-                                (nodes[info.ID].inputsPanel.Children[i] as InputPort).portControl.Visibility = Visibility.Hidden;
-                            }
-                            else
-                            {
-
-                            }
-                        }
-                    };
-                }
             }
         }
 
@@ -213,9 +189,9 @@ namespace NodeVideoEffects.Editor
             Dispatcher.Invoke(() =>
             {
                 // Remove deleted nodes
-                this.infos
-                .Where(kvp => !infos.Contains(kvp.Value))
-                .Select(kvp => kvp.Key)
+                infos
+                .Where(info => !nodes.ContainsKey(info.ID))
+                .Select(info => info.ID)
                 .ToList()
                 .ForEach(id =>
                 {
@@ -262,15 +238,35 @@ namespace NodeVideoEffects.Editor
             });
         }
 
-        private Point ConvertToTransform(Point p)
+        internal Point ConvertToTransform(Point p)
         {
             return new((p.X - translateTransform.X) / scale, (p.Y - translateTransform.Y) / scale);
         }
 
         public void AddChildren(Node node, double x, double y)
         {
-            Canvas.SetLeft(node, (x - translateTransform.X) / scale);
-            Canvas.SetTop(node, (y - translateTransform.Y) / scale);
+            if (nodes.ContainsKey(node.ID))
+            {
+                connectors
+                    .Where(kvp => kvp.Key.Item1.StartsWith(node.ID))
+                    .Select(kvp => kvp.Value)
+                    .ToList()
+                    .ForEach(connector => connector.EndPoint = new(
+                        connector.EndPoint.X - Canvas.GetLeft(nodes[node.ID]) + x - nodes[node.ID].Padding.Left - nodes[node.ID].BorderThickness.Left,
+                        connector.EndPoint.Y - Canvas.GetTop(nodes[node.ID]) + y - nodes[node.ID].Padding.Top - nodes[node.ID].BorderThickness.Top
+                        ));
+                connectors
+                    .Where(kvp => kvp.Key.Item2.StartsWith(node.ID))
+                    .Select(kvp => kvp.Value)
+                    .ToList()
+                    .ForEach(connector => connector.StartPoint = new(
+                        connector.StartPoint.X - Canvas.GetLeft(nodes[node.ID]) + x - nodes[node.ID].Padding.Left - nodes[node.ID].BorderThickness.Left,
+                        connector.StartPoint.Y - Canvas.GetTop(nodes[node.ID]) + y - nodes[node.ID].Padding.Top - nodes[node.ID].BorderThickness.Top
+                        ));
+                canvas.Children.Remove(nodes[node.ID]);
+            }
+            Canvas.SetLeft(node, x);
+            Canvas.SetTop(node, y);
             canvas.Children.Add(node);
             Input[] inputs = NodesManager.GetNode(node.ID)?.Inputs ?? [];
             List<Connection> connections = new();
@@ -366,28 +362,31 @@ namespace NodeVideoEffects.Editor
 
         public void AddConnector(Point pos1, Point pos2, Color col1, Color col2, Connection inputPort, Connection outputPort)
         {
-            if (!connectors.ContainsKey((inputPort.id + ";" + inputPort.index, outputPort.id + ";" + outputPort.index)))
+            if (connectors.ContainsKey((inputPort.id + ";" + inputPort.index, outputPort.id + ";" + outputPort.index)))
             {
-                if ((connectors.Where(kvp => kvp.Key.Item1 == inputPort.id + ";" + inputPort.index).ToList().Count) > 0)
-                {
-                    NodesManager.GetNode(infos[inputPort.id].Connections[inputPort.index].id)
-                        ?.Outputs[infos[inputPort.id].Connections[inputPort.index].index]
-                        .RemoveConnection(inputPort.id, inputPort.index);
-                    RemoveInputConnector(inputPort.id, inputPort.index);
-                }
-                Connector connector;
-                canvas.Children.Add(connector = new Connector()
-                {
-                    StartPoint = ConvertToTransform(PointFromScreen(pos1)),
-                    EndPoint = ConvertToTransform(PointFromScreen(pos2)),
-                    StartColor = col1,
-                    EndColor = col2,
-                    IsHitTestVisible = false
-                });
-                connector.SetValue(Panel.ZIndexProperty, -1);
-                connectors.Add((inputPort.id + ";" + inputPort.index, outputPort.id + ";" + outputPort.index), connector);
-                infos[inputPort.id].Connections[inputPort.index] = outputPort;
+                canvas.Children.Remove(connectors[(inputPort.id + ";" + inputPort.index, outputPort.id + ";" + outputPort.index)]);
+                connectors.Remove((inputPort.id + ";" + inputPort.index, outputPort.id + ";" + outputPort.index));
             }
+            if ((connectors.Where(kvp => kvp.Key.Item1 == inputPort.id + ";" + inputPort.index).ToList().Count) > 0)
+            {
+                NodesManager.GetNode(infos[inputPort.id].Connections[inputPort.index].id)
+                    ?.Outputs[infos[inputPort.id].Connections[inputPort.index].index]
+                    .RemoveConnection(inputPort.id, inputPort.index);
+                RemoveInputConnector(inputPort.id, inputPort.index);
+                NodesManager.GetNode(inputPort.id)?.SetInputConnection(inputPort.index, outputPort);
+            }
+            Connector connector;
+            canvas.Children.Add(connector = new Connector()
+            {
+                StartPoint = ConvertToTransform(PointFromScreen(pos1)),
+                EndPoint = ConvertToTransform(PointFromScreen(pos2)),
+                StartColor = col1,
+                EndColor = col2,
+                IsHitTestVisible = false
+            });
+            connector.SetValue(Panel.ZIndexProperty, -1);
+            connectors.Add((inputPort.id + ";" + inputPort.index, outputPort.id + ";" + outputPort.index), connector);
+            infos[inputPort.id].Connections[inputPort.index] = outputPort;
         }
 
         public void RemoveInputConnector(string id, int index)

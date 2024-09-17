@@ -179,7 +179,7 @@ namespace NodeVideoEffects.Editor
                                         node.SetInputConnection(i, new());
                                     }
                                     NodesManager.AddNode(node.Id, node);
-                                    editor.AddChildren(new(node), e.GetPosition(editor).X, e.GetPosition(editor).Y);
+                                    editor.AddChildren(new(node), editor.ConvertToTransform(e.GetPosition(editor)).X, editor.ConvertToTransform(e.GetPosition(editor)).Y);
                                     editor.OnNodesUpdated();
                                 }
                             }
