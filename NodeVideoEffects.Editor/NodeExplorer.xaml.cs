@@ -221,6 +221,24 @@ namespace NodeVideoEffects.Editor
             set { _Children = value; OnPropertyChanged("Children"); }
         }
 
+        public Brush Color
+        {
+            get 
+            {
+                Color color;
+                try
+                {
+                    color = (Activator.CreateInstance(Type) as INode).Color;
+                }
+                catch
+                {
+                    color = SystemColors.GrayTextColor;
+                }
+                
+                return new SolidColorBrush(color);
+            }
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         private void OnPropertyChanged(string name)

@@ -65,7 +65,8 @@ namespace NodeVideoEffects.Type
 
         ~INode()
         {
-            NodesManager.RemoveNode(_id);
+            if (_id != null)
+                NodesManager.RemoveNode(_id);
         }
 
         private void SubscribeToInputChanges()
