@@ -15,6 +15,7 @@
                  PreviewMouseLeftButtonDown="box_PreviewMouseLeftButtonDown"
                  PreviewMouseMove="box_PreviewMouseMove"
                  PreviewMouseLeftButtonUp="box_PreviewMouseLeftButtonUp"
-                 LostFocus="box_LostFocus"/>
+                 LostFocus="box_LostFocus"
+                 Focusable="False"/>
     </Grid>
 </UserControl>

@@ -38,14 +38,14 @@ namespace NodeVideoEffects.Type
 
         public void _SetValue(object value)
         {
-            if ((double)value == Double.NaN) value = _default;
+            if (Convert.ToDouble(value) == Double.NaN) value = _default;
             else
             {
-                if (_min != Double.NaN && (double)value < _min) value = _min;
-                if (_max != Double.NaN && (double)value > _max) value = _max;
+                if (_min != Double.NaN && Convert.ToDouble(value) < _min) value = _min;
+                if (_max != Double.NaN && Convert.ToDouble(value) > _max) value = _max;
             }
 
-            _value = Math.Round((double)value, _digits);
+            _value = Math.Round(Convert.ToDouble(value), _digits);
         }
 
         public IControl? Control => new NumberPort(_default, _value, _min, _max, _digits);

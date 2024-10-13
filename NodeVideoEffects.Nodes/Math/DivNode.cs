@@ -14,7 +14,7 @@ namespace NodeVideoEffects.Nodes.Math
             [
                 new (new Number(0, null, null, null), "Result")
             ],
-            "Mul",
+            "Div",
             Colors.LightCoral)
         { }
 

@@ -3,7 +3,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Navigation;
 
 namespace NodeVideoEffects.Editor
 {
@@ -37,12 +36,14 @@ namespace NodeVideoEffects.Editor
         }
 
         public System.Type Type => _output.Type;
+        public string ID => _id;
+        public int Index => _index;
 
         private void OutputPort_ToolTipOpening(object sender, ToolTipEventArgs e)
         {
             Task<object> @object = NodesManager.GetOutputValue(_id, _index);
             @object.Wait();
-            ToolTip = @object.Result;
+            ToolTip = @object.Result?.ToString() ?? "(Null)";
         }
 
         public static T FindParent<T>(DependencyObject child) where T : DependencyObject
@@ -90,7 +91,8 @@ namespace NodeVideoEffects.Editor
 
                 if (element != null)
                 {
-                    SetConnectionToInputPort(element, port.PointToScreen(new(5, 5)), position);
+                    if (SetConnectionToInputPort(element, port.PointToScreen(new(5, 5)), position))
+                        editor.OnNodesUpdated();
                 }
             }
             port.ReleaseMouseCapture();
@@ -104,16 +106,34 @@ namespace NodeVideoEffects.Editor
             {
                 if (inputPort.Type.IsAssignableFrom(Type))
                 {
-                    inputPort.SetConnection(_id, _index);
-                    _output.AddConnection(inputPort.ID, inputPort.Index);
-                    editor.AddConnector(pos1, inputPort.port.PointToScreen(new(5, 5)),
+                    if (NodesManager.CheckConnection(inputPort.ID, _id))
+                    {
+                        inputPort.SetConnection(_id, _index);
+                        _output.AddConnection(inputPort.ID, inputPort.Index);
+                        editor.AddConnector(pos1, inputPort.port.PointToScreen(new(5, 5)),
                         ((SolidColorBrush)port.Fill).Color,
                         ((SolidColorBrush)inputPort.port.Fill).Color,
                         new(inputPort.ID, inputPort.Index), new(_id, _index));
-                    return true;
+                        return true;
+                    }
                 }
             }
             return false;
+        }
+
+        public void AddConnection(string id, int index) => _output.AddConnection(id, index);
+
+        public void RemoveAllConnection()
+        {
+            _output.Connection.ForEach(connection => NodesManager.GetNode(connection.id)?.RemoveInputConnection(connection.index));
+            _output.Connection.Clear();
+            editor.RemoveOutputConnector(_id, _index);
+        }
+
+        private void port_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            RemoveAllConnection();
+            editor.OnNodesUpdated();
         }
     }
 }

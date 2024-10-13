@@ -20,5 +20,7 @@
         /// <param name="id">Node ID</param>
         /// <param name="index">Port index</param>
         public Connection(string id, int index) : this() => (this.id, this.index) = (id, index);
+
+        public Connection() { id = ""; index = 0; }
     }
 }

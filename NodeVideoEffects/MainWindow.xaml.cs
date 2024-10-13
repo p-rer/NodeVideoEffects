@@ -1,10 +1,10 @@
 ﻿using NodeVideoEffects.Editor;
 using NodeVideoEffects.Type;
-using System.Collections.Immutable;
 using System.ComponentModel;
 using System.IO;
 using System.Reflection;
 using System.Windows;
+using System.Windows.Input;
 
 namespace NodeVideoEffects
 {
@@ -19,6 +19,15 @@ namespace NodeVideoEffects
             set => EditSpace.Nodes = value;
         }
 
+        public string ItemID
+        {
+            get => EditSpace.ItemID;
+            set => EditSpace.ItemID = value;
+        }
+
+        public static readonly RoutedCommand AllSelectCommand = new RoutedCommand();
+        public static readonly RoutedCommand RemoveCommand = new RoutedCommand();
+
         string tag;
         string commit;
         public NodeEditor()
@@ -27,6 +36,30 @@ namespace NodeVideoEffects
 
             tag = FileLoad("git_tag.txt");
             commit = FileLoad("git_id.txt");
+
+            Task.Run(() =>
+            {
+                Explorer.Dispatcher.Invoke(() =>
+                {
+                    Explorer.Content = new NodeExplorer();
+                });
+            });
+
+            CommandBindings.Add(new CommandBinding(
+                AllSelectCommand,
+                (s, e) => EditSpace.AllSelect()));
+
+            InputBindings.Add(new KeyBinding(
+                AllSelectCommand,
+                new KeyGesture(Key.A, ModifierKeys.Control)));
+
+            CommandBindings.Add(new CommandBinding(
+                RemoveCommand,
+                (s, e) => EditSpace.RemoveChildren()));
+
+            InputBindings.Add(new KeyBinding(
+                RemoveCommand,
+                new KeyGesture(Key.Delete)));
 
             string FileLoad(string file_name)
             {

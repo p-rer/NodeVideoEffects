@@ -17,21 +17,58 @@ namespace NodeVideoEffects.Type
         /// <param name="id">Node id</param>
         /// <param name="index">Port index</param>
         /// <returns>Task of getting value (result is the value)</returns>
-        public static async Task<Object> GetOutputValue(string id, int index)
+        public static async Task<object?> GetOutputValue(string id, int index)
         {
-            INode node = _dictionary[id];
-            if (node.Outputs[index].IsSuccess == true)
+            try
+            {
+                INode node = _dictionary[id];
+                if (node.Outputs[index].IsSuccess)
+                    return node.GetOutput(index);
+                await node.Calculate();
                 return node.GetOutput(index);
-            await node.Calculate();
-            return node.GetOutput(index);
+            }
+            catch (Exception e)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.Write("[Error]\t");
+                Console.ResetColor();
+                Console.Write($"An error has occurred during getting node's value: {e.Message}\n");
+                return null;
+            }
         }
 
         public static INode? GetNode(string id)
         {
             INode? node;
-            if(_dictionary.TryGetValue(id, out node))
+            if (_dictionary.TryGetValue(id, out node))
                 return node;
             return null;
+        }
+
+        public static bool CheckConnection(string iid, string oid)
+        {
+            bool result = true;
+            if (!(_dictionary[iid].Outputs == null || _dictionary[iid].Outputs?.Length == 0))
+            {
+                foreach (Output output in _dictionary[iid].Outputs)
+                {
+                    if (!result)
+                        break;
+                    if (output.Connection.Count == 0)
+                        break;
+                    foreach (Connection connection in output.Connection)
+                    {
+                        if (connection.id == oid)
+                        {
+                            result = false;
+                            break;
+                        }
+                        if (result)
+                            result = CheckConnection(connection.id, oid);
+                    }
+                }
+            }
+            return result;
         }
 
         public static void NoticeOutputChanged(string id, int index)
@@ -58,9 +95,9 @@ namespace NodeVideoEffects.Type
         public static void RemoveNode(string id) => _dictionary.Remove(id);
         public static bool AddItem(string id)
         {
-            if(_items.Contains(id)) return false;
+            if (_items.Contains(id)) return false;
             _items.Add(id);
-            return true;            
+            return true;
         }
 
         /// <summary>
@@ -78,26 +115,35 @@ namespace NodeVideoEffects.Type
 
         internal static void SetInfo(EffectDescription info)
         {
-            if (_frame != (_frame = info.ItemPosition.Frame))
+            if (info.ItemPosition.Frame != _frame)
+            {
+                _frame = info.ItemPosition.Frame;
                 OnFrameChanged(nameof(_FRAME));
-            if (_length != (_length = info.ItemDuration.Frame))
-                OnFrameChanged(nameof(_LENGTH));
-            if (_fps != (_fps = info.FPS))
-                OnFrameChanged(nameof(_FPS));
+            }
+            if (_length != info.ItemDuration.Frame)
+            {
+                _length = info.ItemDuration.Frame;
+                OnLengthChanged(nameof(_LENGTH));
+            }
+            if (_fps != info.FPS)
+            {
+                _fps = info.FPS;
+                OnFPSChanged(nameof(_FPS));
+            }
         }
 
         /// <summary>
         /// Now frame has changed
         /// </summary>
-        public static event PropertyChangedEventHandler FrameChanged;
+        public static event PropertyChangedEventHandler FrameChanged = delegate { };
         /// <summary>
         /// Length of the item has changed
         /// </summary>
-        public static event PropertyChangedEventHandler LengthChanged;
+        public static event PropertyChangedEventHandler LengthChanged = delegate { };
         /// <summary>
         /// FPS of the YMM4 project has changed
         /// </summary>
-        public static event PropertyChangedEventHandler FPSChanged;
+        public static event PropertyChangedEventHandler FPSChanged = delegate { };
 
         private static void OnFrameChanged(string propertyName)
         {

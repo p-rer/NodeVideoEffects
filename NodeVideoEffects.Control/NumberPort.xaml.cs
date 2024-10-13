@@ -77,6 +77,8 @@ namespace NodeVideoEffects.Control
             _value = Math.Round(v, _dig);
             box.Text = _value.ToString("F" + _dig);
             OnPropertyChanged(nameof(Value));
+            Keyboard.ClearFocus();
+            box.Focusable = false;
         }
 
         private void box_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -164,7 +166,6 @@ namespace NodeVideoEffects.Control
             if (e.Key == Key.Return || e.Key == Key.Enter)
             {
                 Update();
-                Keyboard.ClearFocus();
                 isEditing = false;
             }
         }

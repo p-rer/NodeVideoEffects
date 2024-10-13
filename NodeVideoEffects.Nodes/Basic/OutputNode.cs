@@ -12,7 +12,7 @@ namespace NodeVideoEffects.Nodes.Basic
             "Output",
             Colors.PaleVioletRed)
         {
-            Inputs[0].PropertyChanged += (s, e) => 
+            Inputs[0].PropertyChanged += (s, e) =>
             {
                 if (Inputs[0].Value != null)
                     PropertyChanged?.Invoke(this, new(Name));

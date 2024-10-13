@@ -16,7 +16,7 @@ namespace NodeVideoEffects.Type
         public Color Color { get; }
         public void SetValue(object? value)
         {
-            _SetValue(value);
+            _SetValue(value != null ? Convert.ChangeType(value, Type) : value);
         }
 
         /// <summary>

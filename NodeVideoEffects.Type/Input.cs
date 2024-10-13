@@ -1,6 +1,5 @@
 ﻿using NodeVideoEffects.Control;
 using System.ComponentModel;
-using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace NodeVideoEffects.Type
@@ -11,7 +10,7 @@ namespace NodeVideoEffects.Type
     public class Input : INotifyPropertyChanged
     {
         private PortValue _value;
-        private Connection? _connection;
+        private Connection _connection = new();
         private String _name;
 
         /// <summary>
@@ -33,11 +32,11 @@ namespace NodeVideoEffects.Type
         {
             get
             {
-                if (_connection != null)
+                if (_connection.id != "")
                 {
                     try
                     {
-                        Task<object> task = NodesManager.GetOutputValue(_connection.Value.id, _connection.Value.index);
+                        Task<object> task = NodesManager.GetOutputValue(_connection.id, _connection.index);
                         task.Wait();
                         return task.Result;
                     }
@@ -95,7 +94,7 @@ namespace NodeVideoEffects.Type
         public void SetConnection(string iid, int iindex, string oid, int oindex)
         {
             _connection = new(oid, oindex);
-            if (oid != null)
+            if (oid != "")
                 NodesManager.NoticeInputConnectionAdd(iid, iindex, oid, oindex);
         }
 
@@ -106,10 +105,10 @@ namespace NodeVideoEffects.Type
         /// <param name="index">Index of this port</param>
         public void RemoveConnection(string id, int index)
         {
-            if (_connection != null)
+            if (_connection.id != "")
             {
-                NodesManager.NoticeInputConnectionRemove(id, index, _connection.Value.id, _connection.Value.index);
-                _connection = null;
+                NodesManager.NoticeInputConnectionRemove(id, index, _connection.id, _connection.index);
+                _connection.id = "";
             }
         }
 

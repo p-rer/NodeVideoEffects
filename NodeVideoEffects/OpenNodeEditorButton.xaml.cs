@@ -1,6 +1,4 @@
-﻿using NodeVideoEffects.Type;
-using System.Collections.Immutable;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using YukkuriMovieMaker.Commons;
 
@@ -23,25 +21,30 @@ namespace NodeVideoEffects
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            if (editorInfo is null)
-                throw new InvalidOperationException("EditorInfo is not set.");
             if (ItemProperties is null)
                 throw new InvalidOperationException("ItemProperties is not set.");
+            if (((NodeVideoEffectsPlugin)ItemProperties[0].Item).window != null)
+                return;
             BeginEdit?.Invoke(this, EventArgs.Empty);
 
-            var window = new NodeEditor
+            var window = ((NodeVideoEffectsPlugin)ItemProperties[0].Item).window = new NodeEditor
             {
                 Owner = Window.GetWindow(this),
-                Nodes = ((NodeVideoEffectsPlugin)ItemProperties[0].Item).Nodes
+                Nodes = ((NodeVideoEffectsPlugin)ItemProperties[0].Item).Nodes.Select(item => item with { }).ToList(),
+                ItemID = ((NodeVideoEffectsPlugin)ItemProperties[0].Item).ID
             };
+            var parentWindow = Window.GetWindow(this);
+            window.CommandBindings.AddRange(parentWindow.CommandBindings);
             window.Show();
 
             window.NodesUpdated += (s, e) =>
             {
                 BeginEdit?.Invoke(this, EventArgs.Empty);
-                ((NodeVideoEffectsPlugin)ItemProperties[0].Item).Nodes = window.Nodes;
+                ((NodeVideoEffectsPlugin)ItemProperties[0].Item).EditorNodes = window.Nodes;
                 EndEdit?.Invoke(this, EventArgs.Empty);
             };
+
+            window.Closed += (s, e) => ((NodeVideoEffectsPlugin)ItemProperties[0].Item).window = null;
 
             EndEdit?.Invoke(this, EventArgs.Empty);
         }
