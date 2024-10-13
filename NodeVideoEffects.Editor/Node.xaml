@@ -30,11 +30,7 @@
                         <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.ActiveBorderColorKey}}" />
                     </Label.BorderBrush>
                 </Label>
-                <Ellipse Name="categorySign" Grid.Row="0" Height="15" Width="15" Margin="0,5,5,5" HorizontalAlignment="Right" >
-                    <Ellipse.Stroke>
-                        <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.ControlTextColorKey}}"/>
-                    </Ellipse.Stroke>
-                </Ellipse>
+                <Ellipse Name="categorySign" Grid.Row="0" Height="15" Width="15" Margin="0,5,5,5" HorizontalAlignment="Right" />
             </Grid>
         </Border>
         <StackPanel Name="portsPanel" Grid.Row="2" Grid.ColumnSpan="3" VerticalAlignment="Top">

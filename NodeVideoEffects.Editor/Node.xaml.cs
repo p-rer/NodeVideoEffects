@@ -32,6 +32,7 @@ namespace NodeVideoEffects.Editor
             InitializeComponent();
             nodeName.Content = _name = node.Name;
             ID = node.Id;
+            categorySign.Fill = new SolidColorBrush(node.Color);
             Type = node.GetType();
             {
                 int index = 0;

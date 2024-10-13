@@ -1,4 +1,5 @@
 ﻿using NodeVideoEffects.Type;
+using System.Windows.Media;
 
 namespace NodeVideoEffects.Nodes.Math
 {
@@ -13,7 +14,8 @@ namespace NodeVideoEffects.Nodes.Math
             [
                 new (new Number(0, null, null, null), "Result")
             ],
-            "Mul")
+            "Mul",
+            Colors.LightCoral)
         { }
 
         public override async Task Calculate()

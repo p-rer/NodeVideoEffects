@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Windows.Media;
 
 namespace NodeVideoEffects.Type
 {
@@ -12,6 +13,7 @@ namespace NodeVideoEffects.Type
         private string _name;
 
         private string _id;
+        private readonly Color _color;
 
         /// <summary>
         /// Get input ports
@@ -28,6 +30,11 @@ namespace NodeVideoEffects.Type
         /// </summary>
         public string Name { get => _name; }
 
+        /// <summary>
+        /// Color of this node
+        /// </summary>
+        public Color Color => _color;
+
         public string Id { get => _id; set => _id = value; }
         /// <summary>
         /// Create new node object
@@ -41,6 +48,17 @@ namespace NodeVideoEffects.Type
             _inputs = inputs;
             _outputs = outputs;
             _name = name;
+            _color = Colors.Transparent;
+
+            SubscribeToInputChanges();
+        }
+
+        public INode(Input[]? inputs, Output[]? outputs, string name, Color color)
+        {
+            _inputs = inputs;
+            _outputs = outputs;
+            _name = name;
+            _color = color;
 
             SubscribeToInputChanges();
         }

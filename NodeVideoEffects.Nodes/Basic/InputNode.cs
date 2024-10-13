@@ -1,4 +1,5 @@
 ﻿using NodeVideoEffects.Type;
+using System.Windows.Media;
 
 namespace NodeVideoEffects.Nodes.Basic
 {
@@ -9,7 +10,8 @@ namespace NodeVideoEffects.Nodes.Basic
         public InputNode() : base(
             [],
             [new(new Image(null), "Input")],
-            "Input")
+            "Input",
+            Colors.PaleVioletRed)
         {
         }
 
