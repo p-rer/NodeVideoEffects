@@ -1,10 +1,6 @@
-﻿using NodeVideoEffects.Editor;
-using NodeVideoEffects.Nodes.Basic;
+﻿using NodeVideoEffects.Nodes.Basic;
 using NodeVideoEffects.Type;
-using System;
-using System.Numerics;
 using System.Reflection;
-using System.Security.Cryptography;
 using Vortice.DCommon;
 using Vortice.Direct2D1;
 using Vortice.DXGI;
@@ -80,7 +76,7 @@ namespace NodeVideoEffects
                     INode? node = NodesManager.GetNode(info.ID);
                     for (int i = 0; i < info.Connections.Count; i++)
                     {
-                        if(info.Connections[i].id != "")
+                        if (info.Connections[i].id != "")
                         {
                             int index = info.ID.IndexOf('-');
                             if (info.Connections[i].id[0..index] != item.ID)
@@ -95,7 +91,7 @@ namespace NodeVideoEffects
                     }
                 }
             }
-        
+
             this.item = item;
         }
 
@@ -142,7 +138,7 @@ namespace NodeVideoEffects
                     .GetMethod("SetInfo",
                     BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
                     .Invoke(null, [effectDescription]);
-                ID2D1Image? _output = ((ImageAndContext?)outputNode.Inputs[0].Value)?.Image??null;
+                ID2D1Image? _output = ((ImageAndContext?)outputNode.Inputs[0].Value)?.Image ?? null;
                 if (_output == null)
                 {
                     BitmapProperties1 bitmapProperties = new BitmapProperties1(

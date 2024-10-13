@@ -1,9 +1,6 @@
-﻿using NodeVideoEffects.Editor;
-using NodeVideoEffects.Nodes.Basic;
-using NodeVideoEffects.Nodes.Math;
+﻿using NodeVideoEffects.Nodes.Math;
 using NodeVideoEffects.Type;
 using System.Windows;
-using System.Windows.Input;
 
 namespace NodeVideoEffects.UITest
 {

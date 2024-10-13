@@ -1,23 +1,12 @@
 ﻿using NodeVideoEffects.Nodes.Basic;
 using NodeVideoEffects.Type;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
 using System.Reflection;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace NodeVideoEffects.Editor
 {
@@ -85,7 +74,7 @@ namespace NodeVideoEffects.Editor
                 window = FindParent<Window>(this);
             };
         }
-        
+
         private static T FindParent<T>(DependencyObject child) where T : DependencyObject
         {
             DependencyObject parentObject = VisualTreeHelper.GetParent(child);
@@ -138,7 +127,7 @@ namespace NodeVideoEffects.Editor
                         if (element != null)
                         {
                             Editor? editor = FindParent<Editor>(element);
-                            if(editor != null)
+                            if (editor != null)
                             {
 
                             }
@@ -151,7 +140,7 @@ namespace NodeVideoEffects.Editor
 
         private void TextBlock_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            if(type != null)
+            if (type != null)
             {
                 TextBlock? textBlock = sender as TextBlock;
 
@@ -174,7 +163,7 @@ namespace NodeVideoEffects.Editor
                                     INode node = Activator.CreateInstance(type, []) as INode ?? throw new Exception("Unable to create node instance.");
 
                                     node.Id = editor.ItemID + "-" + Guid.NewGuid().ToString("N");
-                                    for (int i = 0; i < (node.Inputs?.Length??0); i++)
+                                    for (int i = 0; i < (node.Inputs?.Length ?? 0); i++)
                                     {
                                         node.SetInputConnection(i, new());
                                     }
@@ -188,7 +177,7 @@ namespace NodeVideoEffects.Editor
                     textBlock.ReleaseMouseCapture();
                 }
                 type = null;
-                
+
             }
             e.Handled = true;
         }

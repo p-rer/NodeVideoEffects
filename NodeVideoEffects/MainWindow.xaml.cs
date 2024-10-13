@@ -1,14 +1,10 @@
 ﻿using NodeVideoEffects.Editor;
 using NodeVideoEffects.Type;
-using System.Collections.Immutable;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Reflection;
-using System.Security.AccessControl;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Threading;
 
 namespace NodeVideoEffects
 {

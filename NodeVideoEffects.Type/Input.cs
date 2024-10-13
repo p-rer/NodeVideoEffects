@@ -1,6 +1,5 @@
 ﻿using NodeVideoEffects.Control;
 using System.ComponentModel;
-using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace NodeVideoEffects.Type
@@ -95,7 +94,7 @@ namespace NodeVideoEffects.Type
         public void SetConnection(string iid, int iindex, string oid, int oindex)
         {
             _connection = new(oid, oindex);
-            if (oid != null)
+            if (oid != "")
                 NodesManager.NoticeInputConnectionAdd(iid, iindex, oid, oindex);
         }
 

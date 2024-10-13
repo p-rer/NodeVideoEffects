@@ -4,7 +4,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Xml.Linq;
 
 namespace NodeVideoEffects.Editor
 {
@@ -118,7 +117,7 @@ namespace NodeVideoEffects.Editor
                 {
                     if (Math.Abs(lastPos.X - e.GetPosition(wrapperCanvas).X) > SystemParameters.MinimumHorizontalDragDistance
                         || Math.Abs(lastPos.Y - e.GetPosition(wrapperCanvas).Y) > SystemParameters.MinimumHorizontalDragDistance)
-                    isDragging = true;
+                        isDragging = true;
                 }
                 if (isDragging)
                 {

@@ -3,7 +3,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Navigation;
 
 namespace NodeVideoEffects.Editor
 {
@@ -44,7 +43,7 @@ namespace NodeVideoEffects.Editor
         {
             Task<object> @object = NodesManager.GetOutputValue(_id, _index);
             @object.Wait();
-            ToolTip = @object.Result?.ToString()??"(Null)";
+            ToolTip = @object.Result?.ToString() ?? "(Null)";
         }
 
         public static T FindParent<T>(DependencyObject child) where T : DependencyObject
@@ -92,7 +91,7 @@ namespace NodeVideoEffects.Editor
 
                 if (element != null)
                 {
-                    if(SetConnectionToInputPort(element, port.PointToScreen(new(5, 5)), position))
+                    if (SetConnectionToInputPort(element, port.PointToScreen(new(5, 5)), position))
                         editor.OnNodesUpdated();
                 }
             }
@@ -107,7 +106,7 @@ namespace NodeVideoEffects.Editor
             {
                 if (inputPort.Type.IsAssignableFrom(Type))
                 {
-                    if(NodesManager.CheckConnection(inputPort.ID, _id))
+                    if (NodesManager.CheckConnection(inputPort.ID, _id))
                     {
                         inputPort.SetConnection(_id, _index);
                         _output.AddConnection(inputPort.ID, inputPort.Index);
@@ -126,13 +125,15 @@ namespace NodeVideoEffects.Editor
 
         public void RemoveAllConnection()
         {
+            _output.Connection.ForEach(connection => NodesManager.GetNode(connection.id)?.RemoveInputConnection(connection.index));
             _output.Connection.Clear();
             editor.RemoveOutputConnector(_id, _index);
         }
 
         private void port_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-         {
+        {
             RemoveAllConnection();
+            editor.OnNodesUpdated();
         }
     }
 }

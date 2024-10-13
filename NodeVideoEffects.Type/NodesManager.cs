@@ -22,7 +22,7 @@ namespace NodeVideoEffects.Type
             try
             {
                 INode node = _dictionary[id];
-                if (node.Outputs[index].IsSuccess )
+                if (node.Outputs[index].IsSuccess)
                     return node.GetOutput(index);
                 await node.Calculate();
                 return node.GetOutput(index);
@@ -40,7 +40,7 @@ namespace NodeVideoEffects.Type
         public static INode? GetNode(string id)
         {
             INode? node;
-            if(_dictionary.TryGetValue(id, out node))
+            if (_dictionary.TryGetValue(id, out node))
                 return node;
             return null;
         }
@@ -95,9 +95,9 @@ namespace NodeVideoEffects.Type
         public static void RemoveNode(string id) => _dictionary.Remove(id);
         public static bool AddItem(string id)
         {
-            if(_items.Contains(id)) return false;
+            if (_items.Contains(id)) return false;
             _items.Add(id);
-            return true;            
+            return true;
         }
 
         /// <summary>
@@ -120,7 +120,8 @@ namespace NodeVideoEffects.Type
                 _frame = info.ItemPosition.Frame;
                 OnFrameChanged(nameof(_FRAME));
             }
-            if (_length != info.ItemDuration.Frame) {
+            if (_length != info.ItemDuration.Frame)
+            {
                 _length = info.ItemDuration.Frame;
                 OnLengthChanged(nameof(_LENGTH));
             }
