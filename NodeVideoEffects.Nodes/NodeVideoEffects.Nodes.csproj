@@ -10,6 +10,10 @@
     <ProjectReference Include="..\NodeVideoEffects.Type\NodeVideoEffects.Type.csproj" />
   </ItemGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DebugType>none</DebugType>
+  </PropertyGroup>
+  
   <ItemGroup>
     <Reference Include="SharpGen.Runtime">
       <HintPath>..\..\..\ymm4\SharpGen.Runtime.dll</HintPath>

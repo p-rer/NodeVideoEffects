@@ -8,6 +8,10 @@
 		<UseWPF>true</UseWPF>
 	</PropertyGroup>
 
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+	  <DebugType>none</DebugType>
+	</PropertyGroup>
+
 	<ItemGroup>
 	  <ProjectReference Include="..\NodeVideoEffects.Editor\NodeVideoEffects.Editor.csproj" />
 	  <ProjectReference Include="..\NodeVideoEffects.Nodes\NodeVideoEffects.Nodes.csproj" />

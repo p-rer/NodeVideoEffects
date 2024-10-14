@@ -10,6 +10,10 @@
     <ProjectReference Include="..\NodeVideoEffects.Control\NodeVideoEffects.Control.csproj" />
   </ItemGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DebugType>none</DebugType>
+  </PropertyGroup>
+
   <ItemGroup>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\..\..\ymm4\Newtonsoft.Json.dll</HintPath>
