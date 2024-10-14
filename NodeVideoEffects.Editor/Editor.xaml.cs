@@ -817,30 +817,32 @@ namespace NodeVideoEffects.Editor
             return n;
         }
 
-        private void Canvas_Zoom(double zoom)
+        private void Canvas_Zoom(double zoom, Point zoomCenter)
         {
             double rate = zoom / scale;
             if (zoom > 4) rate = 4 / scale;
             if (zoom < 0.1) rate = 0.1 / scale;
+
             scale *= rate;
             scaleTransform.ScaleX = scale;
             scaleTransform.ScaleY = scale;
-            translateTransform.X += (rate - 1) * (translateTransform.X - wrapper_canvas.ActualWidth / 2);
-            translateTransform.Y += (rate - 1) * (translateTransform.Y - wrapper_canvas.ActualHeight / 2);
+
+            translateTransform.X += (rate - 1) * (translateTransform.X - zoomCenter.X);
+            translateTransform.Y += (rate - 1) * (translateTransform.Y - zoomCenter.Y);
+
             zoomValue.Text = ((int)(scale * 100)).ToString() + "%";
+        }
+
+        private void Canvas_Zoom(double zoom)
+        {
+            Point canvasCenter = new Point(wrapper_canvas.ActualWidth / 2, wrapper_canvas.ActualHeight / 2);
+            Canvas_Zoom(zoom, canvasCenter);
         }
 
         private void Canvas_Zoom(double zoom, MouseWheelEventArgs e)
         {
-            double rate = zoom / scale;
-            if (zoom > 4) rate = 4 / scale;
-            if (zoom < 0.1) rate = 0.1 / scale;
-            scale *= rate;
-            scaleTransform.ScaleX = scale;
-            scaleTransform.ScaleY = scale;
-            translateTransform.X += (rate - 1) * (translateTransform.X - e.GetPosition(wrapper_canvas).X);
-            translateTransform.Y += (rate - 1) * (translateTransform.Y - e.GetPosition(wrapper_canvas).Y);
-            zoomValue.Text = ((int)(scale * 100)).ToString() + "%";
+            Point mousePosition = e.GetPosition(wrapper_canvas);
+            Canvas_Zoom(zoom, mousePosition);
         }
         private new void PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
