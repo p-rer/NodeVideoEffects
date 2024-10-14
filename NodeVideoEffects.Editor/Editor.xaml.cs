@@ -673,21 +673,25 @@ namespace NodeVideoEffects.Editor
             {
                 if (!multiple)
                 {
+                    bool removingSelection = false;
                     foreach (Node node in selectingNodes)
                     {
-                        Task.Run(() =>
+                        if (node.ID == selectNode.ID)
+                            removingSelection = true;
+                        Dispatcher.Invoke(() =>
                         {
-                            Dispatcher.Invoke(() =>
-                            {
-                                node.Width -= 8;
-                                node.Height -= 8;
-                                Canvas.SetLeft(node, Canvas.GetLeft(node) + 4);
-                                Canvas.SetTop(node, Canvas.GetTop(node) + 4);
-                                node.Padding = new(0);
-                                node.BorderThickness = new(0);
-                                node.BorderBrush = null;
-                            });
+                            node.Width -= 8;
+                            node.Height -= 8;
+                            Canvas.SetLeft(node, Canvas.GetLeft(node) + 4);
+                            Canvas.SetTop(node, Canvas.GetTop(node) + 4);
+                            node.Padding = new(0);
+                            node.BorderThickness = new(0);
+                            node.BorderBrush = null;
                         });
+                    }
+                    if (removingSelection){
+                        selectingNodes = [];
+                        return;
                     }
                     selectingNodes = [selectNode];
                 }

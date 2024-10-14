@@ -19,5 +19,7 @@ namespace NodeVideoEffects.Type
             Image = image;
             Context = context;
         }
+
+        public override string? ToString() => Image?.NativePointer.ToString();
     }
 }
