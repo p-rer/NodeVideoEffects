@@ -79,7 +79,7 @@ namespace NodeVideoEffects.Editor
                     currentNode = node;
                 }
 
-                NodesTree typeNode = new NodesTree { Text = type.Name, Type = type };
+                NodesTree typeNode = new NodesTree { Text = (Activator.CreateInstance(type) as INode)?.Name ?? type.Name, Type = type };
                 currentNode?.Add(typeNode);
             }
 
