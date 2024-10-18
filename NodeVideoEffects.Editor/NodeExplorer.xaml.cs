@@ -2,9 +2,11 @@
 using NodeVideoEffects.Type;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 
@@ -39,10 +41,24 @@ namespace NodeVideoEffects.Editor
 
             void AddTypeToExplorerRoot(System.Type type)
             {
-                string[] namespaces = type.Namespace?.Split('.') ?? Array.Empty<string>();
+                string[] category = (Activator.CreateInstance(type) as INode)?.Category?.Split('/') ?? ["(No Category)"];
+                if ((type.Namespace?.Split('.') ?? Array.Empty<string>())[0] == "NodeVideoEffects")
+                {
+                    string[] temp = new string[category.Length + 1];
+                    temp[0] = "Accessory";
+                    Array.Copy(category, 0, temp, 1, category.Length);
+                    category = temp;
+                }
+                else
+                {
+                    string[] temp = new string[category.Length + 1];
+                    temp[0] = "Expansion";
+                    Array.Copy(category, 0, temp, 1, category.Length);
+                    category = temp;
+                }
                 NodesTree? currentNode = null;
 
-                foreach (string ns in namespaces)
+                foreach (string ns in category)
                 {
                     NodesTree? node = currentNode?.Children?.FirstOrDefault(n => n.Text == ns)
                                ?? Root.FirstOrDefault(n => n.Text == ns);
@@ -252,6 +268,48 @@ namespace NodeVideoEffects.Editor
             if (null == Children) Children = new ObservableCollection<NodesTree>();
             child.Parent = this;
             Children.Add(child);
+        }
+    }
+
+    public static class TreeViewItemExtensions
+    {
+        public static int GetDepth(this TreeViewItem item)
+        {
+            TreeViewItem parent;
+            while ((parent = GetParent(item)) != null)
+            {
+                return GetDepth(parent) + 1;
+            }
+            return 0;
+        }
+
+        private static TreeViewItem GetParent(TreeViewItem item)
+        {
+            var parent = VisualTreeHelper.GetParent(item);
+            while (!(parent is TreeViewItem || parent is TreeView))
+            {
+                parent = VisualTreeHelper.GetParent(parent);
+            }
+            return parent as TreeViewItem;
+        }
+    }
+
+    public class LeftMarginMultiplierConverter : IValueConverter
+    {
+        public double Length { get; set; }
+
+        public object Convert(object value, System.Type targetType, object parameter, CultureInfo culture)
+        {
+            var item = value as TreeViewItem;
+            if (item == null)
+                return new Thickness(0);
+
+            return new Thickness(Length * item.GetDepth(), 0, 0, 0);
+        }
+
+        public object ConvertBack(object value, System.Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

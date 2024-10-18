@@ -17,7 +17,8 @@ namespace NodeVideoEffects.Nodes.Effect
                 new(new Image(null), "Out")
             ],
             "Gaussian Blur",
-            Colors.LawnGreen)
+            Colors.LawnGreen,
+            "Effect")
         {
         }
 

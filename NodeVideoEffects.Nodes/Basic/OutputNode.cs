@@ -10,7 +10,8 @@ namespace NodeVideoEffects.Nodes.Basic
             [new(new Image(null), "Output")],
             [],
             "Output",
-            Colors.PaleVioletRed)
+            Colors.PaleVioletRed,
+            "Basic")
         {
             Inputs[0].PropertyChanged += (s, e) =>
             {

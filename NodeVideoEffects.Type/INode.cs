@@ -12,28 +12,34 @@ namespace NodeVideoEffects.Type
         private Output[]? _outputs;
         private string _name;
 
-        private string _id;
-        private readonly Color _color;
+        private string _id = "";
+        private Color _color;
+        private string? _category;
 
         /// <summary>
         /// Get input ports
         /// </summary>
-        public Input[]? Inputs { get => _inputs; }
+        public Input[]? Inputs => _inputs;
 
         /// <summary>
         /// Get output ports
         /// </summary>
-        public Output[]? Outputs { get => _outputs; }
+        public Output[]? Outputs=> _outputs;
 
         /// <summary>
         /// Name of this node
         /// </summary>
-        public string Name { get => _name; }
+        public string Name => _name;
 
         /// <summary>
         /// Color of this node
         /// </summary>
         public Color Color => _color;
+
+        /// <summary>
+        /// Category of this node
+        /// </summary>
+        public string? Category => _category;
 
         public string Id { get => _id; set => _id = value; }
         /// <summary>
@@ -42,30 +48,40 @@ namespace NodeVideoEffects.Type
         /// <param name="inputs">Input ports</param>
         /// <param name="outputs">Output ports</param>
         /// <param name="name">Name of this node</param>
-        /// <param name="id">ID of this node(Set this null)</param>
-        public INode(Input[]? inputs, Output[]? outputs, string name)
+        /// <param name="category">Category of this node</param>
+        public INode(Input[]? inputs, Output[]? outputs, string name, string? category = null)
         {
             _inputs = inputs;
             _outputs = outputs;
             _name = name;
             _color = Colors.Transparent;
+            _category = category;
 
             SubscribeToInputChanges();
         }
 
-        public INode(Input[]? inputs, Output[]? outputs, string name, Color color)
+        /// <summary>
+        /// Create new node object
+        /// </summary>
+        /// <param name="inputs">Input ports</param>
+        /// <param name="outputs">Output ports</param>
+        /// <param name="name">Name of this node</param>
+        /// <param name="color">Color of this node</param>
+        /// <param name="category">Category of this node</param>
+        public INode(Input[]? inputs, Output[]? outputs, string name, Color color, string? category = null)
         {
             _inputs = inputs;
             _outputs = outputs;
             _name = name;
             _color = color;
+            _category = category;
 
             SubscribeToInputChanges();
         }
 
         ~INode()
         {
-            if (_id != null)
+            if (_id != "")
                 NodesManager.RemoveNode(_id);
         }
 

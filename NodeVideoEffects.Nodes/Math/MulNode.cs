@@ -14,7 +14,8 @@ namespace NodeVideoEffects.Nodes.Math
                 new (new Number(0, null, null, null), "Result")
             ],
             "Mul",
-            Colors.LightCoral)
+            Colors.LightCoral,
+            "Math/Basic")
         { }
 
         public override async Task Calculate()

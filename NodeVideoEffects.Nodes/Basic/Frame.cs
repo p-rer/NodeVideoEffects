@@ -10,7 +10,8 @@ namespace NodeVideoEffects.Nodes.Basic
             [],
             [new(new Number(0, 0, null, 0), "Frame")],
             "Frame",
-            Colors.IndianRed)
+            Colors.IndianRed,
+            "Basic")
         {
             NodesManager.FrameChanged += FRAME_PropertyChanged;
             Outputs[0].Value = (double)NodesManager._FRAME;

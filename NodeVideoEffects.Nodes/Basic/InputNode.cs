@@ -11,7 +11,8 @@ namespace NodeVideoEffects.Nodes.Basic
             [],
             [new(new Image(null), "Input")],
             "Input",
-            Colors.PaleVioletRed)
+            Colors.PaleVioletRed,
+            "Basic")
         {
         }
 
