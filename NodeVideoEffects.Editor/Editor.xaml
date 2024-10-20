@@ -8,24 +8,31 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}">
+    <UserControl.Resources>
+        <ResourceDictionary Source="pack://application:,,,/NodeVideoEffects.Control;component/Style/Style.xaml" />
+    </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*" />
-            <ColumnDefinition Width="50" />
             <ColumnDefinition Width="5" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="1*" />
-            <RowDefinition Height="20" />
             <RowDefinition Height="5" />
+            <RowDefinition Height="20" />
         </Grid.RowDefinitions>
-        <Canvas Name="wrapper_canvas" Grid.ColumnSpan="3" Grid.RowSpan="3" ClipToBounds="True">
-            <Rectangle x:Name="horizontalScrollBar" Height="5" Fill="{DynamicResource {x:Static SystemColors.ScrollBarBrushKey}}" Canvas.Bottom="0" />
-            <Rectangle x:Name="verticalScrollBar" Width="5" Fill="{DynamicResource {x:Static SystemColors.ScrollBarBrushKey}}" Canvas.Right="0" />
+        <Canvas Name="wrapper_canvas" Grid.ColumnSpan="2" Grid.RowSpan="2" ClipToBounds="True">
             <Canvas Name="canvas" Focusable="True" />
+            <Rectangle x:Name="horizontalScrollBar" Height="5" Fill="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" Canvas.Bottom="0" />
+            <Rectangle x:Name="verticalScrollBar" Width="5" Fill="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" Canvas.Right="0" />
         </Canvas>
-        <Grid Grid.Row="1" Grid.Column="1" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
-            <TextBox Name="zoomValue" PreviewTextInput="PreviewTextInput" KeyDown="zoomValueSubmit" DataObject.Pasting="TextBoxPasting" Margin="2,2,2,2" />
+        <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="50" />
+            </Grid.ColumnDefinitions>
+            <TextBox Name="zoomValue" PreviewTextInput="PreviewTextInput" KeyDown="zoomValueSubmit" DataObject.Pasting="TextBoxPasting"
+                     Margin="2,2,2,2" Grid.Column="1" />
         </Grid>
     </Grid>
 </UserControl>
