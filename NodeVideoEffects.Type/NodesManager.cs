@@ -5,11 +5,21 @@ namespace NodeVideoEffects.Type
 {
     public static class NodesManager
     {
-        private static Dictionary<string, INode> _dictionary = new();
-        private static List<string> _items = new();
+        private static Dictionary<string, INode> _dictionary = [];
+        private static List<string> _items = [];
         private static int _frame;
         private static int _length;
         private static int _fps;
+        private static Dictionary<string, List<Task>> _tasks = [];
+
+        public static int GetTasksCount(string id)
+        {
+            List<Task>? value;
+            _tasks.TryGetValue(id, out value);
+            return value?.Count ?? 0;
+        }
+
+        public static event PropertyChangedEventHandler TaskChanged = delegate { };
 
         /// <summary>
         /// Get output port value from node id and port index
@@ -24,7 +34,22 @@ namespace NodeVideoEffects.Type
                 INode node = _dictionary[id];
                 if (node.Outputs[index].IsSuccess)
                     return node.GetOutput(index);
-                await node.Calculate();
+                Task task = node.Calculate();
+                int wordIndex = id.IndexOf('-');
+                if (_tasks.ContainsKey(id[0..wordIndex]))
+                    _tasks[id[0..wordIndex]].Add(task);
+                else
+                    _tasks.Add(id[0..wordIndex], [task]);
+                TaskChanged.Invoke(null, new("Tasks"));
+                _ = task.ContinueWith(t =>
+                {
+                    lock (_tasks[id[0..wordIndex]])
+                    {
+                        _tasks[id[0..wordIndex]].Remove(t);
+                        TaskChanged.Invoke(null, new("Tasks"));
+                    }
+                });
+                await task;
                 return node.GetOutput(index);
             }
             catch (Exception e)

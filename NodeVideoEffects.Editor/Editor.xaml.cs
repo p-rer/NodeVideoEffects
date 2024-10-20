@@ -72,6 +72,12 @@ namespace NodeVideoEffects.Editor
 
             zoomValue.Text = ((int)(scale * 100)).ToString() + "%";
 
+            NodesManager.TaskChanged += (s, e) =>
+            {
+                int count = NodesManager.GetTasksCount(ItemID);
+                Dispatcher.Invoke(() => status.Content = count == 0 ? "Completed" : $"{count} tasks are processing");
+            };
+
             this.Loaded += EditorLoaded;
         }
 
@@ -689,7 +695,8 @@ namespace NodeVideoEffects.Editor
                             node.BorderBrush = null;
                         });
                     }
-                    if (removingSelection){
+                    if (removingSelection)
+                    {
                         selectingNodes = [];
                         return;
                     }
