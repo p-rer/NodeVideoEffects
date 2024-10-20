@@ -121,6 +121,9 @@ namespace NodeVideoEffects.Editor
 
         private void EditorLoaded(object sender, RoutedEventArgs e)
         {
+            int count = NodesManager.GetTasksCount(ItemID);
+            status.Content = count == 0 ? "Completed" : $"{count} tasks are processing";
+
             UpdateScrollBar();
             DrawDotPattern(wrapper_canvas, 50, 50, 1, scale, new Point(translateTransform.X, translateTransform.Y));
 

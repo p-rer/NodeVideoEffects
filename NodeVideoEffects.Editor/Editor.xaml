@@ -23,8 +23,8 @@
         </Grid.RowDefinitions>
         <Canvas Name="wrapper_canvas" Grid.ColumnSpan="2" Grid.RowSpan="2" ClipToBounds="True">
             <Canvas Name="canvas" Focusable="True" />
-            <Rectangle x:Name="horizontalScrollBar" Height="5" Fill="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" Canvas.Bottom="0" />
-            <Rectangle x:Name="verticalScrollBar" Width="5" Fill="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" Canvas.Right="0" />
+            <Rectangle x:Name="horizontalScrollBar" Height="5" Fill="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" Canvas.Bottom="0" />
+            <Rectangle x:Name="verticalScrollBar" Width="5" Fill="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" Canvas.Right="0" />
         </Canvas>
         <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Center">
             <Grid.ColumnDefinitions>
