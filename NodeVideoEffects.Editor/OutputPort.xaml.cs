@@ -125,7 +125,8 @@ namespace NodeVideoEffects.Editor
 
         public void RemoveAllConnection()
         {
-            _output.Connection.ForEach(connection => NodesManager.GetNode(connection.id)?.RemoveInputConnection(connection.index));
+            List<Connection> connections = new List<Connection>(_output.Connection);
+            connections.ForEach(connection => NodesManager.GetNode(connection.id)?.RemoveInputConnection(connection.index));
             _output.Connection.Clear();
             editor.RemoveOutputConnector(_id, _index);
         }

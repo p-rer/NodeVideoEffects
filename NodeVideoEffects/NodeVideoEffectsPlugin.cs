@@ -10,6 +10,12 @@ namespace NodeVideoEffects
     [VideoEffect("NodeVideoEffects", [nameof(Translate.Node)], [], ResourceType = typeof(Translate))]
     internal class NodeVideoEffectsPlugin : VideoEffectBase
     {
+        ~NodeVideoEffectsPlugin()
+        {
+            window?.Close();
+            NodesManager.RemoveItem(ID);
+        }
+
         public override string Label => "NodeVideoEffects";
 
         public string ID { get; set; } = "";

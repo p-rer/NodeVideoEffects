@@ -9,6 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Xml.Linq;
 
 namespace NodeVideoEffects.Editor
 {
@@ -41,7 +42,16 @@ namespace NodeVideoEffects.Editor
 
             void AddTypeToExplorerRoot(System.Type type)
             {
-                string[] category = (Activator.CreateInstance(type) as INode)?.Category?.Split('/') ?? ["(No Category)"];
+                INode? obj;
+                try
+                {
+                    obj = Activator.CreateInstance(type, [""]) as INode;
+                }
+                catch
+                {
+                    obj = Activator.CreateInstance(type, []) as INode;
+                }
+                string[] category = (obj)?.Category?.Split('/') ?? ["(No Category)"];
                 if ((type.Namespace?.Split('.') ?? Array.Empty<string>())[0] == "NodeVideoEffects")
                 {
                     string[] temp = new string[category.Length + 1];
@@ -79,7 +89,7 @@ namespace NodeVideoEffects.Editor
                     currentNode = node;
                 }
 
-                NodesTree typeNode = new NodesTree { Text = (Activator.CreateInstance(type) as INode)?.Name ?? type.Name, Type = type };
+                NodesTree typeNode = new NodesTree { Text = obj?.Name ?? type.Name, Type = type };
                 currentNode?.Add(typeNode);
             }
 
@@ -127,31 +137,31 @@ namespace NodeVideoEffects.Editor
 
         private void TextBlock_MouseMove(object sender, MouseEventArgs e)
         {
-            TextBlock? textBlock = sender as TextBlock;
+                TextBlock? textBlock = sender as TextBlock;
 
-            if (textBlock != null)
-            {
-                if (type != null)
+                if (textBlock != null)
                 {
-                    Point position = e.GetPosition(window);
-                    HitTestResult result = VisualTreeHelper.HitTest(window, position);
-
-                    if (result != null)
+                    if (type != null)
                     {
-                        var element = result.VisualHit as FrameworkElement;
+                        Point position = e.GetPosition(window);
+                        HitTestResult result = VisualTreeHelper.HitTest(window, position);
 
-                        if (element != null)
+                        if (result != null)
                         {
-                            Editor? editor = FindParent<Editor>(element);
-                            if (editor != null)
-                            {
+                            var element = result.VisualHit as FrameworkElement;
 
+                            if (element != null)
+                            {
+                                Editor? editor = FindParent<Editor>(element);
+                                if (editor != null)
+                                    Cursor = Cursors.Arrow;
+                                else
+                                    Cursor = Cursors.No;
                             }
                         }
                     }
                 }
-            }
-            e.Handled = true;
+                e.Handled = true;
         }
 
         private void TextBlock_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
@@ -176,16 +186,26 @@ namespace NodeVideoEffects.Editor
                                 Editor? editor = FindParent<Editor>(element);
                                 if (editor != null)
                                 {
-                                    INode node = Activator.CreateInstance(type, []) as INode ?? throw new Exception("Unable to create node instance.");
-
-                                    node.Id = editor.ItemID + "-" + Guid.NewGuid().ToString("N");
-                                    for (int i = 0; i < (node.Inputs?.Length ?? 0); i++)
+                                    INode? node;
+                                    try
                                     {
-                                        node.SetInputConnection(i, new());
+                                        node = Activator.CreateInstance(type, [editor.ItemID]) as INode;
                                     }
-                                    NodesManager.AddNode(node.Id, node);
-                                    editor.AddChildren(new(node), editor.ConvertToTransform(e.GetPosition(editor)).X, editor.ConvertToTransform(e.GetPosition(editor)).Y);
-                                    editor.OnNodesUpdated();
+                                    catch
+                                    {
+                                        node = Activator.CreateInstance(type, []) as INode;
+                                    }
+                                    if (node != null)
+                                    {
+                                        node.Id = editor.ItemID + "-" + Guid.NewGuid().ToString("N");
+                                        for (int i = 0; i < (node.Inputs?.Length ?? 0); i++)
+                                        {
+                                            node.SetInputConnection(i, new());
+                                        }
+                                        NodesManager.AddNode(node.Id, node);
+                                        editor.AddChildren(new(node), editor.ConvertToTransform(e.GetPosition(editor)).X, editor.ConvertToTransform(e.GetPosition(editor)).Y);
+                                        editor.OnNodesUpdated();
+                                    }
                                 }
                             }
                         }
@@ -193,7 +213,6 @@ namespace NodeVideoEffects.Editor
                     textBlock.ReleaseMouseCapture();
                 }
                 type = null;
-
             }
             e.Handled = true;
         }
@@ -239,18 +258,27 @@ namespace NodeVideoEffects.Editor
 
         public Brush Color
         {
-            get 
+            get
             {
                 Color color;
                 try
                 {
-                    color = (Activator.CreateInstance(Type) as INode).Color;
+                    INode? node;
+                    try
+                    {
+                        node = Activator.CreateInstance(Type, [""]) as INode;
+                    }
+                    catch
+                    {
+                        node = Activator.CreateInstance(Type, []) as INode;
+                    }
+                    color = node.Color;
                 }
                 catch
                 {
                     color = SystemColors.GrayTextColor;
                 }
-                
+
                 return new SolidColorBrush(color);
             }
         }

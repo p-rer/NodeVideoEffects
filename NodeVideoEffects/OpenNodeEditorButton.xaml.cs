@@ -44,7 +44,11 @@ namespace NodeVideoEffects
                 EndEdit?.Invoke(this, EventArgs.Empty);
             };
 
-            window.Closed += (s, e) => ((NodeVideoEffectsPlugin)ItemProperties[0].Item).window = null;
+            window.Closed += (s, e) =>
+            {
+                if(ItemProperties != null)
+                    ((NodeVideoEffectsPlugin)ItemProperties[0].Item).window = null;
+            };
 
             EndEdit?.Invoke(this, EventArgs.Empty);
         }

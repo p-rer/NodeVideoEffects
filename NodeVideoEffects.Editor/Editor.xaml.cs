@@ -160,9 +160,6 @@ namespace NodeVideoEffects.Editor
                 {
                     for (int i = 0; i < info.Connections.Count; i++)
                     {
-#if DEBUG
-                        LogConnection("Called by BuildNodes function");
-#endif
                         if (info.Connections[i].id != "")
                         {
                             Point inputPoint = nodes[info.ID].GetPortPoint(Node.PortType.Input, i);
@@ -213,10 +210,6 @@ namespace NodeVideoEffects.Editor
                 }
             });
 
-#if DEBUG
-            LogConnection("Before calling RebuildNodes Function");
-#endif
-
             await Task.WhenAll(infos.Select(info =>
             {
                 return Task.Run(() =>
@@ -240,10 +233,6 @@ namespace NodeVideoEffects.Editor
             }));
 
             Nodes = infos;
-
-#if DEBUG
-            LogConnection("After calling RebuildNodes Function");
-#endif
 
             Dispatcher.Invoke(() =>
             {
@@ -383,10 +372,6 @@ namespace NodeVideoEffects.Editor
             connector.SetValue(Panel.ZIndexProperty, -1);
             connectors.Add((inputPort.id + ";" + inputPort.index, outputPort.id + ";" + outputPort.index), connector);
             infos[inputPort.id].Connections[inputPort.index] = outputPort;
-
-#if DEBUG
-            LogConnection($"Called by AddConnector function({inputPort.id}, {inputPort.index})");
-#endif
         }
 
         public void RemoveInputConnector(string id, int index)
@@ -403,9 +388,6 @@ namespace NodeVideoEffects.Editor
                     .Select(kvp => kvp.Key)
                     .ToList()[0]);
                 infos[id].Connections[index] = new();
-#if DEBUG
-                LogConnection($"Called by RemoveInputConnector function({id}, {index})");
-#endif
             }
             catch { }
         }
@@ -428,9 +410,6 @@ namespace NodeVideoEffects.Editor
                     (nodes[key.Item1[0..sepIndex]].inputsPanel.Children[int.Parse(key.Item1[(sepIndex + 1)..^0])] as InputPort)?.RemoveConnection();
                     infos[key.Item1[0..sepIndex]].Connections[int.Parse(key.Item1[(sepIndex + 1)..^0])] = new();
                     this.connectors.Remove(key);
-#if DEBUG
-                    LogConnection($"Called by RemoveOutputConnector function({key.Item1[0..sepIndex]}, {key.Item1[(sepIndex + 1)..^0]})");
-#endif
                 }
             }
             catch { }

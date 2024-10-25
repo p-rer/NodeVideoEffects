@@ -7,9 +7,6 @@ namespace NodeVideoEffects.Type
     {
         private static Dictionary<string, INode> _dictionary = new();
         private static List<string> _items = new();
-        private static int _frame;
-        private static int _length;
-        private static int _fps;
 
         /// <summary>
         /// Get output port value from node id and port index
@@ -27,12 +24,8 @@ namespace NodeVideoEffects.Type
                 await node.Calculate();
                 return node.GetOutput(index);
             }
-            catch (Exception e)
+            catch
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.Write("[Error]\t");
-                Console.ResetColor();
-                Console.Write($"An error has occurred during getting node's value: {e.Message}\n");
                 return null;
             }
         }
@@ -99,36 +92,52 @@ namespace NodeVideoEffects.Type
             _items.Add(id);
             return true;
         }
+        public static void RemoveItem(string id)
+        {
+            _items.Remove(id);
+            _dictionary.Where(kvp => kvp.Key.StartsWith(id))
+                       .Select(kvp => _dictionary.Remove(kvp.Key));
+        }
 
         /// <summary>
         /// Now frame
         /// </summary>
-        public static int _FRAME { get => _frame; }
+        public static Dictionary<string, int> _FRAME { get; private set; } = [];
         /// <summary>
         /// Length of the item
         /// </summary>
-        public static int _LENGTH { get => _length; }
+        public static Dictionary<string, int> _LENGTH { get; private set; } = [];
         /// <summary>
         /// FPS of the YMM4 project
         /// </summary>
-        public static int _FPS { get => _fps; }
+        public static Dictionary<string, int> _FPS { get; private set; } = [];
 
-        internal static void SetInfo(EffectDescription info)
+        internal static void SetInfo(string id, EffectDescription info)
         {
-            if (info.ItemPosition.Frame != _frame)
+            if (!_FRAME.ContainsKey(id))
             {
-                _frame = info.ItemPosition.Frame;
-                OnFrameChanged(nameof(_FRAME));
+                _FRAME.Add(id, info.ItemPosition.Frame);
+                _LENGTH.Add(id, info.ItemDuration.Frame);
+                _FPS.Add(id, info.FPS);
             }
-            if (_length != info.ItemDuration.Frame)
+            else
             {
-                _length = info.ItemDuration.Frame;
-                OnLengthChanged(nameof(_LENGTH));
-            }
-            if (_fps != info.FPS)
-            {
-                _fps = info.FPS;
-                OnFPSChanged(nameof(_FPS));
+
+                if (info.ItemPosition.Frame != _FRAME[id])
+                {
+                    _FRAME[id] = info.ItemPosition.Frame;
+                    OnFrameChanged(nameof(_FRAME));
+                }
+                if (_LENGTH[id] != info.ItemDuration.Frame)
+                {
+                    _LENGTH[id] = info.ItemDuration.Frame;
+                    OnLengthChanged(nameof(_LENGTH));
+                }
+                if (_FPS[id] != info.FPS)
+                {
+                    _FPS[id] = info.FPS;
+                    OnFPSChanged(nameof(_FPS));
+                }
             }
         }
 

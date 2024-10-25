@@ -47,11 +47,20 @@ namespace NodeVideoEffects
                 {
                     INode? node = NodesManager.GetNode(info.ID);
                     int index = info.ID.IndexOf('-');
-                    if (info.ID[0..index] != item.ID) info.ID = item.ID + "-" + info.ID[(index + 1)..^0];
+                    if (info.ID[0..index] != item.ID)
+                        info.ID = item.ID + "-" + info.ID[(index + 1)..^0];
                     System.Type? type = System.Type.GetType(info.Type);
                     if (type != null)
                     {
-                        object? obj = Activator.CreateInstance(type, []);
+                        object? obj;
+                        try
+                        {
+                            obj = Activator.CreateInstance(type, [item.ID]);
+                        }
+                        catch
+                        {
+                            obj = Activator.CreateInstance(type, []);
+                        }
                         node = obj as INode ?? throw new Exception("Unable to create node instance.");
                         node.Id = info.ID;
                         NodesManager.AddNode(info.ID, node);
@@ -135,9 +144,9 @@ namespace NodeVideoEffects
             try
             {
                 typeof(NodesManager)
-                    .GetMethod("SetInfo",
+                    ?.GetMethod("SetInfo",
                     BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
-                    .Invoke(null, [effectDescription]);
+                    ?.Invoke(null, [item.ID, effectDescription]);
                 ID2D1Image? _output = ((ImageAndContext?)outputNode.Inputs[0].Value)?.Image ?? null;
                 if (_output == null)
                 {
