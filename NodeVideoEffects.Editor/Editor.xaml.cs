@@ -71,6 +71,7 @@ namespace NodeVideoEffects.Editor
             this.MouseMove += new MouseEventHandler(Canvas_MouseMove);
 
             zoomValue.Text = ((int)(scale * 100)).ToString() + "%";
+            ShowInfoText("Initializing...");
 
             this.Loaded += EditorLoaded;
         }
@@ -132,20 +133,10 @@ namespace NodeVideoEffects.Editor
             BuildNodes();
         }
 
-#if DEBUG
-        private void LogConnection(string message = "")
+        public void ShowInfoText(string text)
         {
-            Console.WriteLine($"[UTC {DateTime.UtcNow.ToString("HH:mm:ss.fff")}] {message}");
-            foreach (NodeInfo info in Nodes)
-            {
-                for (int i = 0; i < info.Connections.Count; i++)
-                {
-                    Console.WriteLine($"{info.ID}({info.Type}):\n[\"{info.Connections[i].id}\", {i}]\n");
-                }
-            }
-            Console.WriteLine("\n");
+            info.Content = text;
         }
-#endif
 
         private void BuildNodes()
         {
@@ -175,10 +166,12 @@ namespace NodeVideoEffects.Editor
                     }
                 };
             }
+            ShowInfoText("Ready");
         }
 
         public async void RebuildNodes(List<NodeInfo> infos)
         {
+            ShowInfoText("Rebuilding nodes...");
             // Remove deleted nodes
             infos
             .Where(info => !nodes.ContainsKey(info.ID))
