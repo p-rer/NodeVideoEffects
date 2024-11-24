@@ -9,7 +9,8 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Xml.Linq;
+using YukkuriMovieMaker.Plugin;
+using YukkuriMovieMaker.Plugin.Effects;
 
 namespace NodeVideoEffects.Editor
 {

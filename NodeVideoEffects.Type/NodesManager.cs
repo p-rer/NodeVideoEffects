@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
 
 namespace NodeVideoEffects.Type
@@ -99,6 +100,25 @@ namespace NodeVideoEffects.Type
                        .Select(kvp => _dictionary.Remove(kvp.Key));
         }
 
+        private static Dictionary<string, IGraphicsDevicesAndContext> contexts = [];
+        public static void SetContext(string id, IGraphicsDevicesAndContext context)
+        {
+#if DEBUG
+            Console.WriteLine("SetContext(): " + context.DeviceContext.NativePointer.ToInt64());
+#endif
+            if (contexts.ContainsKey(id))
+                contexts[id] = context;
+            else
+                contexts.Add(id, context);
+        }
+        public static IGraphicsDevicesAndContext GetContext(string id)
+        {
+#if DEBUG
+            Console.WriteLine("GetContext(): " + contexts[id].DeviceContext.NativePointer.ToInt64());
+#endif
+            return contexts[id];
+        }
+
         /// <summary>
         /// Now frame
         /// </summary>
@@ -112,6 +132,8 @@ namespace NodeVideoEffects.Type
         /// </summary>
         public static Dictionary<string, int> _FPS { get; private set; } = [];
 
+        public static Dictionary<string, EffectDescription> _EffectDescription { get; private set; } = [];
+
         internal static void SetInfo(string id, EffectDescription info)
         {
             if (!_FRAME.ContainsKey(id))
@@ -119,10 +141,10 @@ namespace NodeVideoEffects.Type
                 _FRAME.Add(id, info.ItemPosition.Frame);
                 _LENGTH.Add(id, info.ItemDuration.Frame);
                 _FPS.Add(id, info.FPS);
+                _EffectDescription.Add(id, info);
             }
             else
             {
-
                 if (info.ItemPosition.Frame != _FRAME[id])
                 {
                     _FRAME[id] = info.ItemPosition.Frame;
@@ -138,6 +160,7 @@ namespace NodeVideoEffects.Type
                     _FPS[id] = info.FPS;
                     OnFPSChanged(nameof(_FPS));
                 }
+                _EffectDescription[id] = info;
             }
         }
 

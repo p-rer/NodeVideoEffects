@@ -12,7 +12,7 @@ namespace NodeVideoEffects
 {
     internal class NodeProcessor : IVideoEffectProcessor
     {
-        ID2D1DeviceContext6 _context;
+        internal ID2D1DeviceContext6 _context;
         readonly NodeVideoEffectsPlugin item;
         public ID2D1Image Output { set; get; }
 
@@ -100,6 +100,7 @@ namespace NodeVideoEffects
                     }
                 }
             }
+            NodesManager.SetContext(item.ID, context);
 
             this.item = item;
         }

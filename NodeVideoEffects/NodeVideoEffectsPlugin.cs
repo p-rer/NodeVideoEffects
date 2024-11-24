@@ -10,6 +10,8 @@ namespace NodeVideoEffects
     [VideoEffect("NodeVideoEffects", [nameof(Translate.Node)], [], ResourceType = typeof(Translate))]
     internal class NodeVideoEffectsPlugin : VideoEffectBase
     {
+        private bool isCreated = false;
+        private NodeProcessor processor;
         ~NodeVideoEffectsPlugin()
         {
             window?.Close();
@@ -50,7 +52,13 @@ namespace NodeVideoEffects
 
         public override IVideoEffectProcessor CreateVideoEffect(IGraphicsDevicesAndContext devices)
         {
-            return new NodeProcessor(devices, this);
+            if (isCreated){
+                NodesManager.SetContext(ID, devices);
+                processor._context = devices.DeviceContext;
+                return processor;
+            }
+            isCreated = true;
+            return processor = new(devices, this);
         }
 
         protected override IEnumerable<IAnimatable> GetAnimatables() => [];

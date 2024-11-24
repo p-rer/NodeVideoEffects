@@ -16,5 +16,11 @@
     <ProjectReference Include="..\NodeVideoEffects.Nodes\NodeVideoEffects.Nodes.csproj" />
     <ProjectReference Include="..\NodeVideoEffects.Type\NodeVideoEffects.Type.csproj" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <Reference Include="YukkuriMovieMaker.Plugin">
+      <HintPath>..\..\..\ymm4\YukkuriMovieMaker.Plugin.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 
 </Project>
