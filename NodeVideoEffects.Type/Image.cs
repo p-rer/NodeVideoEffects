@@ -28,6 +28,12 @@ namespace NodeVideoEffects.Type
             _value = (ImageAndContext?)value;
         }
 
-        public IControl? Control => null;
+        public void Dispose()
+        {
+            _value?.Image?.Dispose();
+            _value?.Context?.Dispose();
+        }
+
+        public IControl? Control => null;        
     }
 }

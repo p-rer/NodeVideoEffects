@@ -103,9 +103,6 @@ namespace NodeVideoEffects.Type
         private static Dictionary<string, IGraphicsDevicesAndContext> contexts = [];
         public static void SetContext(string id, IGraphicsDevicesAndContext context)
         {
-#if DEBUG
-            Console.WriteLine("SetContext(): " + context.DeviceContext.NativePointer.ToInt64());
-#endif
             if (contexts.ContainsKey(id))
                 contexts[id] = context;
             else
@@ -113,9 +110,6 @@ namespace NodeVideoEffects.Type
         }
         public static IGraphicsDevicesAndContext GetContext(string id)
         {
-#if DEBUG
-            Console.WriteLine("GetContext(): " + contexts[id].DeviceContext.NativePointer.ToInt64());
-#endif
             return contexts[id];
         }
 
@@ -132,7 +126,7 @@ namespace NodeVideoEffects.Type
         /// </summary>
         public static Dictionary<string, int> _FPS { get; private set; } = [];
 
-        public static Dictionary<string, EffectDescription> _EffectDescription { get; private set; } = [];
+        private static Dictionary<string, EffectDescription> _EffectDescription = [];
 
         internal static void SetInfo(string id, EffectDescription info)
         {
@@ -163,6 +157,8 @@ namespace NodeVideoEffects.Type
                 _EffectDescription[id] = info;
             }
         }
+
+        public static EffectDescription GetInfo(string id) => _EffectDescription[id];
 
         /// <summary>
         /// Now frame has changed

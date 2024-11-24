@@ -1,6 +1,8 @@
 ﻿using NodeVideoEffects.Type;
+using NodeVideoEffects.Utility;
 using System.Windows.Media;
 using YukkuriMovieMaker.Commons;
+using YukkuriMovieMaker.Player.Video;
 using YukkuriMovieMaker.Player.Video.Effects;
 using YukkuriMovieMaker.Plugin;
 using YukkuriMovieMaker.Plugin.Effects;
@@ -9,8 +11,7 @@ namespace NodeVideoEffects.Nodes.Effect
 {
     public class MosaicNode : INode
     {
-        IVideoEffect? effect;
-        string id;
+        VideoEffectsLoader videoEffect;
         public MosaicNode(string id) : base(
             [
                 new(new Image(null), "In"),
@@ -25,19 +26,21 @@ namespace NodeVideoEffects.Nodes.Effect
         {
             if (id == "")
                 return;
-            effect = Activator.CreateInstance(PluginLoader.VideoEffects.ToList().Where(type => type.Name == "MosaicEffect").First()) as IVideoEffect;
-            this.id = id;
+            videoEffect = VideoEffectsLoader.LoadEffect("MosaicEffect", id);
         }
 
         public override async Task Calculate()
         {
-            IGraphicsDevicesAndContext context = NodesManager.GetContext(id);
-            VideoEffectProcessorBase? processor = effect?.CreateVideoEffect(context) as VideoEffectProcessorBase;
-
-            processor?.SetInput(((ImageAndContext)Inputs[0].Value).Image);
-            processor?.Update(NodesManager._EffectDescription[id]);
-            Outputs[0].Value = new ImageAndContext(processor?.Output, ((ImageAndContext)Inputs[0].Value).Context);
+            Outputs[0].Value = new ImageAndContext(
+                videoEffect.Update(((ImageAndContext)Inputs[0].Value).Image),
+                ((ImageAndContext)Inputs[0].Value).Context);
             return;
+        }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+            videoEffect?.Dispose();
         }
     }
 }

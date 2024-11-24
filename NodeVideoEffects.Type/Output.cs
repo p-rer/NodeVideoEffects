@@ -5,7 +5,7 @@ namespace NodeVideoEffects.Type
     /// <summary>
     /// Output port
     /// </summary>
-    public class Output
+    public class Output : IDisposable
     {
         private PortValue _value;
         private Object? _result = null;
@@ -83,6 +83,11 @@ namespace NodeVideoEffects.Type
         {
             _connection.Remove(new(id, index));
             IsSuccess = false;
+        }
+
+        public void Dispose()
+        {
+            _value.Dispose();
         }
     }
 }

@@ -7,8 +7,8 @@ namespace NodeVideoEffects.Nodes.Effect
 {
     public class GaussianBlurNode : INode
     {
-        GaussianBlur blur;
-        public GaussianBlurNode() : base(
+        GaussianBlur? blur;
+        public GaussianBlurNode(string id) : base(
             [
                 new(new Image(null), "In"),
                 new(new Number(10, 0, 250,4), "Level")
@@ -20,22 +20,26 @@ namespace NodeVideoEffects.Nodes.Effect
             Colors.LawnGreen,
             "Effect")
         {
+            if (id == "")
+                return;
+            blur = new(NodesManager.GetContext(id).DeviceContext);
         }
 
         public override async Task Calculate()
         {
-            ID2D1DeviceContext6 context = ((ImageAndContext)Inputs[0].Value).Context;
-            blur = new(context);
+            if (blur == null)
+                return;
             blur.SetInput(0, ((ImageAndContext)Inputs[0].Value).Image, true);
             blur.StandardDeviation = Convert.ToSingle(Inputs[1].Value);
-            Outputs[0].Value = new ImageAndContext(blur.Output, context);
+            Outputs[0].Value = new ImageAndContext(blur.Output, ((ImageAndContext)Inputs[0].Value).Context);
             return;
         }
 
         public override void Dispose()
         {
-            blur.SetInput(0, null, true);
-            blur.Dispose();
+            base.Dispose();
+            blur?.SetInput(0, null, true);
+            blur?.Dispose();
         }
     }
 }

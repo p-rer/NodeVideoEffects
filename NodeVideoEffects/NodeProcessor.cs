@@ -16,8 +16,6 @@ namespace NodeVideoEffects
         readonly NodeVideoEffectsPlugin item;
         public ID2D1Image Output { set; get; }
 
-        bool isFirst = true;
-
         Nodes.Basic.InputNode inputNode;
         Nodes.Basic.OutputNode outputNode;
 
@@ -131,6 +129,7 @@ namespace NodeVideoEffects
                 _context.EndDraw();
 
                 _output = bitmap;
+                bitmap.Dispose();
             }
             Output = _output;
         }
@@ -171,6 +170,7 @@ namespace NodeVideoEffects
                     _context.EndDraw();
 
                     _output = bitmap;
+                    bitmap.Dispose();
                 }
                 Output = _output;
             }

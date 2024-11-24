@@ -3,7 +3,7 @@ using System.Windows.Media;
 
 namespace NodeVideoEffects.Type
 {
-    public interface PortValue
+    public interface PortValue : IDisposable
     {
         /// <summary>
         /// Type of value

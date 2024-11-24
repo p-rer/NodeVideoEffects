@@ -48,6 +48,8 @@ namespace NodeVideoEffects.Type
             _value = Math.Round(Convert.ToDouble(value), _digits);
         }
 
+        public void Dispose() { }
+
         public IControl? Control => new NumberPort(_default, _value, _min, _max, _digits);
     }
 }

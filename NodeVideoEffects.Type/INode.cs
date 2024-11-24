@@ -8,8 +8,8 @@ namespace NodeVideoEffects.Type
     /// </summary>
     public abstract class INode : IDisposable
     {
-        private Input[]? _inputs;
-        private Output[]? _outputs;
+        private Input[] _inputs;
+        private Output[] _outputs;
         private string _name;
 
         private string _id = "";
@@ -19,12 +19,12 @@ namespace NodeVideoEffects.Type
         /// <summary>
         /// Get input ports
         /// </summary>
-        public Input[]? Inputs => _inputs;
+        public Input[] Inputs => _inputs;
 
         /// <summary>
         /// Get output ports
         /// </summary>
-        public Output[]? Outputs=> _outputs;
+        public Output[] Outputs=> _outputs;
 
         /// <summary>
         /// Name of this node
@@ -49,7 +49,7 @@ namespace NodeVideoEffects.Type
         /// <param name="outputs">Output ports</param>
         /// <param name="name">Name of this node</param>
         /// <param name="category">Category of this node</param>
-        public INode(Input[]? inputs, Output[]? outputs, string name, string? category = null)
+        public INode(Input[] inputs, Output[] outputs, string name, string? category = null)
         {
             _inputs = inputs;
             _outputs = outputs;
@@ -83,6 +83,7 @@ namespace NodeVideoEffects.Type
         {
             if (_id != "")
                 NodesManager.RemoveNode(_id);
+            Dispose();
         }
 
         private void SubscribeToInputChanges()
@@ -139,6 +140,13 @@ namespace NodeVideoEffects.Type
         /// <returns>The calculation task</returns>
         public abstract Task Calculate();
 
-        public virtual void Dispose() { }
+        public virtual void Dispose()
+        {
+            foreach (Input input in Inputs)
+                input.Dispose();
+            foreach (Output output in Outputs)
+                output.Dispose();
+            NodesManager.RemoveNode(_id);
+        }
     }
 }

@@ -8,31 +8,18 @@
 
   <ItemGroup>
     <ProjectReference Include="..\NodeVideoEffects.Type\NodeVideoEffects.Type.csproj" />
-    <ProjectReference Include="..\NodeVideoEffects.Utility\NodeVideoEffects.Utility.csproj" />
   </ItemGroup>
-
+  
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DebugType>none</DebugType>
   </PropertyGroup>
-  
+
   <ItemGroup>
-    <Reference Include="SharpGen.Runtime">
-      <HintPath>..\..\..\ymm4\SharpGen.Runtime.dll</HintPath>
-    </Reference>
     <Reference Include="Vortice.Direct2D1">
       <HintPath>..\..\..\ymm4\Vortice.Direct2D1.dll</HintPath>
     </Reference>
-    <Reference Include="Vortice.Direct3D11">
-      <HintPath>..\..\..\ymm4\Vortice.Direct3D11.dll</HintPath>
-    </Reference>
-    <Reference Include="Vortice.DirectX">
-      <HintPath>..\..\..\ymm4\Vortice.DirectX.dll</HintPath>
-    </Reference>
-    <Reference Include="Vortice.DXGI">
-      <HintPath>..\..\..\ymm4\Vortice.DXGI.dll</HintPath>
-    </Reference>
-    <Reference Include="Vortice.Mathematics">
-      <HintPath>..\..\..\ymm4\Vortice.Mathematics.dll</HintPath>
+    <Reference Include="YukkuriMovieMaker">
+      <HintPath>..\..\..\ymm4\YukkuriMovieMaker.dll</HintPath>
     </Reference>
     <Reference Include="YukkuriMovieMaker.Plugin">
       <HintPath>..\..\..\ymm4\YukkuriMovieMaker.Plugin.dll</HintPath>

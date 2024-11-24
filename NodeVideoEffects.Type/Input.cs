@@ -7,7 +7,7 @@ namespace NodeVideoEffects.Type
     /// <summary>
     /// Input port
     /// </summary>
-    public class Input : INotifyPropertyChanged
+    public class Input : INotifyPropertyChanged, IDisposable
     {
         private PortValue _value;
         private Connection _connection = new();
@@ -118,5 +118,7 @@ namespace NodeVideoEffects.Type
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+
+        public void Dispose() => _value.Dispose();
     }
 }
