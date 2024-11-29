@@ -8,8 +8,8 @@
         Title="{x:Static local:Translate.Editor}" MinHeight="450" MinWidth="800">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="2*" MaxWidth="300"/>
-            <ColumnDefinition Width="2"/>
+            <ColumnDefinition Width="2*" MinWidth="30" MaxWidth="300" x:Name="explorerGrid"/>
+            <ColumnDefinition Width="5"/>
             <ColumnDefinition Width="5*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
@@ -36,7 +36,8 @@
                 <MenuItem Header="{x:Static local:Translate.ShowAbout}" Click="ShowAbout" />
             </MenuItem>
         </Menu>
-        <Rectangle Grid.Column="1" Grid.Row="1" Fill="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" />
+        <GridSplitter Grid.Column="1" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                      PreviewMouseUp="GridSplitter_MouseUp"/>
         <ContentControl Grid.Column="0" Grid.Row="1" x:Name="Explorer" />
         <NodeVideoEffects.Editor:Editor Grid.Column="2"  Grid.Row="1" Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}" x:Name="EditSpace"
                                         NodesUpdated="EditSpace_NodesUpdated"/>

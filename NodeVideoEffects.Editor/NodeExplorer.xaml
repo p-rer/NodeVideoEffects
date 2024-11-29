@@ -6,6 +6,9 @@
              xmlns:local="clr-namespace:NodeVideoEffects.Editor"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="300">
+    <UserControl.Resources>
+        <local:WidthToVisibilityConverter x:Key="WidthToVisibilityConverter" Threshold="100" />
+    </UserControl.Resources>
     <Grid>
         <TreeView ItemsSource="{Binding Root}">
             <TreeView.Resources>
@@ -127,5 +130,15 @@
                 </HierarchicalDataTemplate>
             </TreeView.ItemTemplate>
         </TreeView>
+        <Grid Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
+              Visibility="{Binding ActualWidth, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}, Converter={StaticResource WidthToVisibilityConverter}}">
+            <Label Content="Explorer" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Label.LayoutTransform>
+                    <TransformGroup>
+                        <RotateTransform Angle="90"/>
+                    </TransformGroup>
+                </Label.LayoutTransform>
+            </Label>
+        </Grid>
     </Grid>
 </UserControl>

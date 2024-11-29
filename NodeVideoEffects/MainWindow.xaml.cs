@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Reflection;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace NodeVideoEffects
@@ -30,6 +31,11 @@ namespace NodeVideoEffects
 
         string tag;
         string commit;
+
+        const double MinWidthForPreview = 200;
+        const double MinWidthOnRelease = 100;
+        const double FinalMinWidth = 30;
+
         public NodeEditor()
         {
             InitializeComponent();
@@ -98,6 +104,22 @@ namespace NodeVideoEffects
             LogViewer viewer;
             if (LogViewer.CreateWindow(out viewer))
                 viewer.Show();
+        }
+
+
+        private void GridSplitter_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            GridSplitter? splitter = sender as GridSplitter;
+            if (splitter == null) return;
+
+            if (explorerGrid.ActualWidth <= MinWidthOnRelease)
+            {
+                explorerGrid.Width = new(FinalMinWidth);
+            }
+            else if (explorerGrid.ActualWidth <= MinWidthForPreview)
+            {
+                explorerGrid.Width = new(MinWidthForPreview);
+            }
         }
     }
 }

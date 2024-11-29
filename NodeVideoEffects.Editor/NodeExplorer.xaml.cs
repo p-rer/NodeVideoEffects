@@ -341,4 +341,23 @@ namespace NodeVideoEffects.Editor
             throw new System.NotImplementedException();
         }
     }
+
+    public class WidthToVisibilityConverter : IValueConverter
+    {
+        public double Threshold { get; set; }
+
+        public object Convert(object value, System.Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is double width)
+            {
+                return width < Threshold ? Visibility.Visible : Visibility.Collapsed;
+            }
+            return Visibility.Collapsed;
+        }
+
+        public object ConvertBack(object value, System.Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }
