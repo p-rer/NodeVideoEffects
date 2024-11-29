@@ -1,14 +1,16 @@
 ﻿using NodeVideoEffects.Type;
+using NodeVideoEffects.Utility;
 using System.ComponentModel.DataAnnotations;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Exo;
 using YukkuriMovieMaker.Player.Video;
+using YukkuriMovieMaker.Plugin;
 using YukkuriMovieMaker.Plugin.Effects;
 
 namespace NodeVideoEffects
 {
     [VideoEffect("NodeVideoEffects", [nameof(Translate.Node)], [], ResourceType = typeof(Translate))]
-    internal class NodeVideoEffectsPlugin : VideoEffectBase
+    public class NodeVideoEffectsPlugin : VideoEffectBase
     {
         private bool isCreated = false;
         private NodeProcessor processor;
@@ -55,6 +57,7 @@ namespace NodeVideoEffects
             if (isCreated){
                 NodesManager.SetContext(ID, devices);
                 processor._context = devices.DeviceContext;
+                Logger.Write(LogLevel.Info, $"Reloaded the effect processor, ID: \"{ID}\".");
                 return processor;
             }
             isCreated = true;

@@ -1,5 +1,6 @@
 ﻿using NodeVideoEffects.Nodes.Basic;
 using NodeVideoEffects.Type;
+using NodeVideoEffects.Utility;
 using System.Reflection;
 using Vortice.DCommon;
 using Vortice.Direct2D1;
@@ -26,6 +27,7 @@ namespace NodeVideoEffects
             {
                 item.ID = Guid.NewGuid().ToString("N");
                 NodesManager.AddItem(item.ID);
+                Logger.Write(LogLevel.Info, $"Created the effect processor, ID: \"{item.ID}\".");
             }
             if (item.Nodes.Count == 0)
             {
@@ -38,6 +40,7 @@ namespace NodeVideoEffects
                 outputNode.SetInputConnection(0, new(inputNode.Id, 0));
                 item.Nodes.Add(new(inputNode.Id, inputNode.GetType(), [], 100, 100, []));
                 item.Nodes.Add(new(outputNode.Id, outputNode.GetType(), [], 500, 100, [new(inputNode.Id, 0)]));
+                Logger.Write(LogLevel.Info, $"Initializing completed.");
             }
             else
             {
@@ -97,6 +100,7 @@ namespace NodeVideoEffects
                         }
                     }
                 }
+                Logger.Write(LogLevel.Info, $"Connection restoration completed.");
             }
             NodesManager.SetContext(item.ID, context);
 
@@ -109,27 +113,9 @@ namespace NodeVideoEffects
             ID2D1Image? _output = ((ImageAndContext?)outputNode.Inputs[0].Value)?.Image ?? null;
             if (_output == null)
             {
-                BitmapProperties1 bitmapProperties = new BitmapProperties1(
-                    new PixelFormat(Format.B8G8R8A8_UNorm, AlphaMode.Premultiplied),
-                    96,
-                    96,
-                    BitmapOptions.Target
-                );
+                Logger.Write(LogLevel.Warn, $"The output of this item(ID: \"{item.ID}\" is a blank image because the output of OutputNode is null.");
 
-                ID2D1Bitmap1 bitmap = _context.CreateBitmap(
-                    new SizeI(1, 1),
-                    IntPtr.Zero,
-                    0,
-                    bitmapProperties
-                );
-
-                _context.Target = bitmap;
-                _context.BeginDraw();
-                _context.Clear(new Color(0, 0, 0, 0));
-                _context.EndDraw();
-
-                _output = bitmap;
-                bitmap.Dispose();
+                SetBlankImage(out _output);
             }
             Output = _output;
         }
@@ -150,36 +136,47 @@ namespace NodeVideoEffects
                 ID2D1Image? _output = ((ImageAndContext?)outputNode.Inputs[0].Value)?.Image ?? null;
                 if (_output == null)
                 {
-                    BitmapProperties1 bitmapProperties = new BitmapProperties1(
-                        new PixelFormat(Format.B8G8R8A8_UNorm, AlphaMode.Premultiplied),
-                        96,
-                        96,
-                        BitmapOptions.Target
-                    );
+                    Logger.Write(LogLevel.Warn, $"The output of this item(ID: \"{item.ID}\" is a blank image because the output of OutputNode is null.");
 
-                    ID2D1Bitmap1 bitmap = _context.CreateBitmap(
-                        new SizeI(1, 1),
-                        IntPtr.Zero,
-                        0,
-                        bitmapProperties
-                    );
-
-                    _context.Target = bitmap;
-                    _context.BeginDraw();
-                    _context.Clear(new Color(0, 0, 0, 0));
-                    _context.EndDraw();
-
-                    _output = bitmap;
-                    bitmap.Dispose();
+                    SetBlankImage(out _output);
                 }
                 Output = _output;
             }
             catch (NullReferenceException e)
             {
+                Logger.Write(LogLevel.Error, $"{e.Message}\nItem ID: \"{item.ID}\"");
 
+                ID2D1Image _output;
+                SetBlankImage(out _output);
+                Output = _output;
             }
 
             return effectDescription.DrawDescription;
+        }
+
+        private void SetBlankImage(out ID2D1Image _output)
+        {
+            BitmapProperties1 bitmapProperties = new BitmapProperties1(
+                new PixelFormat(Format.B8G8R8A8_UNorm, AlphaMode.Premultiplied),
+                96,
+                96,
+                BitmapOptions.Target
+            );
+
+            ID2D1Bitmap1 bitmap = _context.CreateBitmap(
+                new SizeI(1, 1),
+                IntPtr.Zero,
+                0,
+                bitmapProperties
+            );
+
+            _context.Target = bitmap;
+            _context.BeginDraw();
+            _context.Clear(new Color(0, 0, 0, 0));
+            _context.EndDraw();
+
+            _output = bitmap;
+            bitmap.Dispose();
         }
 
         public void Dispose()

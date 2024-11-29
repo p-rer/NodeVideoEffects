@@ -28,6 +28,7 @@
             </MenuItem>
             <MenuItem Header="{x:Static local:Translate.View}">
                 <MenuItem Header="{x:Static local:Translate.ResetView}" />
+                <MenuItem Header="Open Log..." Click="OpenLogViewer"/>
             </MenuItem>
             <MenuItem Header="{x:Static local:Translate.Help}">
                 <MenuItem Header="{x:Static local:Translate.OpenHelpSite}" />

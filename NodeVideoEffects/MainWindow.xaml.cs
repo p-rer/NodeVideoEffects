@@ -92,5 +92,12 @@ namespace NodeVideoEffects
         {
             NodesUpdated?.Invoke(this, new PropertyChangedEventArgs(Title));
         }
+
+        private void OpenLogViewer(object sender, RoutedEventArgs e)
+        {
+            LogViewer viewer;
+            if (LogViewer.CreateWindow(out viewer))
+                viewer.Show();
+        }
     }
 }
