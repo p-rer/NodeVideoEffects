@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:NodeVideoEffects" 
+        xmlns:local="clr-namespace:NodeVideoEffects"
         mc:Ignorable="d"
         Title="{x:Static local:Translate.Editor}" MinHeight="450" MinWidth="800">
     <Grid>
@@ -36,10 +36,23 @@
                 <MenuItem Header="{x:Static local:Translate.ShowAbout}" Click="ShowAbout" />
             </MenuItem>
         </Menu>
+        <!--
         <GridSplitter Grid.Column="1" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                       PreviewMouseUp="GridSplitter_MouseUp"/>
+        -->
+        <local:DockablePanelField Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="1">
+            <local:DockablePanel Title="Explorer" DockLocation="Left" Priority="0">
+                <ContentControl x:Name="Explorer" />
+            </local:DockablePanel>
+            <local:DockablePanel Title="Editor" DockLocation="Center" Priority="1">
+                <NodeVideoEffects.Editor:Editor Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}" x:Name="EditSpace"
+                                NodesUpdated="EditSpace_NodesUpdated"/>
+            </local:DockablePanel>
+        </local:DockablePanelField>
+        <!--
         <ContentControl Grid.Column="0" Grid.Row="1" x:Name="Explorer" />
         <NodeVideoEffects.Editor:Editor Grid.Column="2"  Grid.Row="1" Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}" x:Name="EditSpace"
                                         NodesUpdated="EditSpace_NodesUpdated"/>
+        -->
     </Grid>
 </Window>
