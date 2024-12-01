@@ -1,18 +1,6 @@
 ﻿using NodeVideoEffects.Utility;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace NodeVideoEffects
 {
@@ -28,8 +16,8 @@ namespace NodeVideoEffects
             switch (log.Item2)
             {
                 case LogLevel.Info:
-                    border.Background = new SolidColorBrush(new() { R=33, G=49, B=77, A=255 });
-                    border.BorderBrush = new SolidColorBrush(new() { R=20, G=51, B=143, A=255 });
+                    border.Background = new SolidColorBrush(new() { R = 33, G = 49, B = 77, A = 255 });
+                    border.BorderBrush = new SolidColorBrush(new() { R = 20, G = 51, B = 143, A = 255 });
                     loglevel.Content = "[Info]";
                     break;
                 case LogLevel.Warn:

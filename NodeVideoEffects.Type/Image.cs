@@ -34,6 +34,6 @@ namespace NodeVideoEffects.Type
             _value?.Context?.Dispose();
         }
 
-        public IControl? Control => null;        
+        public IControl? Control => null;
     }
 }

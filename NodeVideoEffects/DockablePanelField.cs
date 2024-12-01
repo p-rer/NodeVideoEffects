@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 
 namespace NodeVideoEffects
@@ -21,9 +19,9 @@ namespace NodeVideoEffects
             double cellWidth = finalSize.Width / 3;
             double cellHeight = finalSize.Height / 3;
 
-            Dictionary<string, DockablePanel> panels = new();
+            Dictionary<string, DockablePanel> panels = [];
             List<List<Cell>> cells = InitializeCells(3, 3);
-            List<(int, int)> reservedPanels = new();
+            List<(int, int)> reservedPanels = [];
 
             // Reserve panels
             foreach (UIElement child in InternalChildren)
@@ -36,13 +34,13 @@ namespace NodeVideoEffects
             // Fill unoccupied spaces
             foreach ((int, int) pos in reservedPanels)
             {
-                Fill(new List<(int, int)> { pos }, cells[pos.Item1][pos.Item2].priority);
+                Fill([pos], cells[pos.Item1][pos.Item2].priority);
             }
 
             // Arrange panels in their calculated positions
             foreach (var panel in panels)
             {
-                (int x, int y, int width, int height) = GetPanelRect(panel.Value, panel.Key);
+                (int x, int y, int width, int height) = GetPanelRect(panel.Key);
                 panel.Value.Arrange(new Rect(x * cellWidth, y * cellHeight, width * cellWidth, height * cellHeight));
             }
 
@@ -108,9 +106,9 @@ namespace NodeVideoEffects
             }
 
             // Get the bounding rectangle of a panel based on its occupied cells
-            (int x, int y, int width, int height) GetPanelRect(DockablePanel panel, string id)
+            (int x, int y, int width, int height) GetPanelRect(string id)
             {
-                var cellsForPanel = new List<(int x, int y)>();
+                List<(int x, int y)> cellsForPanel = [];
                 for (int i = 0; i < cells.Count; i++)
                 {
                     for (int j = 0; j < cells[i].Count; j++)

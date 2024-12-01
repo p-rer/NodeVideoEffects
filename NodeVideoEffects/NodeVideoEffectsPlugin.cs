@@ -4,7 +4,6 @@ using System.ComponentModel.DataAnnotations;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Exo;
 using YukkuriMovieMaker.Player.Video;
-using YukkuriMovieMaker.Plugin;
 using YukkuriMovieMaker.Plugin.Effects;
 
 namespace NodeVideoEffects
@@ -54,7 +53,8 @@ namespace NodeVideoEffects
 
         public override IVideoEffectProcessor CreateVideoEffect(IGraphicsDevicesAndContext devices)
         {
-            if (isCreated){
+            if (isCreated)
+            {
                 NodesManager.SetContext(ID, devices);
                 processor._context = devices.DeviceContext;
                 Logger.Write(LogLevel.Info, $"Reloaded the effect processor, ID: \"{ID}\".");

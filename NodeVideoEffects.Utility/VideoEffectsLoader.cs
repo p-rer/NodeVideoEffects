@@ -1,8 +1,8 @@
-﻿using YukkuriMovieMaker.Plugin.Effects;
-using YukkuriMovieMaker.Plugin;
-using YukkuriMovieMaker.Player.Video;
-using NodeVideoEffects.Type;
+﻿using NodeVideoEffects.Type;
 using Vortice.Direct2D1;
+using YukkuriMovieMaker.Player.Video;
+using YukkuriMovieMaker.Plugin;
+using YukkuriMovieMaker.Plugin.Effects;
 
 namespace NodeVideoEffects.Utility
 {
@@ -12,7 +12,7 @@ namespace NodeVideoEffects.Utility
         IVideoEffectProcessor? processor;
         string id;
 
-        private VideoEffectsLoader(IVideoEffect? effect, string id) 
+        private VideoEffectsLoader(IVideoEffect? effect, string id)
         {
             if (effect == null) throw new ArgumentNullException(nameof(effect), "Unable load effect");
             videoEffect = effect;
@@ -31,6 +31,6 @@ namespace NodeVideoEffects.Utility
         public void Dispose() => processor?.Dispose();
 
         public static VideoEffectsLoader LoadEffect(string name, string id) =>
-            new(Activator.CreateInstance(PluginLoader.VideoEffects.ToList().Where(type => type.Name == name).First()) as IVideoEffect, id);        
+            new(Activator.CreateInstance(PluginLoader.VideoEffects.ToList().Where(type => type.Name == name).First()) as IVideoEffect, id);
     }
 }

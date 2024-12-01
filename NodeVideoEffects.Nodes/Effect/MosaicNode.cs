@@ -1,11 +1,6 @@
 ﻿using NodeVideoEffects.Type;
 using NodeVideoEffects.Utility;
 using System.Windows.Media;
-using YukkuriMovieMaker.Commons;
-using YukkuriMovieMaker.Player.Video;
-using YukkuriMovieMaker.Player.Video.Effects;
-using YukkuriMovieMaker.Plugin;
-using YukkuriMovieMaker.Plugin.Effects;
 
 namespace NodeVideoEffects.Nodes.Effect
 {

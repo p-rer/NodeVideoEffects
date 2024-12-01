@@ -1,5 +1,4 @@
 ﻿using NodeVideoEffects.Utility;
-using System;
 using System.Collections.Immutable;
 using System.Windows;
 using System.Windows.Controls;

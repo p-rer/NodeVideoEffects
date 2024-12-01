@@ -661,7 +661,8 @@ namespace NodeVideoEffects.Editor
                             node.BorderBrush = null;
                         });
                     }
-                    if (removingSelection){
+                    if (removingSelection)
+                    {
                         selectingNodes = [];
                         return;
                     }

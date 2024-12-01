@@ -9,8 +9,6 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
-using YukkuriMovieMaker.Plugin;
-using YukkuriMovieMaker.Plugin.Effects;
 
 namespace NodeVideoEffects.Editor
 {
@@ -138,31 +136,31 @@ namespace NodeVideoEffects.Editor
 
         private void TextBlock_MouseMove(object sender, MouseEventArgs e)
         {
-                TextBlock? textBlock = sender as TextBlock;
+            TextBlock? textBlock = sender as TextBlock;
 
-                if (textBlock != null)
+            if (textBlock != null)
+            {
+                if (type != null)
                 {
-                    if (type != null)
+                    Point position = e.GetPosition(window);
+                    HitTestResult result = VisualTreeHelper.HitTest(window, position);
+
+                    if (result != null)
                     {
-                        Point position = e.GetPosition(window);
-                        HitTestResult result = VisualTreeHelper.HitTest(window, position);
+                        var element = result.VisualHit as FrameworkElement;
 
-                        if (result != null)
+                        if (element != null)
                         {
-                            var element = result.VisualHit as FrameworkElement;
-
-                            if (element != null)
-                            {
-                                Editor? editor = FindParent<Editor>(element);
-                                if (editor != null)
-                                    Cursor = Cursors.Arrow;
-                                else
-                                    Cursor = Cursors.No;
-                            }
+                            Editor? editor = FindParent<Editor>(element);
+                            if (editor != null)
+                                Cursor = Cursors.Arrow;
+                            else
+                                Cursor = Cursors.No;
                         }
                     }
                 }
-                e.Handled = true;
+            }
+            e.Handled = true;
         }
 
         private void TextBlock_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)

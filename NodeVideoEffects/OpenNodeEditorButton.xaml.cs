@@ -46,7 +46,7 @@ namespace NodeVideoEffects
 
             window.Closed += (s, e) =>
             {
-                if(ItemProperties != null)
+                if (ItemProperties != null)
                     ((NodeVideoEffectsPlugin)ItemProperties[0].Item).window = null;
             };
 

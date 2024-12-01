@@ -1,6 +1,5 @@
 ﻿using NodeVideoEffects.Type;
 using System.Windows.Media;
-using Vortice.Direct2D1;
 using Vortice.Direct2D1.Effects;
 
 namespace NodeVideoEffects.Nodes.Effect

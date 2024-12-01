@@ -24,7 +24,7 @@ namespace NodeVideoEffects.Type
         /// <summary>
         /// Get output ports
         /// </summary>
-        public Output[] Outputs=> _outputs;
+        public Output[] Outputs => _outputs;
 
         /// <summary>
         /// Name of this node
