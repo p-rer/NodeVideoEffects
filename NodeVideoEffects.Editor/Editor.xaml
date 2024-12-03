@@ -7,7 +7,8 @@
              xmlns:local="clr-namespace:NodeVideoEffects.Editor"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
-             Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}">
+             Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
+             Focusable="True">
     <UserControl.Resources>
         <ResourceDictionary Source="pack://application:,,,/NodeVideoEffects.Control;component/Style/Style.xaml" />
     </UserControl.Resources>
