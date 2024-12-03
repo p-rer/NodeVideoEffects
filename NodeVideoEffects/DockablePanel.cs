@@ -24,6 +24,15 @@ namespace NodeVideoEffects
         {
             DefaultStyleKeyProperty.OverrideMetadata(typeof(DockablePanel),
                 new FrameworkPropertyMetadata(typeof(DockablePanel)));
+            FocusableProperty.OverrideMetadata(typeof(DockablePanel),
+                new FrameworkPropertyMetadata(true));
+        }
+
+        protected override void OnPreviewMouseDown(System.Windows.Input.MouseButtonEventArgs e)
+        {
+            base.OnPreviewMouseDown(e);
+
+            Focus();
         }
 
         public static readonly DependencyProperty TitleProperty =
