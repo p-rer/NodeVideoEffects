@@ -1,5 +1,6 @@
 ﻿using NodeVideoEffects.Type;
 using System.Windows.Media;
+using Vortice.Direct2D1;
 using Vortice.Direct2D1.Effects;
 
 namespace NodeVideoEffects.Nodes.Effect
@@ -7,6 +8,7 @@ namespace NodeVideoEffects.Nodes.Effect
     public class GaussianBlurNode : INode
     {
         GaussianBlur? blur;
+        string id;
         public GaussianBlurNode(string id) : base(
             [
                 new(new Image(null), "In"),
@@ -19,18 +21,18 @@ namespace NodeVideoEffects.Nodes.Effect
             Colors.LawnGreen,
             "Effect")
         {
-            if (id == "")
-                return;
-            blur = new(NodesManager.GetContext(id).DeviceContext);
+            this.id = id;
         }
 
         public override async Task Calculate()
         {
-            if (blur == null)
-                return;
+            blur?.SetInput(0, null, true);
+            blur?.Dispose();
+            ID2D1DeviceContext6 context = NodesManager.GetContext(id).DeviceContext;
+            blur = new(context);
             blur.SetInput(0, ((ImageAndContext)Inputs[0].Value).Image, true);
             blur.StandardDeviation = Convert.ToSingle(Inputs[1].Value);
-            Outputs[0].Value = new ImageAndContext(blur.Output, ((ImageAndContext)Inputs[0].Value).Context);
+            Outputs[0].Value = new ImageAndContext(blur.Output, context);
             return;
         }
 
