@@ -19,12 +19,12 @@ namespace NodeVideoEffects.Type
         /// <summary>
         /// Get input ports
         /// </summary>
-        public Input[] Inputs => _inputs;
+        protected Input[] Inputs => _inputs;
 
         /// <summary>
         /// Get output ports
         /// </summary>
-        public Output[] Outputs => _outputs;
+        protected Output[] Outputs => _outputs;
 
         /// <summary>
         /// Name of this node
@@ -68,7 +68,7 @@ namespace NodeVideoEffects.Type
         /// <param name="name">Name of this node</param>
         /// <param name="color">Color of this node</param>
         /// <param name="category">Category of this node</param>
-        public INode(Input[]? inputs, Output[]? outputs, string name, Color color, string? category = null)
+        public INode(Input[] inputs, Output[] outputs, string name, Color color, string? category = null)
         {
             _inputs = inputs;
             _outputs = outputs;
