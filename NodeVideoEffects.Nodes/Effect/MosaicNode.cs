@@ -1,6 +1,7 @@
 ﻿using NodeVideoEffects.Type;
 using NodeVideoEffects.Utility;
 using System.Windows.Media;
+using Vortice.Direct2D1;
 
 namespace NodeVideoEffects.Nodes.Effect
 {
@@ -26,9 +27,10 @@ namespace NodeVideoEffects.Nodes.Effect
 
         public override async Task Calculate()
         {
-            Outputs[0].Value = new ImageAndContext(
-                videoEffect.Update(((ImageAndContext)Inputs[0].Value).Image),
-                ((ImageAndContext)Inputs[0].Value).Context);
+            if (videoEffect.Update(((ImageAndContext)Inputs[0].Value).Image, out ID2D1Image? output))
+            {
+                Outputs[0].Value = new ImageAndContext(output);
+            }
             return;
         }
 

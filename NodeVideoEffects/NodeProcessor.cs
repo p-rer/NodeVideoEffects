@@ -20,6 +20,8 @@ namespace NodeVideoEffects
         Nodes.Basic.InputNode inputNode;
         Nodes.Basic.OutputNode outputNode;
 
+        ID2D1Bitmap1 bitmap;
+
         public NodeProcessor(IGraphicsDevicesAndContext context, NodeVideoEffectsPlugin item)
         {
             _context = context.DeviceContext;
@@ -104,14 +106,28 @@ namespace NodeVideoEffects
             }
             NodesManager.SetContext(item.ID, context);
 
+            BitmapProperties1 bitmapProperties = new BitmapProperties1(
+                new PixelFormat(Format.B8G8R8A8_UNorm, AlphaMode.Premultiplied),
+                96,
+                96,
+                BitmapOptions.Target
+            );
+
+            bitmap = _context.CreateBitmap(
+                new SizeI(1, 1),
+                IntPtr.Zero,
+                0,
+                bitmapProperties
+            );
+
             this.item = item;
         }
 
         public void SetInput(ID2D1Image input)
         {
-            inputNode.Outputs[0].Value = new ImageAndContext(input, _context);
+            NodesManager.SetInput(item.ID, input);
             ID2D1Image? _output = ((ImageAndContext?)outputNode.Inputs[0].Value)?.Image ?? null;
-            if (_output == null)
+            if (_output == null || _output.NativePointer == 0)
             {
                 Logger.Write(LogLevel.Warn, $"The output of this item(ID: \"{item.ID}\" is a blank image because the output of OutputNode is null.");
 
@@ -134,7 +150,7 @@ namespace NodeVideoEffects
                     BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
                     ?.Invoke(null, [item.ID, effectDescription]);
                 ID2D1Image? _output = ((ImageAndContext?)outputNode.Inputs[0].Value)?.Image ?? null;
-                if (_output == null)
+                if (_output == null || _output.NativePointer == 0)
                 {
                     Logger.Write(LogLevel.Warn, $"The output of this item(ID: \"{item.ID}\" is a blank image because the output of OutputNode is null.");
 
@@ -156,32 +172,34 @@ namespace NodeVideoEffects
 
         private void SetBlankImage(out ID2D1Image _output)
         {
-            BitmapProperties1 bitmapProperties = new BitmapProperties1(
+            if (bitmap.NativePointer == 0)
+            {
+                BitmapProperties1 bitmapProperties = new BitmapProperties1(
                 new PixelFormat(Format.B8G8R8A8_UNorm, AlphaMode.Premultiplied),
                 96,
                 96,
                 BitmapOptions.Target
             );
 
-            ID2D1Bitmap1 bitmap = _context.CreateBitmap(
-                new SizeI(1, 1),
-                IntPtr.Zero,
-                0,
-                bitmapProperties
-            );
-
+                bitmap = _context.CreateBitmap(
+                    new SizeI(1, 1),
+                    IntPtr.Zero,
+                    0,
+                    bitmapProperties
+                );
+            }
             _context.Target = bitmap;
             _context.BeginDraw();
             _context.Clear(new Color(0, 0, 0, 0));
             _context.EndDraw();
 
             _output = bitmap;
-            bitmap.Dispose();
         }
 
         public void Dispose()
         {
             ClearInput();
+            bitmap.Dispose();
             try
             {
                 Output.Dispose();

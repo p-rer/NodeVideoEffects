@@ -35,7 +35,7 @@ namespace NodeVideoEffects.Nodes.Composite
             blend.SetInput(0, ((ImageAndContext)Inputs[0].Value).Image, true);
             blend.SetInput(1, ((ImageAndContext)Inputs[1].Value).Image, true);
             blend.Mode = BlendMode.Multiply;
-            Outputs[0].Value = new ImageAndContext(blend.Output, ((ImageAndContext)Inputs[0].Value).Context);
+            Outputs[0].Value = new ImageAndContext(blend.Output);
             return;
         }
 

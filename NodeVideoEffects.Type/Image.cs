@@ -31,7 +31,6 @@ namespace NodeVideoEffects.Type
         public void Dispose()
         {
             _value?.Image?.Dispose();
-            _value?.Context?.Dispose();
         }
 
         public IControl? Control => null;

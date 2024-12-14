@@ -1,4 +1,5 @@
 ﻿using NodeVideoEffects.Type;
+using SharpGen.Runtime;
 using System.Windows.Media;
 using Vortice.Direct2D1;
 using Vortice.Direct2D1.Effects;
@@ -7,7 +8,7 @@ namespace NodeVideoEffects.Nodes.Effect
 {
     public class GaussianBlurNode : INode
     {
-        GaussianBlur? blur;
+        GaussianBlur blur;
         string id;
         public GaussianBlurNode(string id) : base(
             [
@@ -21,18 +22,27 @@ namespace NodeVideoEffects.Nodes.Effect
             Colors.LawnGreen,
             "Effect")
         {
+            if (id == "") return;
             this.id = id;
+            blur = new(NodesManager.GetContext(id).DeviceContext);
         }
 
         public override async Task Calculate()
         {
-            blur?.SetInput(0, null, true);
-            blur?.Dispose();
-            ID2D1DeviceContext6 context = NodesManager.GetContext(id).DeviceContext;
-            blur = new(context);
-            blur.SetInput(0, ((ImageAndContext)Inputs[0].Value).Image, true);
-            blur.StandardDeviation = Convert.ToSingle(Inputs[1].Value);
-            Outputs[0].Value = new ImageAndContext(blur.Output, context);
+            lock (blur)
+            {
+                nint ptr = blur.NativePointer;
+                ID2D1DeviceContext6 context = NodesManager.GetContext(id).DeviceContext;
+                blur = new(context);
+                blur.SetInput(0, ((ImageAndContext)Inputs[0].Value).Image, true);
+                blur.StandardDeviation = Convert.ToSingle(Inputs[1].Value);
+                Outputs[0].Value = new ImageAndContext(blur.Output);
+                if (ptr != 0)
+                {
+                    new ID2D1Effect(ptr)?.SetInput(0, null, true);
+                    new ID2D1Effect(ptr)?.Dispose();
+                }
+            }
             return;
         }
 

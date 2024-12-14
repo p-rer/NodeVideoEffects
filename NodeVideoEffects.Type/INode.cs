@@ -97,14 +97,11 @@ namespace NodeVideoEffects.Type
             }
         }
 
-        private void Input_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        protected void Input_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(Input.Value))
+            foreach (Output output in _outputs)
             {
-                foreach (Output output in _outputs)
-                {
-                    output.IsSuccess = false;
-                }
+                output.IsSuccess = false;
             }
         }
 

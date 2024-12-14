@@ -5,8 +5,6 @@ namespace NodeVideoEffects.Nodes.Basic
 {
     public class InputNode : INode
     {
-        private ImageAndContext? _image;
-
         public InputNode() : base(
             [],
             [new(new Image(null), "Input")],
@@ -14,6 +12,7 @@ namespace NodeVideoEffects.Nodes.Basic
             Colors.PaleVioletRed,
             "Basic")
         {
+            NodesManager.InputUpdated += Input_PropertyChanged;
         }
 
         public override async Task Calculate()

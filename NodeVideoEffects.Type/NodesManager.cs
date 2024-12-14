@@ -1,4 +1,7 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics;
+using System.Windows.Input;
+using Vortice.Direct2D1;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
 
@@ -8,6 +11,7 @@ namespace NodeVideoEffects.Type
     {
         private static Dictionary<string, INode> _dictionary = new();
         private static List<string> _items = new();
+        private static Dictionary<string, ID2D1Image?> _images = new();
 
         /// <summary>
         /// Get output port value from node id and port index
@@ -20,6 +24,8 @@ namespace NodeVideoEffects.Type
             try
             {
                 INode node = _dictionary[id];
+                if (node.GetType().FullName == "NodeVideoEffects.Nodes.Basic.InputNode")
+                    return new ImageAndContext(_images[id[0..id.IndexOf('-')]]);
                 if (node.Outputs[index].IsSuccess)
                     return node.GetOutput(index);
                 await node.Calculate();
@@ -37,6 +43,14 @@ namespace NodeVideoEffects.Type
             if (_dictionary.TryGetValue(id, out node))
                 return node;
             return null;
+        }
+
+        public static PropertyChangedEventHandler InputUpdated = delegate { };
+
+        public static void SetInput(string id, ID2D1Image image)
+        {
+            _images[id] = image;
+            InputUpdated.Invoke(null, new(null));
         }
 
         public static bool CheckConnection(string iid, string oid)
@@ -91,10 +105,16 @@ namespace NodeVideoEffects.Type
         {
             if (_items.Contains(id)) return false;
             _items.Add(id);
+            _images.Add(id, null);
             return true;
         }
         public static void RemoveItem(string id)
         {
+            if (_images.TryGetValue(id, out ID2D1Image? image))
+            {
+                image?.Dispose();
+            }
+            _images.Remove(id);
             _items.Remove(id);
             _dictionary.Where(kvp => kvp.Key.StartsWith(id))
                        .Select(kvp => _dictionary.Remove(kvp.Key));
