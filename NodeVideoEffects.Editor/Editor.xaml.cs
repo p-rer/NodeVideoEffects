@@ -173,12 +173,9 @@ namespace NodeVideoEffects.Editor
         {
             ShowInfoText("Rebuilding nodes...");
             // Remove deleted nodes
-            infos
-            .Where(info => !nodes.ContainsKey(info.ID))
-            .Select(info =>
-            {
-                return Task.Run(() => NodesManager.RemoveNode(info.ID));
-            });
+            HashSet<string> newNodesID = infos.Select(node => node.ID).ToHashSet();
+            foreach (var id in nodes.Select(node => node.Key).Where(id => !newNodesID.Contains(id)))
+                NodesManager.RemoveNode(id);
 
             // Create new node
             infos.ForEach(info =>
@@ -188,7 +185,15 @@ namespace NodeVideoEffects.Editor
                     System.Type? type = System.Type.GetType(info.Type);
                     if (type != null)
                     {
-                        INode? obj = Activator.CreateInstance(type) as INode;
+                        INode? obj;
+                        try
+                        {
+                            obj = Activator.CreateInstance(type, [ItemID]) as INode;
+                        }
+                        catch
+                        {
+                            obj = Activator.CreateInstance(type, []) as INode;
+                        }
                         if (obj != null)
                         {
                             obj.Id = info.ID;
@@ -214,9 +219,8 @@ namespace NodeVideoEffects.Editor
                         {
                             if (connection.id != info.Connections[i].id)
                             {
-                                if (info.Connections[i].id == "")
-                                    NodesManager.GetNode(info.ID)?.RemoveInputConnection(i);
-                                else
+                                NodesManager.GetNode(info.ID)?.RemoveInputConnection(i);
+                                if (info.Connections[i].id != "")
                                     NodesManager.GetNode(info.ID)?.SetInputConnection(i, info.Connections[i]);
                             }
                             i++;
@@ -225,7 +229,11 @@ namespace NodeVideoEffects.Editor
                 });
             }));
 
-            Nodes = infos;
+            this.infos.Clear();
+            infos.ForEach(value =>
+            {
+                this.infos.Add(value.ID, value);
+            });
 
             Dispatcher.Invoke(() =>
             {
@@ -243,7 +251,7 @@ namespace NodeVideoEffects.Editor
             return new((p.X - translateTransform.X) / scale, (p.Y - translateTransform.Y) / scale);
         }
 
-        public void AddChildren(Node node, double x, double y)
+        public void AddChildren(Node node, double x, double y, bool isFirst = true)
         {
             Canvas.SetLeft(node, x);
             Canvas.SetTop(node, y);
@@ -260,8 +268,7 @@ namespace NodeVideoEffects.Editor
                 nodes[node.ID] = node;
             node.Moved += (s, e) =>
             {
-                infos[node.ID].X = Canvas.GetLeft(node);
-                infos[node.ID].Y = Canvas.GetTop(node);
+                infos[node.ID] = infos[node.ID] with { X = Canvas.GetLeft(node), Y = Canvas.GetTop(node) };
             };
             node.ValueChanged += (s, e) =>
             {
@@ -272,8 +279,8 @@ namespace NodeVideoEffects.Editor
                     {
                         value.Add((input as InputPort)?.Value);
                     }
-                    infos[node.ID].Values = value;
-                    OnNodesUpdated();
+                    infos[node.ID] = infos[node.ID] with { Values = value };
+                    if (!isFirst) OnNodesUpdated();
                 }
                 catch { }
             };
@@ -364,7 +371,11 @@ namespace NodeVideoEffects.Editor
             });
             connector.SetValue(Panel.ZIndexProperty, -1);
             connectors.Add((inputPort.id + ";" + inputPort.index, outputPort.id + ";" + outputPort.index), connector);
-            infos[inputPort.id].Connections[inputPort.index] = outputPort;
+            infos[inputPort.id] = infos[inputPort.id] with
+            {
+                Connections = infos[inputPort.id].Connections.Select((connection, index) =>
+                    index == inputPort.index ? outputPort : connection).ToList()
+            };
         }
 
         public void RemoveInputConnector(string id, int index)

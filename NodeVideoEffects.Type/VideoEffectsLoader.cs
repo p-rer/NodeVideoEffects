@@ -8,7 +8,7 @@ namespace NodeVideoEffects.Type
     public class VideoEffectsLoader : IDisposable
     {
         IVideoEffect videoEffect;
-        IVideoEffectProcessor processor;
+        IVideoEffectProcessor? processor;
         string id;
 
         private VideoEffectsLoader(IVideoEffect? effect, string id)
@@ -16,11 +16,12 @@ namespace NodeVideoEffects.Type
             if (effect == null) throw new ArgumentNullException(nameof(effect), "Unable load effect");
             videoEffect = effect;
             this.id = id;
-            processor = videoEffect.CreateVideoEffect(NodesManager.GetContext(id));
         }
 
         public bool Update(ID2D1Image image, out ID2D1Image? output)
         {
+            if(processor == null)
+                processor = videoEffect.CreateVideoEffect(NodesManager.GetContext(id));
             lock (processor)
             {
                 try
