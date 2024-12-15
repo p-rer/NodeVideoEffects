@@ -1,10 +1,9 @@
-﻿using NodeVideoEffects.Type;
-using Vortice.Direct2D1;
+﻿using Vortice.Direct2D1;
 using YukkuriMovieMaker.Player.Video;
 using YukkuriMovieMaker.Plugin;
 using YukkuriMovieMaker.Plugin.Effects;
 
-namespace NodeVideoEffects.Utility
+namespace NodeVideoEffects.Type
 {
     public class VideoEffectsLoader : IDisposable
     {
@@ -26,9 +25,9 @@ namespace NodeVideoEffects.Utility
             {
                 try
                 {
-                    processor.ClearInput();
-                    processor.Dispose();
-                    processor = videoEffect.CreateVideoEffect(NodesManager.GetContext(id));
+                    Console.WriteLine(processor.Output.NativePointer);
+                    if(processor.Output.NativePointer == IntPtr.Zero)
+                        processor = videoEffect.CreateVideoEffect(NodesManager.GetContext(id));
                     processor.SetInput(image);
                     processor.Update(NodesManager.GetInfo(id));
                     output = processor.Output;
@@ -44,6 +43,7 @@ namespace NodeVideoEffects.Utility
 
         public void Dispose()
         {
+            Console.WriteLine("Disposing");
             processor?.Dispose();
         }
 
