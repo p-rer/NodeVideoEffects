@@ -25,7 +25,6 @@ namespace NodeVideoEffects.Type
             {
                 try
                 {
-                    Console.WriteLine(processor.Output.NativePointer);
                     if(processor.Output.NativePointer == IntPtr.Zero)
                         processor = videoEffect.CreateVideoEffect(NodesManager.GetContext(id));
                     processor.SetInput(image);
@@ -43,7 +42,6 @@ namespace NodeVideoEffects.Type
 
         public void Dispose()
         {
-            Console.WriteLine("Disposing");
             processor?.Dispose();
         }
 

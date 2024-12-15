@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\NodeVideoEffects.Control\NodeVideoEffects.Control.csproj" />
+    <ProjectReference Include="..\NodeVideoEffects.Utility\NodeVideoEffects.Utility.csproj" />
   </ItemGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

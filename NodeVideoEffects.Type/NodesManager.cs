@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using NodeVideoEffects.Utility;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows.Input;
 using Vortice.Direct2D1;
@@ -31,8 +32,9 @@ namespace NodeVideoEffects.Type
                 await node.Calculate();
                 return node.GetOutput(index);
             }
-            catch
+            catch(Exception e)
             {
+                Logger.Write(LogLevel.Error, e.Message);
                 return null;
             }
         }
