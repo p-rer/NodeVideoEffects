@@ -31,7 +31,7 @@ namespace NodeVideoEffects
             {
                 if (window != null)
                     window?.EditSpace.RebuildNodes(value);
-                Set(ref nodes, value);
+                nodes = value;
             }
         }
         private List<NodeInfo> nodes = new();

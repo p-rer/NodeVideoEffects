@@ -40,14 +40,17 @@ namespace NodeVideoEffects
                 NodesManager.AddNode(inputNode.Id, inputNode);
                 NodesManager.AddNode(outputNode.Id, outputNode);
                 outputNode.SetInputConnection(0, new(inputNode.Id, 0));
-                item.Nodes.Add(new(inputNode.Id, inputNode.GetType(), [], 100, 100, []));
-                item.Nodes.Add(new(outputNode.Id, outputNode.GetType(), [], 500, 100, [new(inputNode.Id, 0)]));
+                item.EditorNodes = [
+                        new(inputNode.Id, inputNode.GetType(), [], 100, 100, []),
+                        new(outputNode.Id, outputNode.GetType(), [], 500, 100, [new(inputNode.Id, 0)])
+                    ];
                 Logger.Write(LogLevel.Info, $"Initializing completed.");
             }
             else
             {
-                foreach (NodeInfo info in item.Nodes)
+                for (int i = 0; i < item.Nodes.Count; i++)
                 {
+                    NodeInfo info = item.Nodes[i];
                     INode? node = NodesManager.GetNode(info.ID);
                     int index = info.ID.IndexOf('-');
                     if (info.ID[0..index] != item.ID)
@@ -77,9 +80,9 @@ namespace NodeVideoEffects
                         {
                             outputNode = (OutputNode)node;
                         }
-                        for (int i = 0; i < info.Values.Count; i++)
+                        for (int j = 0; j < info.Values.Count; j++)
                         {
-                            node.SetInput(i, info.Values[i]);
+                            node.SetInput(j, info.Values[j]);
                         }
                     }
                 }

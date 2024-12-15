@@ -1,6 +1,6 @@
 ﻿namespace NodeVideoEffects.Type
 {
-    public record NodeInfo
+    public record struct NodeInfo
     {
         public string ID { get; set; }
         public string Type { get; }
@@ -19,15 +19,17 @@
             Connections = connections;
         }
 
+        public NodeInfo DeepCopy()
+        {
+            return new NodeInfo(ID,
+                                System.Type.GetType(Type)!,
+                                Values?.Select(value => value is ICloneable cloneable ? cloneable.Clone() : value).ToList() ?? [],
+                                X,
+                                Y,
+                                Connections ?? new List<Connection>());
+        }
+
         public override int GetHashCode() => base.GetHashCode();
         public override string? ToString() => base.ToString();
-        public virtual bool Equals(NodeInfo? other) =>
-            other != null &&
-            ID == other.ID &&
-            Type == other.Type &&
-            Values.SequenceEqual(other.Values) &&
-            X == other.X &&
-            Y == other.Y &&
-            Connections.SequenceEqual(other.Connections);
     }
 }
