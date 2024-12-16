@@ -27,7 +27,6 @@ namespace NodeVideoEffects.Type
         /// <summary>
         /// Get or set value to input
         /// </summary>
-        /// <exception cref="TypeMismatchException">Type of set value is wrong.</exception>
         public Object? Value
         {
             get
