@@ -251,7 +251,7 @@ namespace NodeVideoEffects.Editor
             return new((p.X - translateTransform.X) / scale, (p.Y - translateTransform.Y) / scale);
         }
 
-        public void AddChildren(Node node, double x, double y, bool isFirst = true)
+        public void AddChildren(Node node, double x, double y)
         {
             Canvas.SetLeft(node, x);
             Canvas.SetTop(node, y);
@@ -275,12 +275,15 @@ namespace NodeVideoEffects.Editor
                 try
                 {
                     List<object?> value = new();
-                    foreach (object input in node.inputsPanel.Children)
+                    Dispatcher.Invoke(() =>
                     {
-                        value.Add((input as InputPort)?.Value);
-                    }
-                    infos[node.ID] = infos[node.ID] with { Values = value };
-                    if (!isFirst) OnNodesUpdated();
+                        foreach (object input in node.inputsPanel.Children)
+                        {
+                            value.Add((input as InputPort)?.Value);
+                        }
+                        infos[node.ID] = infos[node.ID] with { Values = value };
+                        OnNodesUpdated();
+                    });
                 }
                 catch { }
             };

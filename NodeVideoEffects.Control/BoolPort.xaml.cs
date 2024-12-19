@@ -32,7 +32,7 @@ namespace NodeVideoEffects.Control
 
         private void check_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            Value = isChecked ? false : true;
+            Value = !isChecked;
             e.Handled = true;
         }
     }

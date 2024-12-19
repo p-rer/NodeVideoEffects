@@ -43,7 +43,9 @@ namespace NodeVideoEffects.Type
 
         public void Dispose()
         {
+            processor?.ClearInput();
             processor?.Dispose();
+            processor = null;
         }
 
         public static VideoEffectsLoader LoadEffect(string name, string id) =>

@@ -8,7 +8,7 @@ namespace NodeVideoEffects.Nodes.Effect
 {
     public class GaussianBlurNode : INode
     {
-        GaussianBlur blur;
+        GaussianBlur? blur;
         string id;
         public GaussianBlurNode(string id) : base(
             [
@@ -24,24 +24,19 @@ namespace NodeVideoEffects.Nodes.Effect
         {
             if (id == "") return;
             this.id = id;
-            blur = new(NodesManager.GetContext(id).DeviceContext);
         }
 
         public override async Task Calculate()
         {
+            if (blur == null || blur.NativePointer == 0)
+            {
+                blur = new(NodesManager.GetContext(id).DeviceContext);
+            }
             lock (blur)
             {
-                nint ptr = blur.NativePointer;
-                ID2D1DeviceContext6 context = NodesManager.GetContext(id).DeviceContext;
-                blur = new(context);
                 blur.SetInput(0, ((ImageAndContext)Inputs[0].Value).Image, true);
                 blur.StandardDeviation = Convert.ToSingle(Inputs[1].Value);
                 Outputs[0].Value = new ImageAndContext(blur.Output);
-                if (ptr != 0)
-                {
-                    new ID2D1Effect(ptr)?.SetInput(0, null, true);
-                    new ID2D1Effect(ptr)?.Dispose();
-                }
             }
             return;
         }
@@ -49,8 +44,13 @@ namespace NodeVideoEffects.Nodes.Effect
         public override void Dispose()
         {
             base.Dispose();
-            blur?.SetInput(0, null, true);
-            blur?.Dispose();
+
+            if (blur != null)
+            {
+                blur?.SetInput(0, null, true);
+                blur?.Dispose();
+                blur = null;
+            }
         }
     }
 }
