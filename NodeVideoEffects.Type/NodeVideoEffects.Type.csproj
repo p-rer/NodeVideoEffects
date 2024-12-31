@@ -4,6 +4,7 @@
     <TargetFramework>net9.0-windows</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,6 +25,12 @@
     </Reference>
     <Reference Include="Vortice.Direct2D1">
       <HintPath>..\..\..\ymm4\Vortice.Direct2D1.dll</HintPath>
+    </Reference>
+    <Reference Include="Vortice.DirectX">
+      <HintPath>..\..\..\ymm4\Vortice.DirectX.dll</HintPath>
+    </Reference>
+    <Reference Include="Vortice.Mathematics">
+      <HintPath>..\..\..\ymm4\Vortice.Mathematics.dll</HintPath>
     </Reference>
     <Reference Include="YukkuriMovieMaker.Plugin">
       <HintPath>..\..\..\ymm4\YukkuriMovieMaker.Plugin.dll</HintPath>

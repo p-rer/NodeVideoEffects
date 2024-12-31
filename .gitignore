@@ -365,3 +365,6 @@ FodyWeavers.xsd
 /NodeVideoEffects/git_tag.txt
 /NodeVideoEffects/git_tag.txt
 /NodeVideoEffects/git_tag.txt
+
+# Project Settings for Rider
+.idea/
