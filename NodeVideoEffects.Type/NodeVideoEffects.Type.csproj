@@ -18,22 +18,22 @@
 
   <ItemGroup>
     <Reference Include="Newtonsoft.Json">
-      <HintPath>..\..\..\ymm4\Newtonsoft.Json.dll</HintPath>
+      <HintPath>C:\Program Files\ymm4\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="SharpGen.Runtime">
-      <HintPath>..\..\..\ymm4\SharpGen.Runtime.dll</HintPath>
+      <HintPath>C:\Program Files\ymm4\SharpGen.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="Vortice.Direct2D1">
-      <HintPath>..\..\..\ymm4\Vortice.Direct2D1.dll</HintPath>
+      <HintPath>C:\Program Files\ymm4\Vortice.Direct2D1.dll</HintPath>
     </Reference>
     <Reference Include="Vortice.DirectX">
-      <HintPath>..\..\..\ymm4\Vortice.DirectX.dll</HintPath>
+      <HintPath>C:\Program Files\ymm4\Vortice.DirectX.dll</HintPath>
     </Reference>
     <Reference Include="Vortice.Mathematics">
-      <HintPath>..\..\..\ymm4\Vortice.Mathematics.dll</HintPath>
+      <HintPath>C:\Program Files\ymm4\Vortice.Mathematics.dll</HintPath>
     </Reference>
     <Reference Include="YukkuriMovieMaker.Plugin">
-      <HintPath>..\..\..\ymm4\YukkuriMovieMaker.Plugin.dll</HintPath>
+      <HintPath>C:\Program Files\ymm4\YukkuriMovieMaker.Plugin.dll</HintPath>
     </Reference>
   </ItemGroup>
 

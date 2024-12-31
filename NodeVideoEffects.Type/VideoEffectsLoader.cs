@@ -46,6 +46,31 @@ namespace NodeVideoEffects.Type
                 }
             }
         }
+        
+        public void SetValue(int index, object? value)
+        {
+            if (shaderEffect != null)
+            {
+                lock (shaderEffect)
+                {
+                    shaderEffect.SetValue(index, value);
+                }
+            }
+        }
+        
+        public void SetValue(params object[]? values)
+        {
+            if (shaderEffect != null && values != null)
+            {
+                lock (shaderEffect)
+                {
+                    for (int i = 0; i < values.Length; i++)
+                    {
+                        shaderEffect.SetValue(i, values[i]);
+                    }
+                }
+            }
+        }
 
         public bool Update(ID2D1Image? image, out ID2D1Image? output)
         {
@@ -145,6 +170,11 @@ namespace NodeVideoEffects.Type
                 {
                     throw new ArgumentException($"Property '{name}' not found or is not writable.");
                 }
+            }
+
+            public void SetValue(int index, object? value)
+            {
+                GetType().GetRuntimeProperties().ToArray()[index].SetValue(this, value);
             }
 
             public ShaderEffect(nint ptr):base(ptr)

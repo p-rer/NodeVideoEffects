@@ -26,22 +26,22 @@
 
 	<ItemGroup>
 		<Reference Include="SharpGen.Runtime">
-			<HintPath>C:\ymm4\SharpGen.Runtime.dll</HintPath>
+			<HintPath>C:\Program Files\ymm4\SharpGen.Runtime.dll</HintPath>
 		</Reference>
 		<Reference Include="Vortice.Direct2D1">
-			<HintPath>C:\ymm4\Vortice.Direct2D1.dll</HintPath>
+			<HintPath>C:\Program Files\ymm4\Vortice.Direct2D1.dll</HintPath>
 		</Reference>
 		<Reference Include="Vortice.DirectX">
-			<HintPath>C:\ymm4\Vortice.DirectX.dll</HintPath>
+			<HintPath>C:\Program Files\ymm4\Vortice.DirectX.dll</HintPath>
 		</Reference>
 		<Reference Include="Vortice.Mathematics">
-			<HintPath>C:\ymm4\Vortice.Mathematics.dll</HintPath>
+			<HintPath>C:\Program Files\ymm4\Vortice.Mathematics.dll</HintPath>
 		</Reference>
 		<Reference Include="YukkuriMovieMaker.Controls">
-			<HintPath>C:\ymm4\YukkuriMovieMaker.Controls.dll</HintPath>
+			<HintPath>C:\Program Files\ymm4\YukkuriMovieMaker.Controls.dll</HintPath>
 		</Reference>
 		<Reference Include="YukkuriMovieMaker.Plugin">
-			<HintPath>C:\ymm4\YukkuriMovieMaker.Plugin.dll</HintPath>
+			<HintPath>C:\Program Files\ymm4\YukkuriMovieMaker.Plugin.dll</HintPath>
 		</Reference>
 	</ItemGroup>
 
