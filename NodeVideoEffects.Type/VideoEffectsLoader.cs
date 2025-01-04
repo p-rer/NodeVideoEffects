@@ -1,6 +1,5 @@
 ﻿using System.Reflection;
 using System.Reflection.Emit;
-using System.Runtime.InteropServices;
 using Vortice.Direct2D1;
 using YukkuriMovieMaker.Player.Video;
 using YukkuriMovieMaker.Plugin;
@@ -8,8 +7,6 @@ using YukkuriMovieMaker.Plugin.Effects;
 using SharpGen.Runtime;
 using System.Numerics;
 using Vortice.Mathematics;
-using System;
-using System.Windows.Media.Effects;
 using NodeVideoEffects.Utility;
 using YukkuriMovieMaker.Commons;
 
@@ -17,183 +14,189 @@ namespace NodeVideoEffects.Type
 {
     public class VideoEffectsLoader : IDisposable
     {
-        IVideoEffect? videoEffect;
-        IVideoEffectProcessor? processor;
-        ShaderEffect? shaderEffect;
-        string id;
+        private readonly IVideoEffect? _videoEffect;
+        private IVideoEffectProcessor? _processor;
+        private readonly ShaderEffect? _shaderEffect;
+        private readonly string _id;
+        private readonly EffectType _type;
 
+        private enum EffectType
+        {
+            VideoEffect,
+            ShaderEffect
+        }
+        
         private VideoEffectsLoader(IVideoEffect? effect, string id)
         {
-            if (effect == null) throw new ArgumentNullException(nameof(effect), "Unable load effect");
-            videoEffect = effect;
-            this.id = id;
+            _videoEffect = effect ?? throw new ArgumentNullException(nameof(effect), "Unable load effect");
+            _type = EffectType.VideoEffect;
+            _id = id;
         }
 
         private VideoEffectsLoader(ShaderEffect? effect, string id)
         {
             if (effect == null) throw new ArgumentNullException(nameof(effect), "Unable generate effect");
-            shaderEffect = effect;
-            this.id = id;
-        }
-
-        public void SetValue(string name, object? value)
-        {
-            if (shaderEffect != null)
-            {
-                lock (shaderEffect)
-                {
-                    shaderEffect.SetValue(name, value);
-                }
-            }
+            _shaderEffect = effect;
+            _type = EffectType.ShaderEffect;
+            _id = id;
         }
         
-        public void SetValue(int index, object? value)
+        ~VideoEffectsLoader()
         {
-            if (shaderEffect != null)
-            {
-                lock (shaderEffect)
-                {
-                    shaderEffect.SetValue(index, value);
-                }
-            }
+            Dispose(false);
         }
         
         public void SetValue(params object[]? values)
         {
-            if (shaderEffect != null && values != null)
+            if (values == null) return;
+            switch (_type)
             {
-                lock (shaderEffect)
+                case EffectType.VideoEffect when _videoEffect != null:
                 {
-                    for (int i = 0; i < values.Length; i++)
-                    {
-                        shaderEffect.SetValue(i, values[i]);
-                    }
+                    return;
                 }
+                case EffectType.ShaderEffect when _shaderEffect != null:
+                {
+                    lock (_shaderEffect)
+                    {
+                        for (var i = 0; i < values.Length; i++)
+                        {
+                            _shaderEffect.SetValueByIndex(i, values[i]);
+                        }
+                    }
+                    return;
+                }
+
+                default:
+                    return;
             }
         }
 
         public bool Update(ID2D1Image? image, out ID2D1Image? output)
         {
             output = null;
-            if (videoEffect != null)
+            switch (_type)
             {
-                processor ??= videoEffect.CreateVideoEffect(NodesManager.GetContext(id));
-                if (image == null)
+                case EffectType.VideoEffect when _videoEffect != null:
                 {
+                    _processor ??= _videoEffect.CreateVideoEffect(NodesManager.GetContext(_id));
+                    if (image == null)
+                    {
+                        return false;
+                    }
+                    lock (_processor)
+                    {
+                        try
+                        {
+                            if (_processor.Output.NativePointer == IntPtr.Zero)
+                                _processor = _videoEffect.CreateVideoEffect(NodesManager.GetContext(_id));
+                            _processor.SetInput(image);
+                            _processor.Update(NodesManager.GetInfo(_id));
+                            output = _processor.Output;
+                            return true;
+                        }
+                        catch
+                        {
+                            return false;
+                        }
+                    }
+                }
+                case EffectType.ShaderEffect when _shaderEffect != null:
+                {
+                    lock (_shaderEffect)
+                    {
+                        try
+                        {
+                            _shaderEffect.SetInput(0, image, true);
+                            output = _shaderEffect.Output;
+                            return true;
+                        }
+                        catch
+                        {
+                            return false;
+                        }
+                    }
+                }
+                default:
                     return false;
-                }
-                lock (processor)
-                {
-                    try
-                    {
-                        if (processor.Output.NativePointer == IntPtr.Zero)
-                            processor = videoEffect.CreateVideoEffect(NodesManager.GetContext(id));
-                        processor.SetInput(image);
-                        processor.Update(NodesManager.GetInfo(id));
-                        output = processor.Output;
-                        return true;
-                    }
-                    catch
-                    {
-                        return false;
-                    }
-                }
             }
-            else if (shaderEffect != null)
-            {
-                if (shaderEffect == null) return false;
-                lock (shaderEffect)
-                {
-                    try
-                    {
-                        shaderEffect.SetInput(0, image, true);
-                        output = shaderEffect.Output;
-                        return true;
-                    }
-                    catch
-                    {
-                        return false;
-                    }
-                }
-            }
-            else return false;
         }
 
         public void Dispose()
         {
-            processor?.ClearInput();
-            processor?.Dispose();
-            processor = null;
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposing) return;
+            _processor?.ClearInput();
+            _processor?.Dispose();
+            _processor = null;
         }
 
         public static VideoEffectsLoader LoadEffect(string name, string id) =>
-            new(Activator.CreateInstance(PluginLoader.VideoEffects.ToList().Where(type => type.Name == name).First()) as IVideoEffect, id);
+            new(Activator.CreateInstance(PluginLoader.VideoEffects.ToList().First(type => type.Name == name)) as IVideoEffect, id);
 
         public static VideoEffectsLoader LoadEffect(List<(System.Type type, string name)> properties, string shaderResourceId, string effectId)
         {
             if (shaderResourceId == "")
                 throw new ArgumentException("Shader resource id is empty.");
-            ShaderEffect? effect = ShaderEffect.Create(effectId, properties, shaderResourceId);
-            if (!effect.IsEnabled)
-            {
-                effect.Dispose();
-                effect = null;
-            }
-            return new(effect, effectId);
+            var effect = ShaderEffect.Create(effectId, properties, shaderResourceId);
+            if (effect.IsEnabled) return new VideoEffectsLoader(effect, effectId);
+            effect.Dispose();
+            effect = null;
+            return new VideoEffectsLoader(effect, effectId);
         }
 
         public abstract class ShaderEffect : D2D1CustomShaderEffectBase
         {
+            public ShaderEffect(nint ptr) : base(ptr) { }
+
             public static ShaderEffect Create(string effectId, List<(System.Type type, string name)> properties, string shaderId)
             {
                 // Generate a unique class name based on properties
-                string className = $"ShaderEffect_{shaderId}_{string.Join("_", properties.Select(p => p.type.Name + p.name))}";
-                System.Type effectType = GenerateEffectType(className, properties, shaderId);
+                var className = $"ShaderEffect_{shaderId}_{string.Join("_", properties.Select(p => p.type.Name + p.name))}";
+                var effectType = GenerateEffectType(className, properties, shaderId);
 
-                object context = NodesManager.GetContext(effectId);
-                object effectInstance = Activator.CreateInstance(effectType, [context])
-                    ?? throw new InvalidOperationException("Cannot create effect instance");
+                var context = NodesManager.GetContext(effectId);
+                var effectInstance = Activator.CreateInstance(effectType, context)
+                                     ?? throw new InvalidOperationException("Cannot create effect instance");
 
                 return effectInstance as ShaderEffect
                        ?? throw new InvalidOperationException("Cannot cast to ShaderEffect");
             }
 
-            public void SetValue(string name, object? value)
+            public void SetValueByIndex(int index, object? value)
             {
-                PropertyInfo? property = GetType().GetProperty(name, BindingFlags.Public | BindingFlags.Instance);
+                var properties = GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
-                if (property != null && property.CanWrite)
-                {
-                    property.SetValue(this, value);
-                }
-                else
-                {
-                    throw new ArgumentException($"Property '{name}' not found or is not writable.");
-                }
+                if (index < 0 || index >= properties.Length)
+                    throw new IndexOutOfRangeException("The specified index is out of range.");
+
+                var property = properties[index];
+
+                if (!property.CanWrite)
+                    throw new InvalidOperationException($"The property '{property.Name}' is not writable.");
+
+                property.SetValue(this, value);
             }
 
-            public void SetValue(int index, object? value)
-            {
-                GetType().GetRuntimeProperties().ToArray()[index].SetValue(this, value);
-            }
-
-            public ShaderEffect(nint ptr):base(ptr)
-            {
-            }
-            private static System.Type GenerateEffectType(string className, List<(System.Type, string)> properties, string shaderID)
+            private static System.Type GenerateEffectType(string className, List<(System.Type, string)> properties, string shaderId)
             {
                 AssemblyName assemblyName = new("DynamicID2D1PropertiesAssembly");
-                AssemblyBuilder assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
+                var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
                 //PersistedAssemblyBuilder persistedAssemblyBuilder = new(assemblyName, typeof(object).Assembly);
                 //ModuleBuilder moduleBuilder = persistedAssemblyBuilder.DefineDynamicModule("MainModule");
-                ModuleBuilder moduleBuilder = assemblyBuilder.DefineDynamicModule("MainModule");
+                var moduleBuilder = assemblyBuilder.DefineDynamicModule("MainModule");
 
-                TypeBuilder typeBuilder = moduleBuilder.DefineType(className, TypeAttributes.Public, typeof(ShaderEffect));
+                var typeBuilder = moduleBuilder.DefineType(className, TypeAttributes.Public, typeof(ShaderEffect));
+                
+                var effectImplType = DynamicEffectImplGenerator.GenerateEffectImpl(properties, shaderId, moduleBuilder);
 
-                System.Type effectImplType = DynamicEffectImplGenerator.GenerateEffectImpl(properties, shaderID, moduleBuilder);
-
-                int index = 0;
-                foreach ((System.Type type, string name) in properties)
+                var index = 0;
+                foreach (var( type, name) in properties)
                 {
                     //
                     // Define getter
@@ -205,7 +208,7 @@ namespace NodeVideoEffects.Type
                     //     // * The method info is from MakeGetterMethodInfo().
                     // }
                     //
-                    MethodBuilder getterBuilder = typeBuilder.DefineMethod(
+                    var getterBuilder = typeBuilder.DefineMethod(
                         $"get_{name}",
                         MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig,
                         type,
@@ -213,14 +216,14 @@ namespace NodeVideoEffects.Type
                     );
 
                     // Get the method info for the getter
-                    MethodInfo getterInfo = MakeGetterMethodInfo(type) ?? throw new InvalidOperationException("Cannot get the method \"GetValue\"");
+                    var getterInfo = MakeGetterMethodInfo(type) ?? throw new InvalidOperationException("Cannot get the method \"GetValue\"");
 
-                    ILGenerator getterIL = getterBuilder.GetILGenerator();
+                    var getterIl = getterBuilder.GetILGenerator();
                     // return GetValue<{type}>({index});
-                    getterIL.Emit(OpCodes.Ldarg_0);
-                    getterIL.Emit(OpCodes.Ldc_I4, index);
-                    getterIL.Emit(OpCodes.Call, getterInfo);
-                    getterIL.Emit(OpCodes.Ret);
+                    getterIl.Emit(OpCodes.Ldarg_0);
+                    getterIl.Emit(OpCodes.Ldc_I4, index);
+                    getterIl.Emit(OpCodes.Call, getterInfo);
+                    getterIl.Emit(OpCodes.Ret);
 
                     //
                     // Define setter
@@ -230,26 +233,26 @@ namespace NodeVideoEffects.Type
                     //    return;
                     // }
                     //
-                    MethodBuilder setterBuilder = typeBuilder.DefineMethod(
+                    var setterBuilder = typeBuilder.DefineMethod(
                         $"set_{name}",
                         MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig,
                         null,
                         [type]
                     );
 
-                    ILGenerator setterIL = setterBuilder.GetILGenerator();
+                    var setterIl = setterBuilder.GetILGenerator();
                     // SetValue(index, value);
-                    setterIL.Emit(OpCodes.Ldarg_0);
-                    setterIL.Emit(OpCodes.Ldc_I4, index);
-                    setterIL.Emit(OpCodes.Ldarg_1);
-                    setterIL.Emit(OpCodes.Call, typeof(ID2D1Properties).GetMethod("SetValue", [typeof(int), type])
+                    setterIl.Emit(OpCodes.Ldarg_0);
+                    setterIl.Emit(OpCodes.Ldc_I4, index);
+                    setterIl.Emit(OpCodes.Ldarg_1);
+                    setterIl.Emit(OpCodes.Call, typeof(ID2D1Properties).GetMethod("SetValue", [typeof(int), type])
                                    ?? throw new InvalidOperationException("Cannot get the method \"SetValue\""));
-                    getterIL.Emit(OpCodes.Nop);
-                    setterIL.Emit(OpCodes.Ret);
+                    getterIl.Emit(OpCodes.Nop);
+                    setterIl.Emit(OpCodes.Ret);
 
                     // Define the property
                     // public {type} {name} { get => get_{name}(); set => set_{name}(value); }
-                    PropertyBuilder propertyBuilder = typeBuilder.DefineProperty(
+                    var propertyBuilder = typeBuilder.DefineProperty(
                         name,
                         PropertyAttributes.None,
                         type,
@@ -258,23 +261,25 @@ namespace NodeVideoEffects.Type
 
                     propertyBuilder.SetGetMethod(getterBuilder);
                     propertyBuilder.SetSetMethod(setterBuilder);
+
+                    index++;
                 }
 
-                ConstructorBuilder ctorBuilder = typeBuilder.DefineConstructor(
+                var ctorBuilder = typeBuilder.DefineConstructor(
                     MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName,
                     CallingConventions.Standard,
                     [typeof(IGraphicsDevicesAndContext)]);
-                ILGenerator ctorIL = ctorBuilder.GetILGenerator();
-                ctorIL.Emit(OpCodes.Ldarg_0);
-                ctorIL.Emit(OpCodes.Ldarg_1);
-                ctorIL.Emit(OpCodes.Call, typeof(D2D1CustomShaderEffectBase).GetMethods(BindingFlags.Static | BindingFlags.NonPublic)
-                    .FirstOrDefault(m => m.Name == "Create" && m.IsGenericMethod)
+                var ctorIl = ctorBuilder.GetILGenerator();
+                ctorIl.Emit(OpCodes.Ldarg_0);
+                ctorIl.Emit(OpCodes.Ldarg_1);
+                ctorIl.Emit(OpCodes.Call, typeof(D2D1CustomShaderEffectBase).GetMethods(BindingFlags.Static | BindingFlags.NonPublic)
+                    .FirstOrDefault(m => m is { Name: "Create", IsGenericMethod: true })
                     ?.MakeGenericMethod(effectImplType)
                     ?? throw new InvalidOperationException("Cannot get Create method"));
-                ctorIL.Emit(OpCodes.Call, typeof(ShaderEffect).GetConstructor([typeof(nint)])
+                ctorIl.Emit(OpCodes.Call, typeof(ShaderEffect).GetConstructor([typeof(nint)])
                                ?? throw new InvalidOperationException("Cannot get the constructor"));
-                ctorIL.Emit(OpCodes.Nop);
-                ctorIL.Emit(OpCodes.Ret);
+                ctorIl.Emit(OpCodes.Nop);
+                ctorIl.Emit(OpCodes.Ret);
 
                 var generateEffectType = typeBuilder.CreateTypeInfo().AsType();
                 //persistedAssemblyBuilder.Save("EffectModule.dll");
@@ -283,34 +288,34 @@ namespace NodeVideoEffects.Type
 
                 MethodInfo? MakeGetterMethodInfo(System.Type type) => type switch
                 {
-                    System.Type t when t == typeof(bool) => typeof(ShaderEffect).GetMethod("GetBoolValue"),
-                    System.Type t when t == typeof(Guid) => typeof(ShaderEffect).GetMethod("GetGuidValue"),
-                    System.Type t when t == typeof(float) => typeof(ShaderEffect).GetMethod("GetFloatValue"),
-                    System.Type t when t == typeof(int) => typeof(ShaderEffect).GetMethod("GetIntValue"),
-                    System.Type t when t == typeof(Matrix3x2) => typeof(ShaderEffect).GetMethod("GetMatrix3x2Value"),
-                    System.Type t when t == typeof(Matrix4x3) => typeof(ShaderEffect).GetMethod("GetMatrix4x3Value"),
-                    System.Type t when t == typeof(Matrix4x4) => typeof(ShaderEffect).GetMethod("GetMatrix4x4Value"),
-                    System.Type t when t == typeof(Matrix5x4) => typeof(ShaderEffect).GetMethod("GetMatrix5x4Value"),
-                    System.Type t when t == typeof(string) => typeof(ShaderEffect).GetMethod("GetStringValue"),
-                    System.Type t when t == typeof(uint) => typeof(ShaderEffect).GetMethod("GetUIntValue"),
-                    System.Type t when t == typeof(Vector2) => typeof(ShaderEffect).GetMethod("GetVector2Value"),
-                    System.Type t when t == typeof(Vector3) => typeof(ShaderEffect).GetMethod("GetVector3Value"),
-                    System.Type t when t == typeof(Vector4) => typeof(ShaderEffect).GetMethod("GetVector4Value"),
-                    System.Type t when t == typeof(Enum) => typeof(ShaderEffect).GetMethod("GetEnumValue")?.MakeGenericMethod(type),
-                    System.Type t when t == typeof(ComObject) => typeof(ShaderEffect).GetMethod("GetIUnknownValue")?.MakeGenericMethod(type),
-                    System.Type t when t == typeof(ID2D1ColorContext) => typeof(ShaderEffect).GetMethod("GetColorContextValue"),
+                    not null when type == typeof(bool) => typeof(ShaderEffect).GetMethod("GetBoolValue"),
+                    not null when type == typeof(Guid) => typeof(ShaderEffect).GetMethod("GetGuidValue"),
+                    not null when type == typeof(float) => typeof(ShaderEffect).GetMethod("GetFloatValue"),
+                    not null when type == typeof(int) => typeof(ShaderEffect).GetMethod("GetIntValue"),
+                    not null when type == typeof(Matrix3x2) => typeof(ShaderEffect).GetMethod("GetMatrix3x2Value"),
+                    not null when type == typeof(Matrix4x3) => typeof(ShaderEffect).GetMethod("GetMatrix4x3Value"),
+                    not null when type == typeof(Matrix4x4) => typeof(ShaderEffect).GetMethod("GetMatrix4x4Value"),
+                    not null when type == typeof(Matrix5x4) => typeof(ShaderEffect).GetMethod("GetMatrix5x4Value"),
+                    not null when type == typeof(string) => typeof(ShaderEffect).GetMethod("GetStringValue"),
+                    not null when type == typeof(uint) => typeof(ShaderEffect).GetMethod("GetUIntValue"),
+                    not null when type == typeof(Vector2) => typeof(ShaderEffect).GetMethod("GetVector2Value"),
+                    not null when type == typeof(Vector3) => typeof(ShaderEffect).GetMethod("GetVector3Value"),
+                    not null when type == typeof(Vector4) => typeof(ShaderEffect).GetMethod("GetVector4Value"),
+                    not null when type == typeof(Enum) => typeof(ShaderEffect).GetMethod("GetEnumValue")?.MakeGenericMethod(type),
+                    not null when type == typeof(ComObject) => typeof(ShaderEffect).GetMethod("GetIUnknownValue")?.MakeGenericMethod(type),
+                    not null when type == typeof(ID2D1ColorContext) => typeof(ShaderEffect).GetMethod("GetColorContextValue"),
                     _ => throw new InvalidOperationException("Unsupported type")
                 };
             }
         }
 
-        private static Dictionary<string, byte[]> shaderDictionaries = [];
+        private static readonly Dictionary<string, byte[]> ShaderDictionaries = [];
 
         public static string RegisterShader(string shaderName)
         {
             byte[] shader;
-            Assembly asm = Assembly.GetCallingAssembly();
-            string resName = asm.GetManifestResourceNames().FirstOrDefault(a => a.EndsWith(shaderName), "");
+            var asm = Assembly.GetCallingAssembly();
+            var resName = asm.GetManifestResourceNames().FirstOrDefault(a => a.EndsWith(shaderName), "");
 
             if (resName == "")
             {
@@ -318,7 +323,7 @@ namespace NodeVideoEffects.Type
                 return "";
             }
 
-            using (Stream? resourceStream = asm.GetManifestResourceStream(resName))
+            using (var resourceStream = asm.GetManifestResourceStream(resName))
             {
                 if (resourceStream == null)
                 {
@@ -326,21 +331,21 @@ namespace NodeVideoEffects.Type
                     return "";
                 }
 
-                using (MemoryStream memoryStream = new MemoryStream())
+                using (var memoryStream = new MemoryStream())
                 {
                     resourceStream.CopyTo(memoryStream);
                     shader = memoryStream.ToArray();
                 }
             }
 
-            string id = Guid.NewGuid().ToString("N");
-            shaderDictionaries.TryAdd(id, shader);
+            var id = Guid.NewGuid().ToString("N");
+            ShaderDictionaries.TryAdd(id, shader);
             return id;
         }
 
         public static byte[] GetShader(string id)
         {
-            return shaderDictionaries[id];
+            return ShaderDictionaries[id];
         }
     }
 }

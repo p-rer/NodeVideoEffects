@@ -25,6 +25,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Reference Include="Newtonsoft.Json">
+		  <HintPath>..\..\..\Program Files\ymm4\Newtonsoft.Json.dll</HintPath>
+		</Reference>
 		<Reference Include="SharpGen.Runtime">
 			<HintPath>C:\Program Files\ymm4\SharpGen.Runtime.dll</HintPath>
 		</Reference>
