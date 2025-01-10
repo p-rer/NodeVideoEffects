@@ -5,18 +5,18 @@ namespace NodeVideoEffects
     /// <summary>
     /// Interaction logic for About.xaml
     /// </summary>
-    public partial class About : Window
+    public partial class About
     {
         public About(string tag, string commit)
         {
             InitializeComponent();
-            this.ver.Content = $"{tag} (Git {commit})";
+            Ver.Content = $"{tag} (Git {commit})";
         }
 
         private void Close(object sender, RoutedEventArgs e)
         {
             DialogResult = true;
-            this.Close();
+            Close();
         }
     }
 }

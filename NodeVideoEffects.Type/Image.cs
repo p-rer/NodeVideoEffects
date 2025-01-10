@@ -5,32 +5,32 @@ namespace NodeVideoEffects.Type
 {
     public class Image : PortValue
     {
-        ImageAndContext? _value;
+        private ImageAndContext _value;
         /// <summary>
         /// Create new Image object
         /// </summary>
-        /// <param name="_value"></param>
-        public Image(ImageAndContext? _value)
+        /// <param name="value"></param>
+        public Image(ImageAndContext? value)
         {
-            this._value = _value;
+            _value = value ?? new ImageAndContext();
         }
 
-        public System.Type Type { get => typeof(ImageAndContext); }
-        public Color Color { get => Colors.Green; }
+        public System.Type Type => typeof(ImageAndContext);
+        public Color Color => Colors.Green;
 
         /// <summary>
         /// Value contains image and device context
         /// </summary>
-        public object Value { get { return _value; } }
+        public object Value => _value;
 
         public void _SetValue(object? value)
         {
-            _value = (ImageAndContext?)value;
+            _value = (ImageAndContext?)value ?? new ImageAndContext();
         }
 
         public void Dispose()
         {
-            _value?.Image?.Dispose();
+            _value.Image?.Dispose();
         }
 
         public IControl? Control => null;

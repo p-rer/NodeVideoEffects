@@ -9,9 +9,8 @@ namespace NodeVideoEffects.Type
     /// </summary>
     public class Input : INotifyPropertyChanged, IDisposable
     {
-        private PortValue _value;
+        private readonly PortValue _value;
         private Connection _connection = new();
-        private String _name;
 
         /// <summary>
         /// Create new input port object
@@ -21,62 +20,57 @@ namespace NodeVideoEffects.Type
         public Input(PortValue value, string name)
         {
             _value = value;
-            _name = name;
+            Name = name;
         }
 
         /// <summary>
         /// Get or set value to input
         /// </summary>
-        public Object? Value
+        public object? Value
         {
             get
             {
-                if (_connection.id != "")
+                if (_connection.Id == "") return _value.Value;
+                try
                 {
-                    try
-                    {
-                        Task<object> task = NodesManager.GetOutputValue(_connection.id, _connection.index);
-                        task.Wait();
-                        return task.Result;
-                    }
-                    catch
-                    {
-                        return null;
-                    }
+                    var task = NodesManager.GetOutputValue(_connection.Id, _connection.Index);
+                    task.Wait();
+                    return task.Result;
                 }
-                return _value.Value;
+                catch
+                {
+                    return null;
+                }
             }
             set
             {
-                if (_value != value)
-                {
-                    _value.SetValue(value);
-                    OnPropertyChanged(nameof(Value));
-                }
+                if (_value == value) return;
+                _value.SetValue(value);
+                OnPropertyChanged(nameof(Value));
             }
         }
 
         /// <summary>
         /// Type of input value
         /// </summary>
-        public System.Type Type { get { return _value.Type; } }
+        public System.Type Type => _value.Type;
 
-        public Color Color { get => _value.Color; }
+        public Color Color => _value.Color;
 
         /// <summary>
         /// Name of this input port
         /// </summary>
-        public String Name { get { return _name; } }
+        public string Name { get; }
 
         /// <summary>
         /// Control of this input port
         /// </summary>
-        public IControl? Control { get => _value.Control; }
+        public IControl? Control => _value.Control;
 
         /// <summary>
         /// Node id and output port connected to this port
         /// </summary>
-        public Connection? Connection { get { return _connection; } }
+        public Connection Connection => _connection;
 
         public void UpdatedConnectionValue()
         {
@@ -86,15 +80,15 @@ namespace NodeVideoEffects.Type
         /// <summary>
         /// Set node and output port connected to this port
         /// </summary>
-        /// <param name="iid">ID of node contains this port</param>
-        /// <param name="iindex">Index of this port</param>
-        /// <param name="oid">ID of node will be connected to this port</param>
-        /// <param name="oindex">Index of output port will be connected to this port</param>
-        public void SetConnection(string iid, int iindex, string oid, int oindex)
+        /// <param name="inId">ID of node contains this port</param>
+        /// <param name="inIndex">Index of this port</param>
+        /// <param name="outId">ID of node will be connected to this port</param>
+        /// <param name="outIndex">Index of output port will be connected to this port</param>
+        public void SetConnection(string inId, int inIndex, string outId, int outIndex)
         {
-            _connection = new(oid, oindex);
-            if (oid != "")
-                NodesManager.NoticeInputConnectionAdd(iid, iindex, oid, oindex);
+            _connection = new Connection(outId, outIndex);
+            if (outId != "")
+                NodesManager.NoticeInputConnectionAdd(inId, inIndex, outId, outIndex);
         }
 
         /// <summary>
@@ -104,14 +98,12 @@ namespace NodeVideoEffects.Type
         /// <param name="index">Index of this port</param>
         public void RemoveConnection(string id, int index)
         {
-            if (_connection.id != "")
-            {
-                NodesManager.NoticeInputConnectionRemove(id, index, _connection.id, _connection.index);
-                _connection.id = "";
-            }
+            if (_connection.Id == "") return;
+            NodesManager.NoticeInputConnectionRemove(id, index, _connection.Id, _connection.Index);
+            _connection.Id = "";
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         protected virtual void OnPropertyChanged(string propertyName)
         {

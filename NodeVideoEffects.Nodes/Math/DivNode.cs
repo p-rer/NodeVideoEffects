@@ -7,25 +7,25 @@ namespace NodeVideoEffects.Nodes.Math
     {
         public DivNode() : base(
             [
-                new(new Number(0, null, null, null), "Value1"),
-                new(new Number(0, null, null, null), "Value2"),
-                new(new Bool(true),"Allow div0")
+                new Input(new Number(0, null, null, null), "Value1"),
+                new Input(new Number(0, null, null, null), "Value2"),
+                new Input(new Bool(true),"Allow div0")
             ],
             [
-                new (new Number(0, null, null, null), "Result")
+                new Output(new Number(0, null, null, null), "Result")
             ],
             "Div",
             Colors.LightCoral,
             "Math/Basic")
         { }
 
-        public override async Task Calculate()
+        public override Task Calculate()
         {
-            if ((double)Inputs[1].Value == 0 && (bool)Inputs[2].Value)
-                this.Outputs[0].Value = 0.0;
+            if ((double)(Inputs[1].Value ?? 0) == 0 && (bool)(Inputs[2].Value ?? true))
+                Outputs[0].Value = 0.0;
             else
-                this.Outputs[0].Value = (double)Inputs[0].Value / (double)Inputs[1].Value;
-            return;
+                Outputs[0].Value = (double)(Inputs[0].Value ?? 0) / (double)(Inputs[1].Value ?? 0);
+            return Task.CompletedTask;
         }
     }
 }

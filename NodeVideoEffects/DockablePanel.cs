@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace NodeVideoEffects
 {
@@ -28,16 +29,14 @@ namespace NodeVideoEffects
                 new FrameworkPropertyMetadata(true));
         }
 
-        protected override void OnPreviewMouseDown(System.Windows.Input.MouseButtonEventArgs e)
+        protected override void OnMouseDown(MouseButtonEventArgs e)
         {
-            base.OnPreviewMouseDown(e);
-
             Focus();
         }
 
         public static readonly DependencyProperty TitleProperty =
             DependencyProperty.Register(
-                "Title",
+                nameof(Title),
                 typeof(string),
                 typeof(DockablePanel),
                 new PropertyMetadata(string.Empty));
@@ -50,7 +49,7 @@ namespace NodeVideoEffects
 
         public static readonly DependencyProperty DockLocationProperty =
             DependencyProperty.Register(
-                "DockLocation",
+                nameof(DockLocation),
                 typeof(DockLocation),
                 typeof(DockablePanel),
                 new PropertyMetadata(DockLocation.Center));
@@ -63,7 +62,7 @@ namespace NodeVideoEffects
 
         public static readonly DependencyProperty PriorityProperty =
             DependencyProperty.Register(
-                "Priority",
+                nameof(Priority),
                 typeof(int),
                 typeof(DockablePanel),
                 new PropertyMetadata(0));

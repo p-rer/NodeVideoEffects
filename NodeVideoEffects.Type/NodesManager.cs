@@ -1,7 +1,5 @@
 ﻿using NodeVideoEffects.Utility;
 using System.ComponentModel;
-using System.Diagnostics;
-using System.Windows.Input;
 using Vortice.Direct2D1;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
@@ -10,9 +8,9 @@ namespace NodeVideoEffects.Type
 {
     public static class NodesManager
     {
-        private static Dictionary<string, INode> _dictionary = new();
-        private static List<string> _items = new();
-        private static Dictionary<string, ID2D1Image?> _images = new();
+        private static readonly Dictionary<string, INode> Dictionary = [];
+        private static readonly List<string> Items = [];
+        private static readonly Dictionary<string, ID2D1Image?> Images = [];
 
         /// <summary>
         /// Get output port value from node id and port index
@@ -24,9 +22,9 @@ namespace NodeVideoEffects.Type
         {
             try
             {
-                INode node = _dictionary[id];
+                var node = Dictionary[id];
                 if (node.GetType().FullName == "NodeVideoEffects.Nodes.Basic.InputNode")
-                    return new ImageAndContext(_images[id[0..id.IndexOf('-')]]);
+                    return new ImageAndContext(Images[id[..id.IndexOf('-')]]);
                 if (node.Outputs[index].IsSuccess)
                     return node.GetOutput(index);
                 await node.Calculate();
@@ -39,43 +37,35 @@ namespace NodeVideoEffects.Type
             }
         }
 
-        public static INode? GetNode(string id)
-        {
-            INode? node;
-            if (_dictionary.TryGetValue(id, out node))
-                return node;
-            return null;
-        }
+        public static INode? GetNode(string id) => Dictionary.GetValueOrDefault(id);
 
         public static PropertyChangedEventHandler InputUpdated = delegate { };
 
-        public static void SetInput(string id, ID2D1Image image)
+        public static void SetInput(string id, ID2D1Image? image)
         {
-            _images[id] = image;
-            InputUpdated.Invoke(null, new(null));
+            Images[id] = image;
+            InputUpdated.Invoke(null, new PropertyChangedEventArgs(null));
         }
 
         public static bool CheckConnection(string iid, string oid)
         {
-            bool result = true;
-            if (!(_dictionary[iid].Outputs == null || _dictionary[iid].Outputs?.Length == 0))
+            var result = true;
+            if (Dictionary[iid].Outputs.Length == 0) return result;
+            foreach (var output in Dictionary[iid].Outputs)
             {
-                foreach (Output output in _dictionary[iid].Outputs)
+                if (!result)
+                    break;
+                if (output.Connection.Count == 0)
+                    break;
+                foreach (var connection in output.Connection)
                 {
-                    if (!result)
-                        break;
-                    if (output.Connection.Count == 0)
-                        break;
-                    foreach (Connection connection in output.Connection)
+                    if (connection.Id == oid)
                     {
-                        if (connection.id == oid)
-                        {
-                            result = false;
-                            break;
-                        }
-                        if (result)
-                            result = CheckConnection(connection.id, oid);
+                        result = false;
+                        break;
                     }
+                    if (result)
+                        result = CheckConnection(connection.Id, oid);
                 }
             }
             return result;
@@ -83,104 +73,108 @@ namespace NodeVideoEffects.Type
 
         public static void NoticeOutputChanged(string id, int index)
         {
-            _dictionary[id].Inputs[index].UpdatedConnectionValue();
+            Dictionary[id].Inputs[index].UpdatedConnectionValue();
         }
         public static void NoticeInputConnectionAdd(string iid, int iindex, string oid, int oindex)
         {
             try
             {
-                _dictionary[oid].Outputs[oindex].AddConnection(iid, iindex);
+                Dictionary[oid].Outputs[oindex].AddConnection(iid, iindex);
             }
-            catch { }
+            catch (Exception e)
+            {
+                Logger.Write(LogLevel.Error, e.Message);
+            }
         }
-        public static void NoticeInputConnectionRemove(string iid, int iindex, string oid, int oindex)
+        public static void NoticeInputConnectionRemove(string inId, int inIndex, string outId, int outIndex)
         {
             try
             {
-                _dictionary[oid].Outputs[oindex].RemoveConnection(iid, iindex);
+                Dictionary[outId].Outputs[outIndex].RemoveConnection(inId, inIndex);
             }
-            catch { }
+            catch (Exception e)
+            {
+                Logger.Write(LogLevel.Error, e.Message);
+            }
         }
-        public static void AddNode(string id, INode node) => _dictionary.Add(id, node);
-        public static void RemoveNode(string id) => _dictionary.Remove(id);
+        public static void AddNode(string id, INode node) => Dictionary.Add(id, node);
+        public static void RemoveNode(string id) => Dictionary.Remove(id);
         public static bool AddItem(string id)
         {
-            if (_items.Contains(id)) return false;
-            _items.Add(id);
-            _images.Add(id, null);
+            if (Items.Contains(id)) return false;
+            Items.Add(id);
+            Images.Add(id, null);
             return true;
         }
         public static void RemoveItem(string id)
         {
-            if (_images.TryGetValue(id, out ID2D1Image? image))
+            if (Images.TryGetValue(id, out ID2D1Image? image))
             {
                 image?.Dispose();
             }
-            _images.Remove(id);
-            _items.Remove(id);
-            _dictionary.Where(kvp => kvp.Key.StartsWith(id))
-                       .Select(kvp => _dictionary.Remove(kvp.Key));
+            Images.Remove(id);
+            Items.Remove(id);
+            _ = Dictionary.Where(kvp => kvp.Key.StartsWith(id))
+                .Select(kvp => Dictionary.Remove(kvp.Key));
         }
 
-        private static Dictionary<string, IGraphicsDevicesAndContext> contexts = [];
+        private static readonly Dictionary<string, IGraphicsDevicesAndContext> Contexts = [];
         public static void SetContext(string id, IGraphicsDevicesAndContext context)
         {
-            if (contexts.ContainsKey(id))
-                contexts[id] = context;
-            else
-                contexts.Add(id, context);
+            if (!Contexts.TryAdd(id, context))
+                Contexts[id] = context;
         }
         public static IGraphicsDevicesAndContext GetContext(string id)
         {
-            return contexts[id];
+            return Contexts[id];
         }
 
         /// <summary>
         /// Now frame
         /// </summary>
-        public static Dictionary<string, int> _FRAME { get; private set; } = [];
+        public static Dictionary<string, int> Frame { get; private set; } = [];
         /// <summary>
         /// Length of the item
         /// </summary>
-        public static Dictionary<string, int> _LENGTH { get; private set; } = [];
+        public static Dictionary<string, int> Length { get; private set; } = [];
         /// <summary>
         /// FPS of the YMM4 project
         /// </summary>
-        public static Dictionary<string, int> _FPS { get; private set; } = [];
+        public static Dictionary<string, int> Fps { get; private set; } = [];
 
-        private static Dictionary<string, EffectDescription> _EffectDescription = [];
+        private static readonly Dictionary<string, EffectDescription> EffectDescription = [];
 
         internal static void SetInfo(string id, EffectDescription info)
         {
-            if (!_FRAME.ContainsKey(id))
+            if (!Frame.ContainsKey(id))
             {
-                _FRAME.Add(id, info.ItemPosition.Frame);
-                _LENGTH.Add(id, info.ItemDuration.Frame);
-                _FPS.Add(id, info.FPS);
-                _EffectDescription.Add(id, info);
+                Frame.Add(id, info.ItemPosition.Frame);
+                Length.Add(id, info.ItemDuration.Frame);
+                Fps.Add(id, info.FPS);
+                EffectDescription.Add(id, info);
             }
             else
             {
-                if (info.ItemPosition.Frame != _FRAME[id])
+                if (info.ItemPosition.Frame != Frame[id])
                 {
-                    _FRAME[id] = info.ItemPosition.Frame;
-                    OnFrameChanged(nameof(_FRAME));
+                    Frame[id] = info.ItemPosition.Frame;
+                    OnFrameChanged(nameof(Frame));
                 }
-                if (_LENGTH[id] != info.ItemDuration.Frame)
+                if (Length[id] != info.ItemDuration.Frame)
                 {
-                    _LENGTH[id] = info.ItemDuration.Frame;
-                    OnLengthChanged(nameof(_LENGTH));
+                    Length[id] = info.ItemDuration.Frame;
+                    OnLengthChanged(nameof(Length));
                 }
-                if (_FPS[id] != info.FPS)
+                if (Fps[id] != info.FPS)
                 {
-                    _FPS[id] = info.FPS;
-                    OnFPSChanged(nameof(_FPS));
+                    Fps[id] = info.FPS;
+                    OnFPSChanged(nameof(Fps));
                 }
-                _EffectDescription[id] = info;
+                EffectDescription[id] = info;
             }
         }
 
-        public static EffectDescription GetInfo(string id) => _EffectDescription[id];
+        public static EffectDescription GetInfo(string id) => EffectDescription[id];
 
         /// <summary>
         /// Now frame has changed
@@ -193,21 +187,21 @@ namespace NodeVideoEffects.Type
         /// <summary>
         /// FPS of the YMM4 project has changed
         /// </summary>
-        public static event PropertyChangedEventHandler FPSChanged = delegate { };
+        public static event PropertyChangedEventHandler FpsChanged = delegate { };
 
         private static void OnFrameChanged(string propertyName)
         {
-            FrameChanged?.Invoke(null, new PropertyChangedEventArgs(propertyName));
+            FrameChanged(null, new PropertyChangedEventArgs(propertyName));
         }
 
         private static void OnLengthChanged(string propertyName)
         {
-            LengthChanged?.Invoke(null, new PropertyChangedEventArgs(propertyName));
+            LengthChanged(null, new PropertyChangedEventArgs(propertyName));
         }
 
         private static void OnFPSChanged(string propertyName)
         {
-            FPSChanged?.Invoke(null, new PropertyChangedEventArgs(propertyName));
+            FpsChanged(null, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

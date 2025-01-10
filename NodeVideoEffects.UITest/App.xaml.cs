@@ -1,12 +1,6 @@
-﻿using System.Windows;
+﻿namespace NodeVideoEffects.UITest;
 
-namespace NodeVideoEffects.UITest
-{
-    /// <summary>
-    /// Interaction logic for App.xaml
-    /// </summary>
-    public partial class App : Application
-    {
-    }
-
-}
+/// <summary>
+/// Interaction logic for App.xaml
+/// </summary>
+public partial class App;

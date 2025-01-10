@@ -1,17 +1,11 @@
-﻿using Newtonsoft.Json.Linq;
-using NodeVideoEffects.Control;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using NodeVideoEffects.Control;
 using System.Windows.Media;
 
 namespace NodeVideoEffects.Type
 {
     public class Enum : PortValue
     {
-        int _value;
+        private int _value;
         public Enum(List<string> items)
         {
             Control = new EnumPort(items);
@@ -23,7 +17,7 @@ namespace NodeVideoEffects.Type
 
         public Color Color => Colors.CornflowerBlue;
 
-        public IControl? Control { get; init; }
+        public IControl? Control { get; }
 
         public void Dispose() { }
 

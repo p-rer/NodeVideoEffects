@@ -3,138 +3,130 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using NodeVideoEffects.Utility;
 
 namespace NodeVideoEffects.Editor
 {
     /// <summary>
     /// Interaction logic for OutputPort.xaml
     /// </summary>
-    public partial class OutputPort : UserControl
+    public partial class OutputPort
     {
-        Output _output;
-        string _id;
-        int _index;
-        Editor editor;
-        Point startPos;
+        private readonly Output _output;
+        private Editor? _editor;
+        private Point _startPos;
 
-        private bool isMouseDown = false;
+        private bool _isMouseDown;
         public OutputPort(Output output, string id, int index)
         {
             InitializeComponent();
             _output = output;
-            _id = id;
-            _index = index;
-            portName.Content = output.Name;
-            port.Fill = new SolidColorBrush(output.Color);
+            Id = id;
+            Index = index;
+            PortName.Content = output.Name;
+            Port.Fill = new SolidColorBrush(output.Color);
             ToolTip = new();
             ToolTipOpening += OutputPort_ToolTipOpening;
 
-            Loaded += (s, e) =>
+            Loaded += (_, _) =>
             {
-                editor = FindParent<Editor>(this);
+                _editor = FindParent<Editor>(this);
             };
         }
 
         public System.Type Type => _output.Type;
-        public string ID => _id;
-        public int Index => _index;
+        public string Id { get; }
 
-        private void OutputPort_ToolTipOpening(object sender, ToolTipEventArgs e)
+        public int Index { get; }
+
+        private async void OutputPort_ToolTipOpening(object sender, ToolTipEventArgs args)
         {
-            Task<object> @object = NodesManager.GetOutputValue(_id, _index);
-            @object.Wait();
-            ToolTip = @object.Result?.ToString() ?? "(Null)";
+            try
+            {
+                var @object = await NodesManager.GetOutputValue(Id, Index);
+                ToolTip = @object?.ToString() ?? "(Null)";
+            }
+            catch (Exception e)
+            {
+                Logger.Write(LogLevel.Error, e.Message);
+            }
         }
 
-        public static T FindParent<T>(DependencyObject child) where T : DependencyObject
+        private static T? FindParent<T>(DependencyObject child) where T : DependencyObject
         {
-            DependencyObject parentObject = VisualTreeHelper.GetParent(child);
+            var parentObject = VisualTreeHelper.GetParent(child);
 
-            if (parentObject == null) return null;
-
-            T parent = parentObject as T;
-            if (parent != null)
-                return parent;
-            else
-                return FindParent<T>(parentObject);
+            return parentObject switch
+            {
+                null => null,
+                T parent => parent,
+                _ => FindParent<T>(parentObject)
+            };
         }
 
         private void port_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            isMouseDown = true;
-            port.CaptureMouse();
-            startPos = e.GetPosition(editor);
-            editor.PreviewConnection(startPos, startPos);
+            _isMouseDown = true;
+            Port.CaptureMouse();
+            _startPos = e.GetPosition(_editor);
+            _editor!.PreviewConnection(_startPos, _startPos);
             e.Handled = true;
         }
 
         private void port_MouseMove(object sender, MouseEventArgs e)
         {
-            if (isMouseDown)
-                editor.PreviewConnection(startPos, e.GetPosition(editor));
+            if (_isMouseDown)
+                _editor!.PreviewConnection(_startPos, e.GetPosition(_editor));
             e.Handled = true;
         }
 
         private void port_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            isMouseDown = false;
+            _isMouseDown = false;
 
-            editor.RemovePreviewConnection();
+            _editor!.RemovePreviewConnection();
 
             // Get the control under the mouse pointer
-            Point position = e.GetPosition(editor);
-            HitTestResult result = VisualTreeHelper.HitTest(editor, position);
+            var result = VisualTreeHelper.HitTest(_editor!, e.GetPosition(_editor));
 
-            if (result != null)
+            if (result?.VisualHit is FrameworkElement element)
             {
-                var element = result.VisualHit as FrameworkElement;
-
-                if (element != null)
-                {
-                    if (SetConnectionToInputPort(element, port.PointToScreen(new(5, 5)), position))
-                        editor.OnNodesUpdated();
-                }
+                if (SetConnectionToInputPort(element, Port.PointToScreen(new Point(5, 5))))
+                    _editor!.OnNodesUpdated();
             }
-            port.ReleaseMouseCapture();
+            Port.ReleaseMouseCapture();
             e.Handled = true;
         }
 
-        private bool SetConnectionToInputPort(DependencyObject element, Point pos1, Point pos2)
+        private bool SetConnectionToInputPort(DependencyObject element, Point pos1)
         {
-            InputPort? inputPort = FindParent<InputPort>(element);
-            if (inputPort != null)
-            {
-                if (inputPort.Type.IsAssignableFrom(Type))
-                {
-                    if (NodesManager.CheckConnection(inputPort.ID, _id))
-                    {
-                        inputPort.SetConnection(_id, _index);
-                        _output.AddConnection(inputPort.ID, inputPort.Index);
-                        editor.AddConnector(pos1, inputPort.port.PointToScreen(new(5, 5)),
-                        ((SolidColorBrush)port.Fill).Color,
-                        ((SolidColorBrush)inputPort.port.Fill).Color,
-                        new(inputPort.ID, inputPort.Index), new(_id, _index));
-                        return true;
-                    }
-                }
-            }
-            return false;
+            var inputPort = FindParent<InputPort>(element);
+            if (inputPort == null) return false;
+            if (!inputPort.Type.IsAssignableFrom(Type)) return false;
+            if (!NodesManager.CheckConnection(inputPort.Id, Id)) return false;
+            inputPort.SetConnection(Id, Index);
+            _output.AddConnection(inputPort.Id, inputPort.Index);
+            _editor!.AddConnector(pos1, inputPort.Port.PointToScreen(new Point(5, 5)),
+                ((SolidColorBrush)Port.Fill).Color,
+                ((SolidColorBrush)inputPort.Port.Fill).Color,
+                new Connection(inputPort.Id, inputPort.Index), new Connection(Id, Index));
+            return true;
         }
 
         public void AddConnection(string id, int index) => _output.AddConnection(id, index);
 
         public void RemoveAllConnection()
         {
-            List<Connection> connections = new List<Connection>(_output.Connection);
-            connections.ForEach(connection => NodesManager.GetNode(connection.id)?.RemoveInputConnection(connection.index));
+            var connections = new List<Connection>(_output.Connection);
+            connections.ForEach(connection => NodesManager.GetNode(connection.Id)?.RemoveInputConnection(connection.Index));
             _output.Connection.Clear();
-            editor.RemoveOutputConnector(_id, _index);
+            _editor!.RemoveOutputConnector(Id, Index);
         }
 
         private void port_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             RemoveAllConnection();
-            editor.OnNodesUpdated();
+            _editor!.OnNodesUpdated();
         }
     }
 }

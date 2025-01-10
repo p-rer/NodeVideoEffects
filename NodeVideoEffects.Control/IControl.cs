@@ -2,10 +2,8 @@
 
 namespace NodeVideoEffects.Control
 {
-    public interface IControl
+    public interface IControl : INotifyPropertyChanged
     {
         public object? Value { get; set; }
-
-        public event PropertyChangedEventHandler PropertyChanged;
     }
 }

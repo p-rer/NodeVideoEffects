@@ -2,7 +2,6 @@
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace NodeVideoEffects.Control
@@ -10,23 +9,23 @@ namespace NodeVideoEffects.Control
     /// <summary>
     /// Interaction logic for NumberPort.xaml
     /// </summary>
-    public partial class NumberPort : UserControl, IControl
+    public partial class NumberPort : IControl
     {
-        double _def;
-        double _value;
-        double _min;
-        double _max;
-        int _dig;
+        private readonly double _def;
+        private double _value;
+        private readonly double _min;
+        private readonly double _max;
+        private readonly int _dig;
 
-        private bool isClicking = false;
-        private bool isDragging = false;
-        private bool isEditing = false;
-        private Point startPoint;
+        private bool _isClicking;
+        private bool _isDragging;
+        private bool _isEditing;
+        private Point _startPoint;
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         [DllImport("User32.dll")]
-        private static extern bool SetCursorPos(int X, int Y);
+        private static extern bool SetCursorPos(int x, int y);
 
         public object? Value { get => _value; set => Update((double?)value ?? _def); }
 
@@ -39,7 +38,7 @@ namespace NodeVideoEffects.Control
             _min = min;
             _max = max;
             _dig = dig;
-            box.Text = Math.Round(_value, _dig).ToString("F" + _dig);
+            Box.Text = Math.Round(_value, _dig).ToString("F" + _dig);
         }
 
         protected virtual void OnPropertyChanged(string propertyName)
@@ -50,7 +49,7 @@ namespace NodeVideoEffects.Control
         private void Update()
         {
             double v;
-            if (box.Text == "")
+            if (Box.Text == "")
             {
                 v = _def;
             }
@@ -58,7 +57,7 @@ namespace NodeVideoEffects.Control
             {
                 try
                 {
-                    v = double.Parse(box.Text);
+                    v = double.Parse(Box.Text);
                 }
                 catch (Exception)
                 {
@@ -70,87 +69,85 @@ namespace NodeVideoEffects.Control
 
         private void Update(double value)
         {
-            double v;
-            v = value;
-            if (_min != double.NaN && value < _min) v = _min;
-            if (_max != double.NaN && value > _max) v = _max;
+            var v = value;
+            if (!double.IsNaN(_min) && value < _min) v = _min;
+            if (!double.IsNaN(_max) && value > _max) v = _max;
             _value = Math.Round(v, _dig);
-            box.Text = _value.ToString("F" + _dig);
+            Box.Text = _value.ToString("F" + _dig);
             OnPropertyChanged(nameof(Value));
             Keyboard.ClearFocus();
-            box.Focusable = false;
+            Box.Focusable = false;
+            if(!_isDragging)
+                Mouse.OverrideCursor = null;
         }
 
-        private void box_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void Box_PreviewMouseDown(object _, MouseButtonEventArgs e) => e.Handled = true;
+
+        private void Box_PreviewMouseLeftButtonDown(object _, MouseButtonEventArgs e)
         {
-            startPoint = box.PointToScreen(e.GetPosition(box));
-            if (!isEditing)
+            _isClicking = true;
+            if (_isEditing) return;
+            _startPoint = Box.PointToScreen(e.GetPosition(Box));
+            e.Handled = true;
+            Box.Focusable = false;
+            Mouse.OverrideCursor = Cursors.None;
+            Box.CaptureMouse();
+        }
+
+        private void Box_PreviewMouseMove(object _, MouseEventArgs e)
+        {
+            if (!_isClicking || _isEditing) return;
+            var currentPoint = Box.PointToScreen(e.GetPosition(Box));
+            var delta = currentPoint.X - _startPoint.X;
+
+            if (Math.Abs(delta) > SystemParameters.MinimumHorizontalDragDistance || _isDragging)
             {
-                isClicking = true;
-                box.Focusable = false;
-                Mouse.OverrideCursor = Cursors.None;
-                e.Handled = true;
-                box.CaptureMouse();
+                _isDragging = true;
+
+                const double sensitivity = 0.01;
+                Update(_value + delta * sensitivity);
+                SetCursorPos((int)_startPoint.X, (int)_startPoint.Y);
             }
+            e.Handled = true;
         }
 
-        private void box_PreviewMouseMove(object sender, MouseEventArgs e)
+        private void Box_PreviewMouseLeftButtonUp(object _, MouseButtonEventArgs e)
         {
-            if (isClicking && !isEditing)
+            _isClicking = false;
+
+            if (_isDragging)
             {
-                Point currentPoint = box.PointToScreen(e.GetPosition(box));
-                double delta = currentPoint.X - startPoint.X;
-
-                if (Math.Abs(delta) > SystemParameters.MinimumHorizontalDragDistance || isDragging)
-                {
-                    isDragging = true;
-
-                    double sensitivity = 0.01;
-                    Update(_value + delta * sensitivity);
-                    SetCursorPos((int)startPoint.X, (int)startPoint.Y);
-                }
-                e.Handled = true;
-            }
-        }
-
-        private void box_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            isClicking = false;
-
-            if (isDragging)
-            {
-                isDragging = false;
+                _isDragging = false;
+                SetCursorPos((int)_startPoint.X, (int)_startPoint.Y);
                 e.Handled = true;
             }
             else
             {
-                isEditing = true;
-                box.Focusable = true;
-                box.Focus();
+                _isEditing = true;
+                Box.Focusable = true;
+                Keyboard.Focus(Box);
             }
-            SetCursorPos((int)startPoint.X, (int)startPoint.Y);
             Mouse.OverrideCursor = null;
-            box.ReleaseMouseCapture();
+            Box.ReleaseMouseCapture();
         }
 
-        private void box_LostFocus(object sender, RoutedEventArgs e)
+        private void Box_LostFocus(object sender, RoutedEventArgs e)
         {
-            isEditing = false;
+            _isEditing = false;
             Update();
         }
 
         private new void PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            Regex regex = new("[^0-9.-]+");
-            e.Handled = regex.IsMatch(e.Text);
+            e.Handled = NumberRegex().IsMatch(e.Text);
         }
 
         private void TextBoxPasting(object sender, DataObjectPastingEventArgs e)
         {
-            if (e.DataObject.GetDataPresent(typeof(String)))
+            if (e.DataObject.GetDataPresent(typeof(string)))
             {
-                String text = (String)e.DataObject.GetData(typeof(String));
-                if (new Regex("[^0-9.-]+").IsMatch(text))
+                var text = (string?)e.DataObject.GetData(typeof(string)) ?? string.Empty;
+                if (NumberRegex().IsMatch(text))
                 {
                     e.CancelCommand();
                 }
@@ -163,11 +160,12 @@ namespace NodeVideoEffects.Control
 
         private void ValueSubmit(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Return || e.Key == Key.Enter)
-            {
-                Update();
-                isEditing = false;
-            }
+            if (e.Key is not Key.Return) return;
+            Update();
+            _isEditing = false;
         }
+
+        [GeneratedRegex("[^0-9.-]+")]
+        private static partial Regex NumberRegex();
     }
 }

@@ -2,7 +2,6 @@
 using NodeVideoEffects.Type;
 using System.ComponentModel;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 
@@ -11,156 +10,143 @@ namespace NodeVideoEffects.Editor
     /// <summary>
     /// Interaction logic for OutputPort.xaml
     /// </summary>
-    public partial class InputPort : UserControl
+    public partial class InputPort
     {
-        private IControl? control;
-        private Input _input;
-        private string _id;
-        private int _index;
+        private readonly IControl? _control;
+        private readonly Input _input;
 
-        Editor editor;
-        Point startPos;
+        private Editor? _editor;
+        private Point _startPos;
 
-        private bool isMouseDown = false;
+        private bool _isMouseDown;
 
         public InputPort(Input input, string id, int index)
         {
             InitializeComponent();
             _input = input;
-            _id = id;
-            _index = index;
-            portName.Content = input.Name;
-            control = input.Control;
-            port.Fill = new SolidColorBrush(input.Color);
-            if (control is System.Windows.Controls.Control)
-                ((System.Windows.Controls.Control)control).Loaded += (s, e) => { control.PropertyChanged += OnControlPropertyChanged; };
-            portControl.Content = control;
-            Loaded += (s, e) =>
+            Id = id;
+            Index = index;
+            PortName.Content = input.Name;
+            _control = input.Control;
+            Port.Fill = new SolidColorBrush(input.Color);
+            if (_control is not null)
             {
-                editor = FindParent<Editor>(this);
+                (_control as System.Windows.Controls.Control)!.Loaded += (_, _) =>
+                    _control.PropertyChanged += OnControlPropertyChanged;
+                PortControl.Content = _control;
+            }
+
+            Loaded += (_, _) =>
+            {
+                _editor = FindParent<Editor>(this);
             };
         }
 
-        public static T FindParent<T>(DependencyObject child) where T : DependencyObject
+        private static T? FindParent<T>(DependencyObject child) where T : DependencyObject
         {
             //get parent item
-            DependencyObject parentObject = VisualTreeHelper.GetParent(child);
+            var parentObject = VisualTreeHelper.GetParent(child);
 
-            //we've reached the end of the tree
-            if (parentObject == null) return null;
-
-            //check if the parent matches the type we're looking for
-            T parent = parentObject as T;
-            if (parent != null)
-                return parent;
-            else
-                return FindParent<T>(parentObject);
-        }
-
-        public object? Value
-        {
-            get => control?.Value;
-            set
+            return parentObject switch
             {
-                if (control != null)
-                    control.Value = value;
-            }
+                //we've reached the end of the tree
+                null => null,
+                //check if the parent matches the type we're looking for
+                T parent => parent,
+                _ => FindParent<T>(parentObject)
+            };
         }
 
-        public string ID => _id;
-        public int Index => _index;
+        public object? Value => _control?.Value;
+
+        public string Id { get; }
+
+        public int Index { get; }
+
         public System.Type Type => _input.Type;
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler PropertyChanged = delegate { };
 
         private void OnControlPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            _input.Value = control.Value;
-            PropertyChanged?.Invoke(this, new(Name));
+            _input.Value = _control?.Value;
+            PropertyChanged(this, new PropertyChangedEventArgs(Name));
         }
 
         public void SetConnection(string id, int index)
         {
-            _input.SetConnection(_id, _index, id, index);
-            portControl.Visibility = Visibility.Hidden;
+            _input.SetConnection(Id, Index, id, index);
+            PortControl.Visibility = Visibility.Hidden;
         }
 
         public void RemoveConnection()
         {
-            _input.RemoveConnection(_id, _index);
-            editor.RemoveInputConnector(_id, _index);
-            portControl.Visibility = Visibility.Visible;
+            _input.RemoveConnection(Id, Index);
+            _editor?.RemoveInputConnector(Id, Index);
+            PortControl.Visibility = Visibility.Visible;
         }
 
         private void Port_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             RemoveConnection();
-            editor.OnNodesUpdated();
+            _editor?.OnNodesUpdated();
         }
 
         private void port_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            isMouseDown = true;
-            port.CaptureMouse();
-            startPos = e.GetPosition(editor);
-            editor.PreviewConnection(startPos, startPos);
+            _isMouseDown = true;
+            Port.CaptureMouse();
+            _startPos = e.GetPosition(_editor);
+            _editor?.PreviewConnection(_startPos, _startPos);
             e.Handled = true;
         }
 
         private void port_MouseMove(object sender, MouseEventArgs e)
         {
-            if (isMouseDown)
-                editor.PreviewConnection(startPos, e.GetPosition(editor));
+            if (_isMouseDown)
+                _editor?.PreviewConnection(_startPos, e.GetPosition(_editor));
             e.Handled = true;
         }
 
         private void port_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            isMouseDown = false;
+            _isMouseDown = false;
 
-            editor.RemovePreviewConnection();
+            _editor?.RemovePreviewConnection();
 
             // Get the control under the mouse pointer
-            Point position = e.GetPosition(editor);
-            HitTestResult result = VisualTreeHelper.HitTest(editor, position);
-
-            if (result != null)
+            Point position = e.GetPosition(_editor);
+            if (_editor != null)
             {
-                var element = result.VisualHit as FrameworkElement;
+                var result = VisualTreeHelper.HitTest(_editor, position);
 
-                if (element != null)
+                if (result?.VisualHit is FrameworkElement element)
                 {
-                    if (AddConnectionToOutputPort(element, port.PointToScreen(new(5, 5)), position))
-                        editor.OnNodesUpdated();
+                    if (AddConnectionToOutputPort(element, Port.PointToScreen(new Point(5, 5))))
+                        _editor.OnNodesUpdated();
                 }
             }
-            port.ReleaseMouseCapture();
+
+            Port.ReleaseMouseCapture();
             e.Handled = true;
         }
 
-        private bool AddConnectionToOutputPort(DependencyObject element, Point pos1, Point pos2)
+        private bool AddConnectionToOutputPort(DependencyObject element, Point pos1)
         {
-            OutputPort? outputPort = FindParent<OutputPort>(element);
-            if (outputPort != null)
-            {
-                if (outputPort.Type.IsAssignableFrom(Type))
-                {
-                    if (NodesManager.CheckConnection(_id, outputPort.ID))
-                    {
-                        SetConnection(outputPort.ID, outputPort.Index);
-                        outputPort.AddConnection(ID, Index);
-                        editor.AddConnector(outputPort.port.PointToScreen(new(5, 5)),
-                        pos1,
-                        ((SolidColorBrush)outputPort.port.Fill).Color,
-                        ((SolidColorBrush)port.Fill).Color,
-                        new(_id, _index),
-                        new(outputPort.ID, outputPort.Index));
+            var outputPort = FindParent<OutputPort>(element);
+            if (outputPort == null) return false;
+            if (!outputPort.Type.IsAssignableFrom(Type)) return false;
+            if (!NodesManager.CheckConnection(Id, outputPort.Id)) return false;
+            SetConnection(outputPort.Id, outputPort.Index);
+            outputPort.AddConnection(Id, Index);
+            _editor?.AddConnector(outputPort.Port.PointToScreen(new Point(5, 5)),
+                pos1,
+                ((SolidColorBrush)outputPort.Port.Fill).Color,
+                ((SolidColorBrush)Port.Fill).Color,
+                new Connection(Id, Index),
+                new Connection(outputPort.Id, outputPort.Index));
 
-                        return true;
-                    }
-                }
-            }
-            return false;
+            return true;
         }
     }
 }

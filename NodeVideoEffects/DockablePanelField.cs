@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 
 namespace NodeVideoEffects
@@ -8,8 +6,8 @@ namespace NodeVideoEffects
     public class DockablePanelField : Panel
     {
         // Define the row and column ratios
-        public List<double> RowRatios { get; set; } = new() { 1, 1, 1 };
-        public List<double> ColumnRatios { get; set; } = new() { 1, 1, 1 };
+        private List<double> RowRatios { get; } = [1, 1, 1];
+        private List<double> ColumnRatios { get; } = [1, 1, 1];
 
         protected override Size MeasureOverride(Size availableSize)
         {
@@ -23,16 +21,16 @@ namespace NodeVideoEffects
         protected override Size ArrangeOverride(Size finalSize)
         {
             // Normalize ratios to ensure they sum to 1
-            double totalRowRatio = NormalizeRatios(RowRatios);
-            double totalColumnRatio = NormalizeRatios(ColumnRatios);
+            var totalRowRatio = NormalizeRatios(RowRatios);
+            var totalColumnRatio = NormalizeRatios(ColumnRatios);
 
             // Calculate the actual cell widths and heights
             var cellWidths = CalculateCellSizes(finalSize.Width, ColumnRatios, totalColumnRatio);
             var cellHeights = CalculateCellSizes(finalSize.Height, RowRatios, totalRowRatio);
 
             Dictionary<string, DockablePanel> panels = new();
-            List<List<Cell>> cells = InitializeCells(RowRatios.Count, ColumnRatios.Count);
-            List<(int, int)> reservedPanels = new();
+            var cells = InitializeCells(RowRatios.Count, ColumnRatios.Count);
+            List<(int, int)> reservedPanels = [];
 
             // Reserve panels
             foreach (UIElement child in InternalChildren)
@@ -43,19 +41,19 @@ namespace NodeVideoEffects
             }
 
             // Fill unoccupied spaces
-            foreach ((int, int) pos in reservedPanels)
+            foreach (var pos in reservedPanels)
             {
-                Fill(new List<(int, int)> { pos }, cells[pos.Item1][pos.Item2].priority);
+                Fill([pos], cells[pos.Item1][pos.Item2]!.Priority);
             }
 
             // Arrange panels in their calculated positions
             foreach (var panel in panels)
             {
-                (int _x, int _y, int _width, int _height) = GetPanelRect(panel.Key);
-                double left = SumSizes(cellWidths, 0, _x);
-                double top = SumSizes(cellHeights, 0, _y);
-                double width = SumSizes(cellWidths, _x, _width);
-                double height = SumSizes(cellHeights, _y, _height);
+                var (x, y, columnSpan, rowSpan) = GetPanelRect(panel.Key);
+                var left = SumSizes(cellWidths, 0, x);
+                var top = SumSizes(cellHeights, 0, y);
+                var width = SumSizes(cellWidths, x, columnSpan);
+                var height = SumSizes(cellHeights, y, rowSpan);
 
                 panel.Value.Arrange(new Rect(left, top, width, height));
             }
@@ -65,9 +63,9 @@ namespace NodeVideoEffects
             // Reserve a panel at its docked position
             void ReservePanel(DockablePanel panel)
             {
-                (int x, int y) = (((int)panel.DockLocation) % ColumnRatios.Count, ((int)panel.DockLocation) / ColumnRatios.Count);
-                string id = Guid.NewGuid().ToString("N");
-                cells[x][y] = new Cell { panelID = id, priority = panel.Priority };
+                var (x, y) = ((int)panel.DockLocation % ColumnRatios.Count, (int)panel.DockLocation / ColumnRatios.Count);
+                var id = Guid.NewGuid().ToString("N");
+                cells[x][y] = new Cell { PanelId = id, Priority = panel.Priority };
 
                 panels.Add(id, panel);
                 reservedPanels.Add((x, y));
@@ -80,52 +78,52 @@ namespace NodeVideoEffects
 
                 foreach (var (dx, dy) in directions)
                 {
-                    List<(int, int)> newPositions = new(positions);
-                    bool canExpand = true;
+                    List<(int, int)> newPositions = [..positions];
+                    var canExpand = true;
 
                     foreach (var (x, y) in positions)
                     {
-                        int nx = x + dx;
-                        int ny = y + dy;
+                        var nx = x + dx;
+                        var ny = y + dy;
 
-                        if (!positions.Contains((nx, ny)))
+                        if (positions.Contains((nx, ny))) continue;
+                        if (!IsValidPosition(nx, ny, priority))
                         {
-                            if (!IsValidPosition(nx, ny, priority))
-                            {
-                                canExpand = false;
-                                break;
-                            }
-                            newPositions.Add((nx, ny));
+                            canExpand = false;
+                            break;
                         }
+                        newPositions.Add((nx, ny));
                     }
 
-                    if (canExpand)
+                    if (!canExpand) continue;
                     {
                         foreach (var (nx, ny) in newPositions)
                         {
-                            cells[nx][ny] = new Cell { panelID = cells[positions[0].Item1][positions[0].Item2].panelID, priority = priority };
+                            cells[nx][ny] = new Cell { PanelId = cells[positions[0].Item1][positions[0].Item2]?.PanelId, Priority = priority };
                         }
                         Fill(newPositions, priority);
                         return;
                     }
                 }
 
-                bool IsValidPosition(int x, int y, int priority)
+                return;
+
+                bool IsValidPosition(int x, int y, int currentPriority)
                 {
                     return x >= 0 && y >= 0 && x < RowRatios.Count && y < ColumnRatios.Count &&
                            !reservedPanels.Contains((x, y)) &&
-                           (cells[x][y] == null || cells[x][y].priority <= priority);
+                           (cells[x][y] is null || cells[x][y]?.Priority <= currentPriority);
                 }
             }
 
             (int x, int y, int width, int height) GetPanelRect(string id)
             {
-                List<(int x, int y)> cellsForPanel = new();
-                for (int i = 0; i < cells.Count; i++)
+                List<(int x, int y)> cellsForPanel = [];
+                for (var i = 0; i < cells.Count; i++)
                 {
-                    for (int j = 0; j < cells[i].Count; j++)
+                    for (var j = 0; j < cells[i].Count; j++)
                     {
-                        if (cells[i][j]?.panelID == id)
+                        if (cells[i][j]?.PanelId == id)
                         {
                             cellsForPanel.Add((i, j));
                         }
@@ -147,12 +145,12 @@ namespace NodeVideoEffects
             }
         }
 
-        private List<List<Cell>> InitializeCells(int rows, int cols)
+        private static List<List<Cell?>> InitializeCells(int rows, int cols)
         {
-            var grid = new List<List<Cell>>();
-            for (int i = 0; i < rows; i++)
+            var grid = new List<List<Cell?>>();
+            for (var i = 0; i < rows; i++)
             {
-                grid.Add(new List<Cell>(new Cell[cols]));
+                grid.Add([..new Cell[cols]]);
             }
             return grid;
         }
@@ -187,8 +185,8 @@ namespace NodeVideoEffects
 
         private class Cell
         {
-            public string? panelID;
-            public int priority;
+            public string? PanelId;
+            public int Priority = -1;
         }
     }
 }

@@ -1,35 +1,34 @@
-﻿using System.Collections.ObjectModel;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Windows.Controls;
 
 namespace NodeVideoEffects.Control
 {
-    public partial class EnumPort : UserControl, IControl
+    public partial class EnumPort : IControl
     {
-        int value = 0;
+        private int _value;
         public EnumPort(List<string> items)
         {
             InitializeComponent();
 
-            box.ItemsSource = items;
-            Value = value;
+            Box.ItemsSource = items;
+            Value = _value;
         }
 
         public object? Value
         {
-            get => value;
+            get => _value;
             set
             {
-                this.value = (int?)value ?? 0;
+                _value = (int?)value ?? 0;
                 OnPropertyChanged(nameof(Value));
             }
         }
 
-        public event PropertyChangedEventHandler PropertyChanged = delegate { };
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            Value = box.SelectedIndex;
+            Value = Box.SelectedIndex;
         }
 
         protected virtual void OnPropertyChanged(string propertyName)

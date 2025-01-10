@@ -5,31 +5,31 @@ namespace NodeVideoEffects.Type
 {
     public class Bool : PortValue
     {
-        bool _value;
+        private bool _value;
         /// <summary>
         /// Create new bool object
         /// </summary>
-        /// <param name="_value">Value</param>
-        public Bool(bool _value)
+        /// <param name="value">Value</param>
+        public Bool(bool value)
         {
-            this._value = _value;
+            _value = value;
         }
 
-        public System.Type Type { get => typeof(bool); }
-        public Color Color { get => Colors.Purple; }
+        public System.Type Type => typeof(bool);
+        public Color Color => Colors.Purple;
 
         /// <summary>
         /// Value
         /// </summary>
-        public object Value { get { return _value; } }
+        public object Value => _value;
 
-        public void _SetValue(object value)
+        public void _SetValue(object? value)
         {
-            _value = (bool)value;
+            _value = (bool)(value ?? true);
         }
 
         public void Dispose() { }
 
-        public IControl? Control => new BoolPort(_value);
+        public IControl Control => new BoolPort(_value);
     }
 }

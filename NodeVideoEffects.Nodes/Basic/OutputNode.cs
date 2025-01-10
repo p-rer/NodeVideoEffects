@@ -7,16 +7,16 @@ namespace NodeVideoEffects.Nodes.Basic
     public class OutputNode : INode
     {
         public OutputNode() : base(
-            [new(new Image(null), "Output")],
+            [new Input(new Image(null), "Output")],
             [],
             "Output",
             Colors.PaleVioletRed,
             "Basic")
         {
-            Inputs[0].PropertyChanged += (s, e) =>
+            Inputs[0].PropertyChanged += (_, _) =>
             {
                 if (Inputs[0].Value != null)
-                    PropertyChanged?.Invoke(this, new(Name));
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(Name));
             };
         }
 
@@ -25,12 +25,9 @@ namespace NodeVideoEffects.Nodes.Basic
             return Inputs[0].Value;
         }
 
-        public override async Task Calculate()
-        {
-            return;
-        }
+        public override Task Calculate() => Task.CompletedTask;
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
     }
 }
 
