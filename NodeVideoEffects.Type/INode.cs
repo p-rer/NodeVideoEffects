@@ -8,40 +8,33 @@ namespace NodeVideoEffects.Type
     /// </summary>
     public abstract class INode : IDisposable
     {
-        private Input[] _inputs;
-        private Output[] _outputs;
-        private string _name;
-
-        private string _id = "";
-        private Color _color;
-        private string? _category;
-
         /// <summary>
         /// Get input ports
         /// </summary>
-        public Input[] Inputs => _inputs;
+        public Input[] Inputs { get; }
 
         /// <summary>
         /// Get output ports
         /// </summary>
-        public Output[] Outputs => _outputs;
+        public Output[] Outputs { get; }
 
         /// <summary>
         /// Name of this node
         /// </summary>
-        public string Name => _name;
+        public string Name { get; }
 
         /// <summary>
         /// Color of this node
         /// </summary>
-        public Color Color => _color;
+        public Color Color { get; }
 
         /// <summary>
         /// Category of this node
         /// </summary>
-        public string? Category => _category;
+        public string? Category { get; }
 
-        public string Id { get => _id; set => _id = value; }
+        public string Id { get; set; } = "";
+
         /// <summary>
         /// Create new node object
         /// </summary>
@@ -49,13 +42,13 @@ namespace NodeVideoEffects.Type
         /// <param name="outputs">Output ports</param>
         /// <param name="name">Name of this node</param>
         /// <param name="category">Category of this node</param>
-        public INode(Input[] inputs, Output[] outputs, string name, string? category = null)
+        protected INode(Input[] inputs, Output[] outputs, string name, string? category = null)
         {
-            _inputs = inputs;
-            _outputs = outputs;
-            _name = name;
-            _color = Colors.Transparent;
-            _category = category;
+            Inputs = inputs;
+            Outputs = outputs;
+            Name = name;
+            Color = Colors.Transparent;
+            Category = category;
 
             SubscribeToInputChanges();
         }
@@ -68,30 +61,27 @@ namespace NodeVideoEffects.Type
         /// <param name="name">Name of this node</param>
         /// <param name="color">Color of this node</param>
         /// <param name="category">Category of this node</param>
-        public INode(Input[]? inputs, Output[]? outputs, string name, Color color, string? category = null)
+        protected INode(Input[] inputs, Output[] outputs, string name, Color color, string? category = null)
         {
-            _inputs = inputs;
-            _outputs = outputs;
-            _name = name;
-            _color = color;
-            _category = category;
+            Inputs = inputs;
+            Outputs = outputs;
+            Name = name;
+            Color = color;
+            Category = category;
 
             SubscribeToInputChanges();
         }
 
         ~INode()
         {
-            if (_id != "")
-                NodesManager.RemoveNode(_id);
+            if (Id != "")
+                NodesManager.RemoveNode(Id);
             Dispose();
         }
 
         private void SubscribeToInputChanges()
         {
-            if (_inputs == null)
-                return;
-
-            foreach (var input in _inputs)
+            foreach (var input in Inputs)
             {
                 input.PropertyChanged += Input_PropertyChanged;
             }
@@ -99,15 +89,15 @@ namespace NodeVideoEffects.Type
 
         protected void Input_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            foreach (Output output in _outputs)
+            foreach (var output in Outputs)
             {
                 output.IsSuccess = false;
             }
         }
 
-        public void SetInput(int index, Object value)
+        public void SetInput(int index, object? value)
         {
-            _inputs[index].Value = value;
+            Inputs[index].Value = value;
         }
 
         /// <summary>
@@ -118,17 +108,17 @@ namespace NodeVideoEffects.Type
         /// <returns>Value of output port</returns>
         public virtual object? GetOutput(int index)
         {
-            return _outputs[index].Value;
+            return Outputs[index].Value;
         }
 
         public void SetInputConnection(int index, Connection connection)
         {
-            _inputs[index].SetConnection(_id, index, connection.id, connection.index);
+            Inputs[index].SetConnection(Id, index, connection.Id, connection.Index);
         }
 
         public void RemoveInputConnection(int index)
         {
-            _inputs[index].RemoveConnection(_id, index);
+            Inputs[index].RemoveConnection(Id, index);
         }
 
         /// <summary>
@@ -139,11 +129,11 @@ namespace NodeVideoEffects.Type
 
         public virtual void Dispose()
         {
-            foreach (Input input in Inputs)
+            foreach (var input in Inputs)
                 input.Dispose();
-            foreach (Output output in Outputs)
+            foreach (var output in Outputs)
                 output.Dispose();
-            NodesManager.RemoveNode(_id);
+            NodesManager.RemoveNode(Id);
         }
     }
 }

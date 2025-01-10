@@ -2,7 +2,6 @@ using SharpGen.Runtime;
 using System.Numerics;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Runtime.InteropServices;
 using Vortice.Direct2D1;
 using Vortice.Mathematics;
 using YukkuriMovieMaker.Player.Video;
@@ -43,7 +42,7 @@ namespace NodeVideoEffects.Type
                                                                ?? throw new InvalidOperationException("Cannot get the constructor");
             var customEffectAttributeBuilder = new CustomAttributeBuilder(
             customEffectAttributeConstructor,
-                [1, null, null, null, null]
+            [1, null, null, null, null]
             );
             effectImplTypeBuilder.SetCustomAttribute(customEffectAttributeBuilder);
 

@@ -1,4 +1,4 @@
-﻿<Window xmlns:NodeVideoEffects.Editor="clr-namespace:NodeVideoEffects.Editor;assembly=NodeVideoEffects.Editor"  x:Class="NodeVideoEffects.NodeEditor"
+﻿<Window xmlns:nodeVideoEffects.Editor="clr-namespace:NodeVideoEffects.Editor;assembly=NodeVideoEffects.Editor"  x:Class="NodeVideoEffects.NodeEditor"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -8,7 +8,7 @@
         Title="{x:Static local:Translate.Editor}" MinHeight="450" MinWidth="800">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="2*" MinWidth="30" MaxWidth="300" x:Name="explorerGrid"/>
+            <ColumnDefinition Width="2*" MinWidth="30" MaxWidth="300" />
             <ColumnDefinition Width="5"/>
             <ColumnDefinition Width="5*"/>
         </Grid.ColumnDefinitions>
@@ -36,23 +36,14 @@
                 <MenuItem Header="{x:Static local:Translate.ShowAbout}" Click="ShowAbout" />
             </MenuItem>
         </Menu>
-        <!--
-        <GridSplitter Grid.Column="1" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                      PreviewMouseUp="GridSplitter_MouseUp"/>
-        -->
         <local:DockablePanelField Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="1">
             <local:DockablePanel Title="Explorer" DockLocation="Left" Priority="0">
                 <ContentControl x:Name="Explorer" />
             </local:DockablePanel>
             <local:DockablePanel Title="Editor" DockLocation="Center" Priority="1">
-                <NodeVideoEffects.Editor:Editor Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}" x:Name="EditSpace"
+                <nodeVideoEffects.Editor:Editor Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}" x:Name="EditSpace"
                                 NodesUpdated="EditSpace_NodesUpdated"/>
             </local:DockablePanel>
         </local:DockablePanelField>
-        <!--
-        <ContentControl Grid.Column="0" Grid.Row="1" x:Name="Explorer" />
-        <NodeVideoEffects.Editor:Editor Grid.Column="2"  Grid.Row="1" Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}" x:Name="EditSpace"
-                                        NodesUpdated="EditSpace_NodesUpdated"/>
-        -->
     </Grid>
 </Window>

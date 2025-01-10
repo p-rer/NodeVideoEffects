@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.IO;
 using System.Reflection;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace NodeVideoEffects
@@ -12,7 +11,7 @@ namespace NodeVideoEffects
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class NodeEditor : Window
+    public partial class NodeEditor
     {
         public List<NodeInfo> Nodes
         {
@@ -20,28 +19,24 @@ namespace NodeVideoEffects
             set => EditSpace.Nodes = value;
         }
 
-        public string ItemID
+        public string ItemId
         {
-            get => EditSpace.ItemID;
-            set => EditSpace.ItemID = value;
+            get => EditSpace.ItemId;
+            set => EditSpace.ItemId = value;
         }
 
-        public static readonly RoutedCommand AllSelectCommand = new RoutedCommand();
-        public static readonly RoutedCommand RemoveCommand = new RoutedCommand();
+        private static readonly RoutedCommand AllSelectCommand = new();
+        private static readonly RoutedCommand RemoveCommand = new();
 
-        string tag;
-        string commit;
-
-        const double MinWidthForPreview = 200;
-        const double MinWidthOnRelease = 100;
-        const double FinalMinWidth = 30;
+        private readonly string _tag;
+        private readonly string _commit;
 
         public NodeEditor()
         {
             InitializeComponent();
 
-            tag = FileLoad("git_tag.txt");
-            commit = FileLoad("git_id.txt");
+            _tag = FileLoad("git_tag.txt");
+            _commit = FileLoad("git_id.txt");
 
             Task.Run(() =>
             {
@@ -53,7 +48,7 @@ namespace NodeVideoEffects
 
             CommandBindings.Add(new CommandBinding(
                 AllSelectCommand,
-                (s, e) => EditSpace.AllSelect()));
+                (_, _) => EditSpace.AllSelect()));
 
             InputBindings.Add(new KeyBinding(
                 AllSelectCommand,
@@ -61,65 +56,42 @@ namespace NodeVideoEffects
 
             CommandBindings.Add(new CommandBinding(
                 RemoveCommand,
-                (s, e) => EditSpace.RemoveChildren()));
+                (_, _) => EditSpace.RemoveChildren()));
 
             InputBindings.Add(new KeyBinding(
                 RemoveCommand,
                 new KeyGesture(Key.Delete)));
+            return;
 
-            string FileLoad(string file_name)
+            string FileLoad(string fileName)
             {
                 var asm = Assembly.GetExecutingAssembly();
-                var resName = asm.GetManifestResourceNames().FirstOrDefault(a => a.EndsWith(file_name));
+                var resName = asm.GetManifestResourceNames().FirstOrDefault(a => a.EndsWith(fileName));
                 if (resName == null)
                     return string.Empty;
-                using (var st = asm.GetManifestResourceStream(resName))
-                {
-                    if (st == null) return string.Empty;
-                    var reader = new StreamReader(st);
-                    return reader.ReadToEnd().Trim('\r', '\n');
-                }
+                using var st = asm.GetManifestResourceStream(resName);
+                if (st == null) return string.Empty;
+                var reader = new StreamReader(st);
+                return reader.ReadToEnd().Trim('\r', '\n');
             }
-        }
-
-        public void AddChildren(Node obj, double x, double y)
-        {
-            EditSpace.AddChildren(obj, x, y);
         }
 
         private void ShowAbout(object sender, RoutedEventArgs e)
         {
-            new About(tag, commit) { Owner = this }.ShowDialog();
+            new About(_tag, _commit) { Owner = this }.ShowDialog();
         }
 
-        internal event PropertyChangedEventHandler NodesUpdated;
+        internal event PropertyChangedEventHandler NodesUpdated = delegate { };
 
         private void EditSpace_NodesUpdated(object sender, PropertyChangedEventArgs e)
         {
-            NodesUpdated?.Invoke(this, new PropertyChangedEventArgs(Title));
+            NodesUpdated.Invoke(this, new PropertyChangedEventArgs(Title));
         }
 
         private void OpenLogViewer(object sender, RoutedEventArgs e)
         {
-            LogViewer viewer;
-            if (LogViewer.CreateWindow(out viewer))
+            if (LogViewer.LogViewer.CreateWindow(out var viewer))
                 viewer.Show();
-        }
-
-
-        private void GridSplitter_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            GridSplitter? splitter = sender as GridSplitter;
-            if (splitter == null) return;
-
-            if (explorerGrid.ActualWidth <= MinWidthOnRelease)
-            {
-                explorerGrid.Width = new(FinalMinWidth);
-            }
-            else if (explorerGrid.ActualWidth <= MinWidthForPreview)
-            {
-                explorerGrid.Width = new(MinWidthForPreview);
-            }
         }
     }
 }

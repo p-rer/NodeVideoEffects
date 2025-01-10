@@ -1,17 +1,9 @@
 ﻿using NodeVideoEffects.Type;
 using NodeVideoEffects.Utility;
 using System.ComponentModel.DataAnnotations;
-using System.Diagnostics;
-using System.IO;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Windows;
-using Newtonsoft.Json.Linq;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Exo;
 using YukkuriMovieMaker.Player.Video;
-using YukkuriMovieMaker.Plugin;
 using YukkuriMovieMaker.Plugin.Effects;
 
 namespace NodeVideoEffects
@@ -19,39 +11,35 @@ namespace NodeVideoEffects
     [VideoEffect("NodeVideoEffects", [nameof(Translate.Node)], [], ResourceType = typeof(Translate))]
     public class NodeVideoEffectsPlugin : VideoEffectBase
     {
-        private bool isCreated = false;
-        private NodeProcessor processor;
+        private bool _isCreated;
+        private NodeProcessor? _processor;
         ~NodeVideoEffectsPlugin()
         {
-            window?.Close();
-            NodesManager.RemoveItem(ID);
+            Window?.Close();
+            NodesManager.RemoveItem(Id);
         }
 
         public override string Label => "NodeVideoEffects";
 
-        public string ID { get; set; } = "";
+        public string Id { get; set; } = "";
 
         [Display(Name = nameof(Translate.NodeEditor), GroupName = nameof(Translate.NodeVideoEffects), ResourceType = typeof(Translate))]
         [OpenNodeEditor]
         public List<NodeInfo> Nodes
         {
-            get => nodes; set
+            get => _nodes; set
             {
-                if (window != null)
-                    window?.EditSpace.RebuildNodes(value);
-                nodes = value;
+                Window?.EditSpace.RebuildNodes(value);
+                _nodes = value;
             }
         }
-        private List<NodeInfo> nodes = new();
+        private List<NodeInfo> _nodes = [];
 
-        internal NodeEditor? window = null;
+        internal NodeEditor? Window = null;
 
         internal List<NodeInfo> EditorNodes
         {
-            get => nodes; set
-            {
-                Set(ref nodes, value, "Nodes", "Nodes");
-            }
+            set => Set(ref _nodes, value, nameof(Nodes), "Nodes");
         }
 
         public override IEnumerable<string> CreateExoVideoFilters(int keyFrameIndex, ExoOutputDescription exoOutputDescription)
@@ -61,15 +49,15 @@ namespace NodeVideoEffects
 
         public override IVideoEffectProcessor CreateVideoEffect(IGraphicsDevicesAndContext devices)
         {
-            if (isCreated)
+            if (_isCreated)
             {
-                NodesManager.SetContext(ID, devices);
-                processor._context = devices.DeviceContext;
-                Logger.Write(LogLevel.Info, $"Reloaded the effect processor, ID: \"{ID}\".");
-                return processor;
+                NodesManager.SetContext(Id, devices);
+                _processor!.Context = devices.DeviceContext;
+                Logger.Write(LogLevel.Info, $"Reloaded the effect processor, ID: \"{Id}\".");
+                return _processor;
             }
-            isCreated = true;
-            return processor = new(devices, this);
+            _isCreated = true;
+            return _processor = new NodeProcessor(devices, this);
         }
 
         protected override IEnumerable<IAnimatable> GetAnimatables() => [];

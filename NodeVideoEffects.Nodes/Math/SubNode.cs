@@ -7,21 +7,21 @@ namespace NodeVideoEffects.Nodes.Math
     {
         public SubNode() : base(
             [
-                new(new Number(0, null, null, null), "Value1"),
-                new(new Number(0, null, null, null), "Value2")
+                new Input(new Number(0, null, null, null), "Value1"),
+                new Input(new Number(0, null, null, null), "Value2")
             ],
             [
-                new (new Number(0, null, null, null), "Result")
+                new Output(new Number(0, null, null, null), "Result")
             ],
             "Sub",
             Colors.LightCoral,
             "Math/Basic")
         { }
 
-        public override async Task Calculate()
+        public override Task Calculate()
         {
-            this.Outputs[0].Value = (double)Inputs[0].Value - (double)Inputs[1].Value;
-            return;
+            Outputs[0].Value = (double)(Inputs[0].Value ?? 0) - (double)(Inputs[1].Value ?? 0);
+            return Task.CompletedTask;
         }
     }
 }

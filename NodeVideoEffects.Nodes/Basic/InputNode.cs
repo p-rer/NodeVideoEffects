@@ -15,10 +15,7 @@ namespace NodeVideoEffects.Nodes.Basic
             NodesManager.InputUpdated += Input_PropertyChanged;
         }
 
-        public override async Task Calculate()
-        {
-            return;
-        }
+        public override Task Calculate() => Task.CompletedTask;
     }
 }
 

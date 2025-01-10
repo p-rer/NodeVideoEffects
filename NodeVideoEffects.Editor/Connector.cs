@@ -12,39 +12,39 @@ namespace NodeVideoEffects.Editor
 
         public Point StartPoint
         {
-            get { return (Point)GetValue(StartPointProperty); }
-            set { SetValue(StartPointProperty, value); }
+            get => (Point)GetValue(StartPointProperty);
+            set => SetValue(StartPointProperty, value);
         }
 
         public static readonly DependencyProperty StartPointProperty =
-            DependencyProperty.Register("StartPoint", typeof(Point), typeof(Connector), new PropertyMetadata(new Point(0, 0), OnPropertyChanged));
+            DependencyProperty.Register(nameof(StartPoint), typeof(Point), typeof(Connector), new PropertyMetadata(new Point(0, 0), OnPropertyChanged));
 
         public Point EndPoint
         {
-            get { return (Point)GetValue(EndPointProperty); }
-            set { SetValue(EndPointProperty, value); }
+            get => (Point)GetValue(EndPointProperty);
+            set => SetValue(EndPointProperty, value);
         }
 
         public static readonly DependencyProperty EndPointProperty =
-            DependencyProperty.Register("EndPoint", typeof(Point), typeof(Connector), new PropertyMetadata(new Point(100, 100), OnPropertyChanged));
+            DependencyProperty.Register(nameof(EndPoint), typeof(Point), typeof(Connector), new PropertyMetadata(new Point(100, 100), OnPropertyChanged));
 
         public Color StartColor
         {
-            get { return (Color)GetValue(StartColorProperty); }
-            set { SetValue(StartColorProperty, value); }
+            get => (Color)GetValue(StartColorProperty);
+            init => SetValue(StartColorProperty, value);
         }
 
         public static readonly DependencyProperty StartColorProperty =
-            DependencyProperty.Register("StartColor", typeof(Color), typeof(Connector), new PropertyMetadata(new Color(), OnPropertyChanged));
+            DependencyProperty.Register(nameof(StartColor), typeof(Color), typeof(Connector), new PropertyMetadata(new Color(), OnPropertyChanged));
 
         public Color EndColor
         {
-            get { return (Color)GetValue(EndColorProperty); }
-            set { SetValue(EndColorProperty, value); }
+            get => (Color)GetValue(EndColorProperty);
+            init => SetValue(EndColorProperty, value);
         }
 
         public static readonly DependencyProperty EndColorProperty =
-            DependencyProperty.Register("EndColor", typeof(Color), typeof(Connector), new PropertyMetadata(new Color(), OnPropertyChanged));
+            DependencyProperty.Register(nameof(EndColor), typeof(Color), typeof(Connector), new PropertyMetadata(new Color(), OnPropertyChanged));
 
         private static void OnPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -62,19 +62,19 @@ namespace NodeVideoEffects.Editor
                     EndPoint
                 ), 2);
 
-            Point startPoint = StartPoint;
-            Point endPoint = EndPoint;
+            var startPoint = StartPoint;
+            var endPoint = EndPoint;
             Point controlPoint1;
             Point controlPoint2;
             if (endPoint.X - startPoint.X > 200)
             {
-                controlPoint1 = new((startPoint.X + endPoint.X) / 2, startPoint.Y);
-                controlPoint2 = new((startPoint.X + endPoint.X) / 2, endPoint.Y);
+                controlPoint1 = new Point((startPoint.X + endPoint.X) / 2, startPoint.Y);
+                controlPoint2 = new Point((startPoint.X + endPoint.X) / 2, endPoint.Y);
             }
             else
             {
-                controlPoint1 = new(startPoint.X + 100, startPoint.Y);
-                controlPoint2 = new(endPoint.X - 100, endPoint.Y);
+                controlPoint1 = new Point(startPoint.X + 100, startPoint.Y);
+                controlPoint2 = new Point(endPoint.X - 100, endPoint.Y);
             }
 
             var geometry = new PathGeometry();

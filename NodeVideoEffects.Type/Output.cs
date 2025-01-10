@@ -7,11 +7,9 @@ namespace NodeVideoEffects.Type
     /// </summary>
     public class Output : IDisposable
     {
-        private PortValue _value;
-        private Object? _result = null;
-        private bool _isSuccess = false;
-        private List<Connection> _connection = new();
-        private String _name;
+        private readonly PortValue _value;
+        private object? _result;
+        private bool _isSuccess;
 
         /// <summary>
         /// Create new output port object
@@ -21,43 +19,42 @@ namespace NodeVideoEffects.Type
         public Output(PortValue value, string name)
         {
             _value = value;
-            _name = name;
+            Name = name;
         }
 
         /// <summary>
         /// Value of this port
         /// </summary>
-        public Object? Value { get { return _isSuccess ? _result : null; } set { _value.SetValue(value); _result = _value.Value; IsSuccess = true; } }
+        public object? Value { get => _isSuccess ? _result : null;
+            set { _value.SetValue(value); _result = _value.Value; IsSuccess = true; } }
 
-        public Color Color { get => _value.Color; }
+        public Color Color => _value.Color;
 
-        public System.Type Type { get => _value.Type; }
+        public System.Type Type => _value.Type;
 
         /// <summary>
         /// Name of this output port
         /// </summary>
-        public String Name { get { return _name; } }
+        public String Name { get; }
 
         /// <summary>
         /// List of node id and output port connected to this port
         /// </summary>
-        public List<Connection> Connection { get { return _connection; } }
+        public List<Connection> Connection { get; } = new();
 
         /// <summary>
         /// Was the calculation successful
         /// </summary>
         public bool IsSuccess
         {
-            get { return _isSuccess; }
+            get => _isSuccess;
             set
             {
                 _isSuccess = value;
-                if (_connection.Count != 0)
+                if (Connection.Count == 0) return;
+                foreach (var connection in Connection)
                 {
-                    foreach (Connection connection in _connection)
-                    {
-                        NodesManager.NoticeOutputChanged(connection.id, connection.index);
-                    }
+                    NodesManager.NoticeOutputChanged(connection.Id, connection.Index);
                 }
             }
         }
@@ -69,7 +66,7 @@ namespace NodeVideoEffects.Type
         /// <param name="index">Index of input port will be connected to this port</param>
         public void AddConnection(string id, int index)
         {
-            _connection.Add(new(id, index));
+            Connection.Add(new Connection(id, index));
         }
 
         /// <summary>
@@ -79,7 +76,7 @@ namespace NodeVideoEffects.Type
         /// <param name="index">Index of input port was connected to this port</param>
         public void RemoveConnection(string id, int index)
         {
-            _connection.Remove(new(id, index));
+            Connection.Remove(new Connection(id, index));
         }
 
         public void Dispose()

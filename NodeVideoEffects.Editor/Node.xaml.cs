@@ -10,83 +10,76 @@ namespace NodeVideoEffects.Editor
     /// <summary>
     /// Interaction logic for Node.xaml
     /// </summary>
-    public partial class Node : UserControl
+    public partial class Node
     {
-        private string _name;
+        private readonly string _name;
 
-        private bool isDragging = false;
-        private bool isClicking = false;
-        private Canvas wrapperCanvas;
-        private Editor editor;
-        private Point lastPos;
+        private bool _isDragging;
+        private bool _isClicking;
+        private Canvas? _wrapperCanvas;
+        private Editor? _editor;
+        private Point _lastPos;
 
-        public string ID { get; }
+        public string Id { get; }
         public System.Type Type { get; }
-        public List<object> Values { get; private set; } = new();
-        public List<Color> InputColors { get; private set; } = new();
-        public List<Color> OutputColors { get; private set; } = new();
+        public List<object?> Values { get; } = [];
 
-        public event PropertyChangedEventHandler ValueChanged;
+        public event PropertyChangedEventHandler ValueChanged = delegate { };
 
         public Node(INode node)
         {
             InitializeComponent();
-            nodeName.Content = _name = node.Name;
-            ID = node.Id;
-            categorySign.Fill = new SolidColorBrush(node.Color);
+            NodeName.Content = _name = node.Name;
+            Id = node.Id;
+            CategorySign.Fill = new SolidColorBrush(node.Color);
             Type = node.GetType();
             {
-                int index = 0;
+                var index = 0;
                 foreach (Output output in node.Outputs)
                 {
-                    outputsPanel.Children.Add(new OutputPort(output, node.Id, index));
-                    OutputColors.Add(output.Color);
+                    OutputsPanel.Children.Add(new OutputPort(output, node.Id, index));
                     index++;
                 }
             }
             {
-                int index = 0;
+                var index = 0;
                 foreach (Input input in node.Inputs)
                 {
                     InputPort inputPort = new InputPort(input, node.Id, index);
-                    inputsPanel.Children.Add(inputPort);
+                    InputsPanel.Children.Add(inputPort);
                     Values.Add(input.Value);
-                    InputColors.Add(input.Color);
-                    if (input.Connection.Value.id != "")
-                        inputPort.Loaded += (s, e) => inputPort.portControl.Visibility = Visibility.Hidden;
-                    input.PropertyChanged += (s, e) => ValueChanged?.Invoke(this, new(_name));
+                    if (input.Connection.Id != "")
+                        inputPort.Loaded += (_, _) => inputPort.PortControl.Visibility = Visibility.Hidden;
+                    input.PropertyChanged += (_, _) => ValueChanged(this, new PropertyChangedEventArgs(_name));
                     index++;
                 }
             }
-            Loaded += (s, e) =>
+            Loaded += (_, _) =>
             {
-                wrapperCanvas = FindParent<Canvas>(this);
-                editor = FindParent<Editor>(this);
+                _wrapperCanvas = FindParent<Canvas>(this);
+                _editor = FindParent<Editor>(this);
             };
         }
 
-        public static T FindParent<T>(DependencyObject child) where T : DependencyObject
+        private static T? FindParent<T>(DependencyObject? child) where T : DependencyObject
         {
-            DependencyObject parentObject = VisualTreeHelper.GetParent(child);
+            if (child == null)
+                return null;
+            var parentObject = VisualTreeHelper.GetParent(child);
 
-            if (parentObject == null) return null;
-
-            if (parentObject is T parent)
-                return parent;
-            else
-                return FindParent<T>(parentObject);
+            return parentObject switch
+            {
+                null => null,
+                T parent => parent,
+                _ => FindParent<T>(parentObject)
+            };
         }
 
         internal Point GetPortPoint(PortType type, int index)
         {
-            if (type == PortType.Input)
-            {
-                return (inputsPanel.Children[index] as InputPort).port.PointToScreen(new(5, 5));
-            }
-            else
-            {
-                return (outputsPanel.Children[index] as OutputPort).port.PointToScreen(new(5, 5));
-            }
+            return type == PortType.Input
+                ? (InputsPanel.Children[index] as InputPort)!.Port.PointToScreen(new Point(5, 5))
+                : (OutputsPanel.Children[index] as OutputPort)!.Port.PointToScreen(new Point(5, 5));
         }
 
         internal enum PortType
@@ -96,64 +89,57 @@ namespace NodeVideoEffects.Editor
         }
 
         #region Move node
-        public event PropertyChangedEventHandler Moved;
+        public event PropertyChangedEventHandler Moved = delegate { };
         private void Node_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (sender is Node node)
-            {
-                isDragging = false;
-                isClicking = true;
-                lastPos = e.GetPosition(wrapperCanvas);
-                editor.RestoreChild(this);
-                node.CaptureMouse();
-                e.Handled = true;
-            }
+            if (sender is not Node node) return;
+            _isDragging = false;
+            _isClicking = true;
+            _lastPos = e.GetPosition(_wrapperCanvas);
+            _editor?.RestoreChild(this);
+            node.CaptureMouse();
+            e.Handled = true;
         }
 
         private void Node_MouseMove(object sender, MouseEventArgs e)
         {
-            if (sender is Node node && isClicking)
+            if (sender is not Node || !_isClicking) return;
+            if (!_isDragging)
             {
-                if (!isDragging)
-                {
-                    if (Math.Abs(lastPos.X - e.GetPosition(wrapperCanvas).X) > SystemParameters.MinimumHorizontalDragDistance
-                        || Math.Abs(lastPos.Y - e.GetPosition(wrapperCanvas).Y) > SystemParameters.MinimumHorizontalDragDistance)
-                        isDragging = true;
-                }
-                if (isDragging)
-                {
-                    Point p = e.GetPosition(wrapperCanvas);
-                    editor.MoveNode(this, p.X - lastPos.X, p.Y - lastPos.Y);
-                    lastPos = p;
-                    e.Handled = true;
-                }
+                if (Math.Abs(_lastPos.X - e.GetPosition(_wrapperCanvas).X) > SystemParameters.MinimumHorizontalDragDistance
+                    || Math.Abs(_lastPos.Y - e.GetPosition(_wrapperCanvas).Y) > SystemParameters.MinimumHorizontalDragDistance)
+                    _isDragging = true;
             }
+
+            if (!_isDragging) return;
+            var p = e.GetPosition(_wrapperCanvas);
+            _editor?.MoveNode(this, p.X - _lastPos.X, p.Y - _lastPos.Y);
+            _lastPos = p;
+            e.Handled = true;
         }
 
         private void Node_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            if (isClicking && sender is Node node)
-            {
-                if (!isDragging)
-                    editor.ToggleSelection(this, Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl));
-                isClicking = false;
-                isDragging = false;
-                node.ReleaseMouseCapture();
-                editor.SubmitMoving(this);
-                e.Handled = true;
-            }
+            if (!_isClicking || sender is not Node node) return;
+            if (!_isDragging)
+                _editor?.ToggleSelection(this, Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl));
+            _isClicking = false;
+            _isDragging = false;
+            node.ReleaseMouseCapture();
+            _editor?.SubmitMoving();
+            e.Handled = true;
         }
 
         internal void Move(double dx, double dy)
         {
             Canvas.SetLeft(this, Canvas.GetLeft(this) + dx);
             Canvas.SetTop(this, Canvas.GetTop(this) + dy);
-            editor.MoveConnector(ID, new(dx, dy));
+            _editor?.MoveConnector(Id, new Point(dx, dy));
         }
 
         internal void SubmitMoving()
         {
-            Moved?.Invoke(this, new PropertyChangedEventArgs(_name));
+            Moved(this, new PropertyChangedEventArgs(_name));
         }
         #endregion
     }

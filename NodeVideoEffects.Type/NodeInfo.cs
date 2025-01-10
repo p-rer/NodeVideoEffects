@@ -2,16 +2,16 @@
 {
     public record struct NodeInfo
     {
-        public string ID { get; set; }
+        public string Id { get; set; }
         public string Type { get; }
-        public List<object?> Values { get; set; }
-        public double X { get; set; }
-        public double Y { get; set; }
-        public List<Connection> Connections { get; set; }
+        public List<object?> Values { get; init; }
+        public double X { get; init; }
+        public double Y { get; init; }
+        public List<Connection> Connections { get; init; }
 
         public NodeInfo(string id, System.Type type, List<object?> values, double x, double y, List<Connection> connections)
         {
-            ID = id;
+            Id = id;
             Type = $"{type.FullName}, {type.Assembly}";
             Values = values;
             X = x;
@@ -21,15 +21,14 @@
 
         public NodeInfo DeepCopy()
         {
-            return new NodeInfo(ID,
+            return new NodeInfo(Id,
                                 System.Type.GetType(Type)!,
                                 Values?.Select(value => value is ICloneable cloneable ? cloneable.Clone() : value).ToList() ?? [],
                                 X,
                                 Y,
-                                Connections ?? new List<Connection>());
+                                Connections ?? []);
         }
 
-        public override int GetHashCode() => base.GetHashCode();
         public override string? ToString() => base.ToString();
     }
 }

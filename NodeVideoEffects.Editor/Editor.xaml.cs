@@ -7,98 +7,101 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
-using System.Windows.Threading;
+using NodeVideoEffects.Utility;
 
 namespace NodeVideoEffects.Editor
 {
     /// <summary>
     /// Interaction logic for UserControl1.xaml
     /// </summary>
-    public partial class Editor : UserControl
+    public partial class Editor
     {
-        private ScaleTransform scaleTransform;
-        private TranslateTransform translateTransform;
+        private readonly ScaleTransform _scaleTransform;
+        private readonly TranslateTransform _translateTransform;
 
-        private Point lastPos;
-        private Point nowPos;
-        private bool isDragging;
-        private bool isSelecting;
-        double scale;
-        private Rect wrapRect;
-        private Rectangle selectingRect = new();
+        private Point _lastPos;
+        private Point _nowPos;
+        private bool _isDragging;
+        private bool _isSelecting;
+        private double _scale;
+        private Rect _wrapRect;
+        private Rectangle _selectingRect = new();
 
-        private Path? previewPath;
+        private Path? _previewPath;
 
-        Dictionary<(string, string), Connector> connectors = new();
-        Dictionary<string, NodeInfo> infos = new();
-        Dictionary<string, Node> nodes = new();
+        private readonly Dictionary<(string, string), Connector> _connectors = [];
+        private readonly Dictionary<string, NodeInfo> _infos = [];
+        private readonly Dictionary<string, Node> _nodes = [];
 
-        List<Node> selectingNodes = new();
+        private List<Node> _selectingNodes = [];
+
+        private const double Tolerance = 0.001;
 
         public List<NodeInfo> Nodes
         {
-            get
-            {
-                return infos.Values.ToList();
-            }
+            get => _infos.Values.ToList();
             set
             {
-                infos.Clear();
+                _infos.Clear();
                 value.ForEach(value =>
                 {
-                    infos.Add(value.ID, value);
+                    _infos.Add(value.Id, value);
                 });
             }
         }
 
-        public string ItemID { get; set; }
+        public string ItemId { get; set; } = "";
 
         public Editor()
         {
             InitializeComponent();
 
-            scaleTransform = new ScaleTransform();
-            translateTransform = new TranslateTransform();
+            _scaleTransform = new ScaleTransform();
+            _translateTransform = new TranslateTransform();
 
-            scale = scaleTransform.ScaleX;
+            _scale = _scaleTransform.ScaleX;
 
-            canvas.LayoutTransform = scaleTransform;
-            canvas.RenderTransform = translateTransform;
+            Canvas.LayoutTransform = _scaleTransform;
+            Canvas.RenderTransform = _translateTransform;
 
-            this.MouseWheel += Canvas_MouseWheel;
-            this.MouseDown += Canvas_Down;
-            this.MouseUp += Canvas_Up;
-            this.MouseMove += new MouseEventHandler(Canvas_MouseMove);
+            MouseWheel += Canvas_MouseWheel;
+            MouseDown += Canvas_Down;
+            MouseUp += Canvas_Up;
+            MouseMove += Canvas_MouseMove;
 
-            zoomValue.Text = ((int)(scale * 100)).ToString() + "%";
+            ZoomValue.Text = ((int)(_scale * 100)) + "%";
             ShowInfoText("Initializing...");
 
-            this.Loaded += EditorLoaded;
+            Loaded += EditorLoaded;
         }
 
-        public event PropertyChangedEventHandler NodesUpdated;
+        public event PropertyChangedEventHandler? NodesUpdated;
 
         public void OnNodesUpdated()
         {
             NodesUpdated?.Invoke(this, new PropertyChangedEventArgs(nameof(Editor)));
         }
+        
+        private void Editor_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is Editor) return;
+            e.Handled = true;
+        }
 
         #region Draw Editor
-        private void DrawDotPattern(Canvas canvas, double dotSpacingX, double dotSpacingY, double dotSize, double scale, Point offset)
+        private static void DrawDotPattern(Canvas canvas, double dotSpacingX, double dotSpacingY, double dotSize, double scale, Point offset)
         {
-            DrawingVisual drawingVisual = new DrawingVisual();
-            using (DrawingContext dc = drawingVisual.RenderOpen())
+            var drawingVisual = new DrawingVisual();
+            using var dc = drawingVisual.RenderOpen();
+            for (double x = 0; x < dotSpacingX * 10; x += dotSpacingX)
             {
-                for (double x = 0; x < dotSpacingX * 10; x += dotSpacingX)
+                for (double y = 0; y < dotSpacingY * 10; y += dotSpacingY)
                 {
-                    for (double y = 0; y < dotSpacingY * 10; y += dotSpacingY)
-                    {
-                        dc.DrawEllipse(SystemColors.GrayTextBrush, null, new Point(x, y), dotSize, dotSize);
-                    }
+                    dc.DrawEllipse(SystemColors.GrayTextBrush, null, new Point(x, y), dotSize, dotSize);
                 }
             }
 
-            VisualBrush dotBrush = new VisualBrush(drawingVisual)
+            var dotBrush = new VisualBrush(drawingVisual)
             {
                 TileMode = TileMode.Tile,
                 Viewport = new Rect(0, 0, dotSpacingX, dotSpacingY),
@@ -106,7 +109,7 @@ namespace NodeVideoEffects.Editor
                 Stretch = Stretch.None
             };
 
-            TransformGroup transformGroup = new TransformGroup();
+            var transformGroup = new TransformGroup();
             transformGroup.Children.Add(new ScaleTransform(scale, scale));
             transformGroup.Children.Add(new TranslateTransform(offset.X, offset.Y));
             dotBrush.Transform = transformGroup;
@@ -117,52 +120,50 @@ namespace NodeVideoEffects.Editor
         private void EditorLoaded(object sender, RoutedEventArgs e)
         {
             UpdateScrollBar();
-            DrawDotPattern(wrapper_canvas, 50, 50, 1, scale, new Point(translateTransform.X, translateTransform.Y));
+            DrawDotPattern(WrapperCanvas, 50, 50, 1, _scale, new Point(_translateTransform.X, _translateTransform.Y));
 
-            canvas.LayoutUpdated += (s, e) =>
+            Canvas.LayoutUpdated += (_, _) =>
             {
                 UpdateScrollBar();
-                DrawDotPattern(wrapper_canvas, 50, 50, 1, scale, new Point(translateTransform.X, translateTransform.Y));
+                DrawDotPattern(WrapperCanvas, 50, 50, 1, _scale, new Point(_translateTransform.X, _translateTransform.Y));
             };
-            wrapper_canvas.SizeChanged += (s, e) =>
+            WrapperCanvas.SizeChanged += (_, _) =>
             {
                 UpdateScrollBar();
-                DrawDotPattern(wrapper_canvas, 50, 50, 1, scale, new Point(translateTransform.X, translateTransform.Y));
+                DrawDotPattern(WrapperCanvas, 50, 50, 1, _scale, new Point(_translateTransform.X, _translateTransform.Y));
             };
 
             BuildNodes();
         }
 
-        public void ShowInfoText(string text)
+        private void ShowInfoText(string text)
         {
-            info.Content = text;
+            Info.Content = text;
         }
 
         private void BuildNodes()
         {
-            foreach (NodeInfo info in Nodes)
+            foreach (var info in Nodes)
             {
-                INode node = NodesManager.GetNode(info.ID);
-                AddChildren(new(node), info.X, info.Y);
+                var node = NodesManager.GetNode(info.Id);
+                AddChildren(new Node(node!), info.X, info.Y);
             }
-            foreach (NodeInfo info in Nodes)
+            foreach (var info in Nodes)
             {
-                nodes[info.ID].Loaded += (s, e) =>
+                _nodes[info.Id].Loaded += (_, _) =>
                 {
-                    for (int i = 0; i < info.Connections.Count; i++)
+                    for (var i = 0; i < info.Connections.Count; i++)
                     {
-                        if (info.Connections[i].id != "")
-                        {
-                            Point inputPoint = nodes[info.ID].GetPortPoint(Node.PortType.Input, i);
-                            Point outputPoint = nodes[info.Connections[i].id].GetPortPoint(Node.PortType.Output, info.Connections[i].index);
-                            INode node = NodesManager.GetNode(info.ID);
-                            Color inputColor = node.Inputs[i].Color;
-                            Color outputColor = NodesManager.GetNode(node.Inputs[i].Connection.Value.id).Outputs[node.Inputs[i].Connection.Value.index].Color;
-                            AddConnector(outputPoint, inputPoint,
-                                inputColor, outputColor,
-                                new(info.ID, i), new(info.Connections[i].id, info.Connections[i].index));
-                            (nodes[info.ID].inputsPanel.Children[i] as InputPort).portControl.Visibility = Visibility.Hidden;
-                        }
+                        if (info.Connections[i].Id == "") continue;
+                        var inputPoint = _nodes[info.Id].GetPortPoint(Node.PortType.Input, i);
+                        var outputPoint = _nodes[info.Connections[i].Id].GetPortPoint(Node.PortType.Output, info.Connections[i].Index);
+                        var node = NodesManager.GetNode(info.Id);
+                        var inputColor = node!.Inputs[i].Color;
+                        var outputColor = NodesManager.GetNode(node.Inputs[i].Connection.Id)!.Outputs[node.Inputs[i].Connection.Index].Color;
+                        AddConnector(outputPoint, inputPoint,
+                            inputColor, outputColor,
+                            new Connection(info.Id, i), new Connection(info.Connections[i].Id, info.Connections[i].Index));
+                        (_nodes[info.Id].InputsPanel.Children[i] as InputPort)!.PortControl.Visibility = Visibility.Hidden;
                     }
                 };
             }
@@ -171,149 +172,142 @@ namespace NodeVideoEffects.Editor
 
         public async void RebuildNodes(List<NodeInfo> infos)
         {
-            ShowInfoText("Rebuilding nodes...");
-            // Remove deleted nodes
-            HashSet<string> newNodesID = infos.Select(node => node.ID).ToHashSet();
-            foreach (var id in nodes.Select(node => node.Key).Where(id => !newNodesID.Contains(id)))
-                NodesManager.RemoveNode(id);
-
-            // Create new node
-            infos.ForEach(info =>
+            try
             {
-                if (!nodes.ContainsKey(info.ID))
+                ShowInfoText("Rebuilding nodes...");
+                // Remove deleted nodes
+                var newNodesId = infos.Select(node => node.Id).ToHashSet();
+                foreach (var id in _nodes.Select(node => node.Key).Where(id => !newNodesId.Contains(id)))
+                    NodesManager.RemoveNode(id);
+
+                // Create new node
+                infos.ForEach(info =>
                 {
-                    System.Type? type = System.Type.GetType(info.Type);
-                    if (type != null)
+                    if (_nodes.ContainsKey(info.Id)) return;
+                    var type = System.Type.GetType(info.Type);
+                    if (type == null) return;
+                    INode? obj;
+                    try
                     {
-                        INode? obj;
-                        try
-                        {
-                            obj = Activator.CreateInstance(type, [ItemID]) as INode;
-                        }
-                        catch
-                        {
-                            obj = Activator.CreateInstance(type, []) as INode;
-                        }
-                        if (obj != null)
-                        {
-                            obj.Id = info.ID;
-                            NodesManager.AddNode(info.ID, obj);
-                            for (int i = 0; i < info.Values.Count; i++)
-                            {
-                                obj.SetInput(i, info.Values[i]);
-                                obj.SetInputConnection(i, info.Connections[i]);
-                            }
-                        }
+                        obj = Activator.CreateInstance(type, [ItemId]) as INode;
                     }
-                }
-            });
-
-            await Task.WhenAll(infos.Select(info =>
-            {
-                return Task.Run(() =>
-                {
-                    if (this.infos.ContainsKey(info.ID))
+                    catch
                     {
-                        int i = 0;
-                        foreach (Connection connection in this.infos[info.ID].Connections)
+                        obj = Activator.CreateInstance(type, []) as INode;
+                    }
+
+                    if (obj == null) return;
+                    obj.Id = info.Id;
+                    NodesManager.AddNode(info.Id, obj);
+                    for (var i = 0; i < info.Values.Count; i++)
+                    {
+                        obj.SetInput(i, info.Values[i]);
+                        obj.SetInputConnection(i, info.Connections[i]);
+                    }
+                });
+
+                await Task.WhenAll(infos.Select(info =>
+                {
+                    return Task.Run(() =>
+                    {
+                        if (!_infos.TryGetValue(info.Id, out var value)) return;
+                        var i = 0;
+                        foreach (var connection in value.Connections)
                         {
-                            if (connection.id != info.Connections[i].id)
+                            if (connection.Id != info.Connections[i].Id)
                             {
-                                NodesManager.GetNode(info.ID)?.RemoveInputConnection(i);
-                                if (info.Connections[i].id != "")
-                                    NodesManager.GetNode(info.ID)?.SetInputConnection(i, info.Connections[i]);
+                                NodesManager.GetNode(info.Id)?.RemoveInputConnection(i);
+                                if (info.Connections[i].Id != "")
+                                    NodesManager.GetNode(info.Id)?.SetInputConnection(i, info.Connections[i]);
                             }
                             i++;
                         }
-                    }
+                    });
+                }));
+
+                _infos.Clear();
+                infos.ForEach(value =>
+                {
+                    _infos.Add(value.Id, value);
                 });
-            }));
 
-            this.infos.Clear();
-            infos.ForEach(value =>
+                Dispatcher.Invoke(() =>
+                {
+                    Canvas.Children.Clear();
+                    _nodes.Clear();
+                    _selectingNodes.Clear();
+                    _connectors.Clear();
+
+                    BuildNodes();
+                });
+            }
+            catch (Exception e)
             {
-                this.infos.Add(value.ID, value);
-            });
-
-            Dispatcher.Invoke(() =>
-            {
-                canvas.Children.Clear();
-                nodes.Clear();
-                selectingNodes.Clear();
-                connectors.Clear();
-
-                BuildNodes();
-            });
+                Logger.Write(LogLevel.Error, e.Message);
+            }
         }
 
-        internal Point ConvertToTransform(Point p)
-        {
-            return new((p.X - translateTransform.X) / scale, (p.Y - translateTransform.Y) / scale);
-        }
+        internal Point ConvertToTransform(Point p) => new((p.X - _translateTransform.X) / _scale,
+            (p.Y - _translateTransform.Y) / _scale);
 
         public void AddChildren(Node node, double x, double y)
         {
             Canvas.SetLeft(node, x);
             Canvas.SetTop(node, y);
-            canvas.Children.Add(node);
-            Input[] inputs = NodesManager.GetNode(node.ID)?.Inputs ?? [];
-            List<Connection> connections = new();
-            for (int i = 0; i < inputs.Length; i++)
+            Canvas.Children.Add(node);
+            var inputs = NodesManager.GetNode(node.Id)?.Inputs ?? [];
+            var connections = inputs.Select(t => t.Connection).ToList();
+            if (!_infos.TryAdd(node.Id, new NodeInfo(node.Id, node.Type, node.Values, x, y, connections)))
+                _infos[node.Id] = new NodeInfo(node.Id, node.Type, node.Values, x, y, connections);
+            if (!_nodes.TryAdd(node.Id, node))
+                _nodes[node.Id] = node;
+            node.Moved += (_, _) =>
             {
-                connections.Add(inputs[i].Connection ?? new());
-            }
-            if (!infos.TryAdd(node.ID, new(node.ID, node.Type, node.Values, x, y, connections)))
-                infos[node.ID] = new(node.ID, node.Type, node.Values, x, y, connections);
-            if (!nodes.TryAdd(node.ID, node))
-                nodes[node.ID] = node;
-            node.Moved += (s, e) =>
-            {
-                infos[node.ID] = infos[node.ID] with { X = Canvas.GetLeft(node), Y = Canvas.GetTop(node) };
+                _infos[node.Id] = _infos[node.Id] with { X = Canvas.GetLeft(node), Y = Canvas.GetTop(node) };
             };
-            node.ValueChanged += (s, e) =>
+            node.ValueChanged += (_, _) =>
             {
                 try
                 {
-                    List<object?> value = new();
+                    List<object?> value = [];
                     Dispatcher.Invoke(() =>
                     {
-                        foreach (object input in node.inputsPanel.Children)
-                        {
-                            value.Add((input as InputPort)?.Value);
-                        }
-                        infos[node.ID] = infos[node.ID] with { Values = value };
+                        value.AddRange(from object input in node.InputsPanel.Children select (input as InputPort)?.Value);
+                        _infos[node.Id] = _infos[node.Id] with { Values = value };
                         OnNodesUpdated();
                     });
                 }
-                catch { }
+                catch (Exception e)
+                {
+                    Logger.Write(LogLevel.Error, e.Message);
+                }
             };
         }
 
         public void RemoveChildren()
         {
-            if (selectingNodes.Count > 0)
+            if (_selectingNodes.Count > 0)
             {
                 Dispatcher.Invoke(() =>
                 {
-                    foreach (Node node in selectingNodes)
+                    foreach (var node in _selectingNodes.Where(node =>
+                                 node.Type != typeof(InputNode) && node.Type != typeof(OutputNode)))
                     {
-                        if (node.Type != typeof(InputNode) && node.Type != typeof(OutputNode))
+                        Canvas.Children.Remove(node);
+                        foreach (OutputPort output in node.OutputsPanel.Children)
                         {
-                            canvas.Children.Remove(node);
-                            foreach (OutputPort output in node.outputsPanel.Children)
-                            {
-                                output.RemoveAllConnection();
-                            }
-                            foreach (InputPort input in node.inputsPanel.Children)
-                            {
-                                input.RemoveConnection();
-                            }
-                            infos.Remove(node.ID);
-                            nodes.Remove(node.ID);
-                            NodesManager.RemoveNode(node.ID);
+                            output.RemoveAllConnection();
                         }
+                        foreach (InputPort input in node.InputsPanel.Children)
+                        {
+                            input.RemoveConnection();
+                        }
+                        _infos.Remove(node.Id);
+                        _nodes.Remove(node.Id);
+                        NodesManager.RemoveNode(node.Id);
                     }
-                    selectingNodes.Clear();
+
+                    _selectingNodes.Clear();
                 });
             }
             OnNodesUpdated();
@@ -321,50 +315,50 @@ namespace NodeVideoEffects.Editor
 
         public void RestoreChild(Node node)
         {
-            canvas.Children.Remove(node);
-            canvas.Children.Add(node);
+            Canvas.Children.Remove(node);
+            Canvas.Children.Add(node);
         }
 
         public void PreviewConnection(Point pos1, Point pos2)
         {
-            if (previewPath != null) canvas.Children.Remove(previewPath);
-            canvas.Children.Add(previewPath = new Path()
+            if (_previewPath != null) Canvas.Children.Remove(_previewPath);
+            Canvas.Children.Add(_previewPath = new Path()
             {
-                Data = new LineGeometry()
+                Data = new LineGeometry
                 {
                     StartPoint = ConvertToTransform(pos1),
                     EndPoint = ConvertToTransform(pos2)
                 },
                 Stroke = SystemColors.GrayTextBrush,
                 StrokeThickness = 1,
-                StrokeDashArray = new([5.0, 5.0]),
+                StrokeDashArray = new DoubleCollection([5.0, 5.0]),
                 IsHitTestVisible = false
             });
         }
 
         public void RemovePreviewConnection()
         {
-            if (previewPath != null) canvas.Children.Remove(previewPath);
-            previewPath = null;
+            if (_previewPath != null) Canvas.Children.Remove(_previewPath);
+            _previewPath = null;
         }
 
         public void AddConnector(Point pos1, Point pos2, Color col1, Color col2, Connection inputPort, Connection outputPort)
         {
-            if (connectors.ContainsKey((inputPort.id + ";" + inputPort.index, outputPort.id + ";" + outputPort.index)))
+            if (_connectors.ContainsKey((inputPort.Id + ";" + inputPort.Index, outputPort.Id + ";" + outputPort.Index)))
             {
-                canvas.Children.Remove(connectors[(inputPort.id + ";" + inputPort.index, outputPort.id + ";" + outputPort.index)]);
-                connectors.Remove((inputPort.id + ";" + inputPort.index, outputPort.id + ";" + outputPort.index));
+                Canvas.Children.Remove(_connectors[(inputPort.Id + ";" + inputPort.Index, outputPort.Id + ";" + outputPort.Index)]);
+                _connectors.Remove((inputPort.Id + ";" + inputPort.Index, outputPort.Id + ";" + outputPort.Index));
             }
-            if ((connectors.Where(kvp => kvp.Key.Item1 == inputPort.id + ";" + inputPort.index).ToList().Count) > 0)
+            if (_connectors.Where(kvp => kvp.Key.Item1 == inputPort.Id + ";" + inputPort.Index).ToList().Count > 0)
             {
-                NodesManager.GetNode(infos[inputPort.id].Connections[inputPort.index].id)
-                    ?.Outputs[infos[inputPort.id].Connections[inputPort.index].index]
-                    .RemoveConnection(inputPort.id, inputPort.index);
-                RemoveInputConnector(inputPort.id, inputPort.index);
-                NodesManager.GetNode(inputPort.id)?.SetInputConnection(inputPort.index, outputPort);
+                NodesManager.GetNode(_infos[inputPort.Id].Connections[inputPort.Index].Id)
+                    ?.Outputs[_infos[inputPort.Id].Connections[inputPort.Index].Index]
+                    .RemoveConnection(inputPort.Id, inputPort.Index);
+                RemoveInputConnector(inputPort.Id, inputPort.Index);
+                NodesManager.GetNode(inputPort.Id)?.SetInputConnection(inputPort.Index, outputPort);
             }
             Connector connector;
-            canvas.Children.Add(connector = new Connector()
+            Canvas.Children.Add(connector = new Connector()
             {
                 StartPoint = ConvertToTransform(PointFromScreen(pos1)),
                 EndPoint = ConvertToTransform(PointFromScreen(pos2)),
@@ -373,11 +367,11 @@ namespace NodeVideoEffects.Editor
                 IsHitTestVisible = false
             });
             connector.SetValue(Panel.ZIndexProperty, -1);
-            connectors.Add((inputPort.id + ";" + inputPort.index, outputPort.id + ";" + outputPort.index), connector);
-            infos[inputPort.id] = infos[inputPort.id] with
+            _connectors.Add((inputPort.Id + ";" + inputPort.Index, outputPort.Id + ";" + outputPort.Index), connector);
+            _infos[inputPort.Id] = _infos[inputPort.Id] with
             {
-                Connections = infos[inputPort.id].Connections.Select((connection, index) =>
-                    index == inputPort.index ? outputPort : connection).ToList()
+                Connections = _infos[inputPort.Id].Connections.Select((connection, index) =>
+                    index == inputPort.Index ? outputPort : connection).ToList()
             };
         }
 
@@ -385,243 +379,266 @@ namespace NodeVideoEffects.Editor
         {
             try
             {
-                Connector connector = connectors
+                var connector = _connectors
                     .Where(kvp => kvp.Key.Item1 == id + ";" + index)
                     .Select(kvp => kvp.Value)
                     .ToList()[0];
-                canvas.Children.Remove(connector);
-                connectors.Remove(connectors
+                Canvas.Children.Remove(connector);
+                _connectors.Remove(_connectors
                     .Where(kvp => kvp.Value == connector)
                     .Select(kvp => kvp.Key)
                     .ToList()[0]);
-                infos[id].Connections[index] = new();
+                _infos[id].Connections[index] = new Connection();
             }
-            catch { }
+            catch (Exception e)
+            {
+                Logger.Write(LogLevel.Error, e.Message);
+            }
         }
 
         public void RemoveOutputConnector(string id, int index)
         {
             try
             {
-                List<Connector> connectors = this.connectors
+                var connectors = _connectors
                     .Where(kvp => kvp.Key.Item2 == id + ";" + index)
                     .Select(kvp => kvp.Value)
                     .ToList();
                 foreach (Connector connector in connectors)
                 {
-                    (string, string) key = this.connectors
+                    var key = _connectors
                         .Where(kvp => kvp.Value == connector)
                         .Select(kvp => kvp.Key)
                         .ToList()[0];
-                    int sepIndex = key.Item1.IndexOf(";");
-                    (nodes[key.Item1[0..sepIndex]].inputsPanel.Children[int.Parse(key.Item1[(sepIndex + 1)..^0])] as InputPort)?.RemoveConnection();
-                    infos[key.Item1[0..sepIndex]].Connections[int.Parse(key.Item1[(sepIndex + 1)..^0])] = new();
-                    this.connectors.Remove(key);
+                    var sepIndex = key.Item1.IndexOf(";", StringComparison.Ordinal);
+                    (_nodes[key.Item1[..sepIndex]].InputsPanel
+                        .Children[int.Parse(key.Item1[(sepIndex + 1)..])] as InputPort)?.RemoveConnection();
+                    _infos[key.Item1[..sepIndex]].Connections[int.Parse(key.Item1[(sepIndex + 1)..])] =
+                        new Connection();
+                    _connectors.Remove(key);
                 }
             }
-            catch { }
+            catch (Exception e)
+            {
+                Logger.Write(LogLevel.Error, e.Message);
+            }
         }
 
         public void MoveConnector(string id, Point d)
         {
             try
             {
-                foreach (Connector connector in connectors
+                foreach (var connector in _connectors
                     .Where(kvp => kvp.Key.Item1.StartsWith(id))
                     .Select(kvp => kvp.Value)
                     .ToList())
                 {
-                    connector.EndPoint = new(connector.EndPoint.X + d.X, connector.EndPoint.Y + d.Y);
+                    connector.EndPoint = new Point(connector.EndPoint.X + d.X, connector.EndPoint.Y + d.Y);
                 }
-                foreach (Connector connector in connectors
+                foreach (Connector connector in _connectors
                     .Where(kvp => kvp.Key.Item2.StartsWith(id))
                     .Select(kvp => kvp.Value)
                     .ToList())
                 {
-                    connector.StartPoint = new(connector.StartPoint.X + d.X, connector.StartPoint.Y + d.Y);
+                    connector.StartPoint = new Point(connector.StartPoint.X + d.X, connector.StartPoint.Y + d.Y);
                 }
             }
-            catch { }
+            catch (Exception e)
+            {
+                Logger.Write(LogLevel.Error, e.Message);
+            }
         }
 
-        public void UpdateScrollBar()
+        private void UpdateScrollBar()
         {
-            double minX = double.MaxValue;
-            double minY = double.MaxValue;
-            double maxX = double.MinValue;
-            double maxY = double.MinValue;
+            var minX = double.MaxValue;
+            var minY = double.MaxValue;
+            var maxX = double.MinValue;
+            var maxY = double.MinValue;
 
-            foreach (UIElement element in canvas.Children)
+            foreach (UIElement element in Canvas.Children)
             {
-                if (element is FrameworkElement)
-                {
-                    var fe = (FrameworkElement)element;
+                if (element is not FrameworkElement fe) continue;
 
-                    double left = Canvas.GetLeft(fe) * scale + translateTransform.X;
-                    double top = Canvas.GetTop(fe) * scale + translateTransform.Y;
-                    double right = left + fe.ActualWidth * scale;
-                    double bottom = top + fe.ActualHeight * scale;
+                var left = Canvas.GetLeft(fe) * _scale + _translateTransform.X;
+                var top = Canvas.GetTop(fe) * _scale + _translateTransform.Y;
+                var right = left + fe.ActualWidth * _scale;
+                var bottom = top + fe.ActualHeight * _scale;
 
-                    if (left < minX) minX = left;
-                    if (top < minY) minY = top;
-                    if (right > maxX) maxX = right;
-                    if (bottom > maxY) maxY = bottom;
-                }
+                if (left < minX) minX = left;
+                if (top < minY) minY = top;
+                if (right > maxX) maxX = right;
+                if (bottom > maxY) maxY = bottom;
             }
 
-            if (minX == double.MaxValue || minY == double.MaxValue || maxX == double.MinValue || maxY == double.MinValue)
+            if (Math.Abs(minX - double.MaxValue) < Tolerance || Math.Abs(minY - double.MaxValue) < Tolerance ||
+                Math.Abs(maxX - double.MinValue) < Tolerance || Math.Abs(maxY - double.MinValue) < Tolerance)
             {
-                wrapRect = Rect.Empty;
+                _wrapRect = Rect.Empty;
             }
             else
             {
-                wrapRect = new Rect(
+                _wrapRect = new Rect(
                     new Point(
                         minX < 0 ? minX : 0,
                         minY < 0 ? minY : 0),
                     new Point(
-                        maxX > wrapper_canvas.ActualWidth ? maxX : wrapper_canvas.ActualWidth,
-                        maxY > wrapper_canvas.ActualHeight ? maxY : wrapper_canvas.ActualHeight
+                        maxX > WrapperCanvas.ActualWidth ? maxX : WrapperCanvas.ActualWidth,
+                        maxY > WrapperCanvas.ActualHeight ? maxY : WrapperCanvas.ActualHeight
                     )
                 );
             }
 
-            horizontalScrollBar.Width = (wrapper_canvas.ActualWidth * wrapper_canvas.ActualWidth) / wrapRect.Width;
-            Canvas.SetLeft(horizontalScrollBar, -wrapRect.Left * wrapper_canvas.ActualWidth / wrapRect.Width);
+            HorizontalScrollBar.Width = (WrapperCanvas.ActualWidth * WrapperCanvas.ActualWidth) / _wrapRect.Width;
+            Canvas.SetLeft(HorizontalScrollBar, -_wrapRect.Left * WrapperCanvas.ActualWidth / _wrapRect.Width);
 
-            verticalScrollBar.Height = (wrapper_canvas.ActualHeight * wrapper_canvas.ActualHeight) / wrapRect.Height;
-            Canvas.SetTop(verticalScrollBar, -wrapRect.Top * wrapper_canvas.ActualHeight / wrapRect.Height);
+            VerticalScrollBar.Height = (WrapperCanvas.ActualHeight * WrapperCanvas.ActualHeight) / _wrapRect.Height;
+            Canvas.SetTop(VerticalScrollBar, -_wrapRect.Top * WrapperCanvas.ActualHeight / _wrapRect.Height);
         }
 
         private void Canvas_MouseWheel(object sender, MouseWheelEventArgs e)
         {
-            double rate = e.Delta > 0 ? 1.1 : 1 / 1.1;
-            double zoom = scale * rate;
+            var rate = e.Delta > 0 ? 1.1 : 1 / 1.1;
+            var zoom = _scale * rate;
             Canvas_Zoom(zoom, e);
         }
 
         private void Canvas_Down(object sender, MouseButtonEventArgs e)
         {
-            if (e.ChangedButton == MouseButton.Middle && e.ButtonState == MouseButtonState.Pressed)
+            switch (e.ChangedButton)
             {
-                lastPos = e.GetPosition(this);
-                isDragging = true;
-                this.CaptureMouse();
-            }
-            else if (e.ChangedButton == MouseButton.Left && e.ButtonState == MouseButtonState.Pressed)
-            {
-                lastPos = e.GetPosition(this);
-                isSelecting = true;
-                selectingRect = CreateSelectingRectangleFromPoints(ConvertToTransform(lastPos), ConvertToTransform(lastPos));
-                canvas.Children.Add(selectingRect);
-                Task.Run(() =>
-                {
-                    while (isSelecting)
+                case MouseButton.Middle when e.ButtonState == MouseButtonState.Pressed:
+                    _lastPos = e.GetPosition(this);
+                    _isDragging = true;
+                    CaptureMouse();
+                    break;
+                case MouseButton.Left when e.ButtonState == MouseButtonState.Pressed:
+                    _lastPos = e.GetPosition(this);
+                    _isSelecting = true;
+                    _selectingRect = CreateSelectingRectangleFromPoints(ConvertToTransform(_lastPos), ConvertToTransform(_lastPos));
+                    Canvas.Children.Add(_selectingRect);
+                    Task.Run(() =>
                     {
-                        int f = GetDirectionIfOutside(nowPos);
-                        this.Dispatcher.Invoke(() =>
+                        while (_isSelecting)
                         {
-                            const int step = 15;
-                            if ((f & 1) != 0)
+                            int f = GetDirectionIfOutside(_nowPos);
+                            Dispatcher.Invoke(() =>
                             {
-                                translateTransform.Y += step;
-                                lastPos.Y += step;
-                            }
-                            if ((f & 2) != 0)
-                            {
-                                translateTransform.X -= step;
-                                lastPos.X -= step;
-                            }
-                            if ((f & 4) != 0)
-                            {
-                                translateTransform.Y -= step;
-                                lastPos.Y -= step;
-                            }
-                            if ((f & 8) != 0)
-                            {
-                                translateTransform.X += step;
-                                lastPos.X += step;
-                            }
-                            canvas.Children.Remove(selectingRect);
-                            selectingRect = CreateSelectingRectangleFromPoints(ConvertToTransform(lastPos), ConvertToTransform(nowPos));
-                            canvas.Children.Add(selectingRect);
-                        });
-                        Task.Delay(50).Wait();
-                    }
-                });
-                this.CaptureMouse();
+                                const int step = 15;
+                                if ((f & 1) != 0)
+                                {
+                                    _translateTransform.Y += step;
+                                    _lastPos.Y += step;
+                                }
+                                if ((f & 2) != 0)
+                                {
+                                    _translateTransform.X -= step;
+                                    _lastPos.X -= step;
+                                }
+                                if ((f & 4) != 0)
+                                {
+                                    _translateTransform.Y -= step;
+                                    _lastPos.Y -= step;
+                                }
+                                if ((f & 8) != 0)
+                                {
+                                    _translateTransform.X += step;
+                                    _lastPos.X += step;
+                                }
+                                Canvas.Children.Remove(_selectingRect);
+                                _selectingRect = CreateSelectingRectangleFromPoints(ConvertToTransform(_lastPos), ConvertToTransform(_nowPos));
+                                Canvas.Children.Add(_selectingRect);
+                            });
+                            Task.Delay(50).Wait();
+                        }
+                    });
+                    CaptureMouse();
+                    break;
+                case MouseButton.Right:
+                case MouseButton.XButton1:
+                case MouseButton.XButton2:
+                default:
+                    break;
             }
         }
 
         private void Canvas_Up(object sender, MouseButtonEventArgs e)
         {
-            if (e.ChangedButton == MouseButton.Middle && e.ButtonState == MouseButtonState.Released)
+            switch (e.ChangedButton)
             {
-                isDragging = false;
-                this.ReleaseMouseCapture();
-            }
-            if (e.ChangedButton == MouseButton.Left && e.ButtonState == MouseButtonState.Released)
-            {
-                isSelecting = false;
-                canvas.Children.Remove(selectingRect);
-                foreach (Node node in selectingNodes)
+                case MouseButton.Middle when e.ButtonState == MouseButtonState.Released:
+                    _isDragging = false;
+                    ReleaseMouseCapture();
+                    break;
+                case MouseButton.Left when e.ButtonState == MouseButtonState.Released:
                 {
-                    Task.Run(() => Dispatcher.Invoke(() =>
+                    _isSelecting = false;
+                    Canvas.Children.Remove(_selectingRect);
+                    foreach (var node in _selectingNodes)
                     {
-                        node.Width -= 8;
-                        node.Height -= 8;
-                        Canvas.SetLeft(node, Canvas.GetLeft(node) + 4);
-                        Canvas.SetTop(node, Canvas.GetTop(node) + 4);
-                        node.Padding = new(0);
-                        node.BorderThickness = new(0);
-                        node.BorderBrush = null;
-                    }));
-                }
-                selectingNodes = GetElementsInsideRect(canvas,
-                                                       new(Canvas.GetLeft(selectingRect),
-                                                                    Canvas.GetTop(selectingRect),
-                                                                    selectingRect.ActualWidth,
-                                                                    selectingRect.ActualHeight));
-                selectingRect = new();
-                foreach (Node node in selectingNodes)
-                {
-                    Task.Run(() => Dispatcher.Invoke(() =>
+                        Task.Run(() => Dispatcher.Invoke(() =>
+                        {
+                            node.Width -= 8;
+                            node.Height -= 8;
+                            Canvas.SetLeft(node, Canvas.GetLeft(node) + 4);
+                            Canvas.SetTop(node, Canvas.GetTop(node) + 4);
+                            node.Padding = new Thickness(0);
+                            node.BorderThickness = new Thickness(0);
+                            node.BorderBrush = null;
+                        }));
+                    }
+                    _selectingNodes = GetElementsInsideRect(Canvas,
+                        new Rect(Canvas.GetLeft(_selectingRect),
+                            Canvas.GetTop(_selectingRect),
+                            _selectingRect.ActualWidth,
+                            _selectingRect.ActualHeight));
+                    _selectingRect = new Rectangle();
+                    foreach (var node in _selectingNodes)
                     {
-                        node.Width += 8;
-                        node.Height += 8;
-                        Canvas.SetLeft(node, Canvas.GetLeft(node) - 4);
-                        Canvas.SetTop(node, Canvas.GetTop(node) - 4);
-                        node.Padding = new(2.0);
-                        node.BorderThickness = new(2.0);
-                        node.BorderBrush = SystemColors.HighlightBrush;
-                    }));
+                        Task.Run(() => Dispatcher.Invoke(() =>
+                        {
+                            node.Width += 8;
+                            node.Height += 8;
+                            Canvas.SetLeft(node, Canvas.GetLeft(node) - 4);
+                            Canvas.SetTop(node, Canvas.GetTop(node) - 4);
+                            node.Padding = new Thickness(2.0);
+                            node.BorderThickness = new Thickness(2.0);
+                            node.BorderBrush = SystemColors.HighlightBrush;
+                        }));
+                    }
+                    ReleaseMouseCapture();
+                    break;
                 }
-                this.ReleaseMouseCapture();
+                case MouseButton.Right:
+                case MouseButton.XButton1:
+                case MouseButton.XButton2:
+                default:
+                    break;
             }
         }
 
         private void Canvas_MouseMove(object sender, MouseEventArgs e)
         {
-            nowPos = e.GetPosition(this);
-            if (isDragging)
+            _nowPos = e.GetPosition(this);
+            if (_isDragging)
             {
-                translateTransform.X += nowPos.X - lastPos.X;
-                translateTransform.Y += nowPos.Y - lastPos.Y;
-                lastPos = nowPos;
+                _translateTransform.X += _nowPos.X - _lastPos.X;
+                _translateTransform.Y += _nowPos.Y - _lastPos.Y;
+                _lastPos = _nowPos;
 
                 UpdateScrollBar();
             }
-            else if (isSelecting)
+            else if (_isSelecting)
             {
-                canvas.Children.Remove(selectingRect);
-                selectingRect = CreateSelectingRectangleFromPoints(ConvertToTransform(lastPos), ConvertToTransform(nowPos));
-                canvas.Children.Add(selectingRect);
+                Canvas.Children.Remove(_selectingRect);
+                _selectingRect = CreateSelectingRectangleFromPoints(ConvertToTransform(_lastPos), ConvertToTransform(_nowPos));
+                Canvas.Children.Add(_selectingRect);
             }
         }
 
         public void AllSelect()
         {
-            foreach (Node node in selectingNodes)
+            foreach (var node in _selectingNodes)
             {
                 Task.Run(() => Dispatcher.Invoke(() =>
                 {
@@ -629,13 +646,13 @@ namespace NodeVideoEffects.Editor
                     node.Height -= 8;
                     Canvas.SetLeft(node, Canvas.GetLeft(node) + 4);
                     Canvas.SetTop(node, Canvas.GetTop(node) + 4);
-                    node.Padding = new(0);
-                    node.BorderThickness = new(0);
+                    node.Padding = new Thickness(0);
+                    node.BorderThickness = new Thickness(0);
                     node.BorderBrush = null;
                 }));
             }
-            selectingNodes = nodes.Select((kvp) => kvp.Value).ToList();
-            foreach (Node node in selectingNodes)
+            _selectingNodes = _nodes.Select((kvp) => kvp.Value).ToList();
+            foreach (var node in _selectingNodes)
             {
                 Task.Run(() =>
                 {
@@ -645,8 +662,8 @@ namespace NodeVideoEffects.Editor
                         node.Height += 8;
                         Canvas.SetLeft(node, Canvas.GetLeft(node) - 4);
                         Canvas.SetTop(node, Canvas.GetTop(node) - 4);
-                        node.Padding = new(2.0);
-                        node.BorderThickness = new(2.0);
+                        node.Padding = new Thickness(2.0);
+                        node.BorderThickness = new Thickness(2.0);
                         node.BorderBrush = SystemColors.HighlightBrush;
                     });
                 });
@@ -659,10 +676,10 @@ namespace NodeVideoEffects.Editor
             {
                 if (!multiple)
                 {
-                    bool removingSelection = false;
-                    foreach (Node node in selectingNodes)
+                    var removingSelection = false;
+                    foreach (var node in _selectingNodes)
                     {
-                        if (node.ID == selectNode.ID)
+                        if (node.Id == selectNode.Id)
                             removingSelection = true;
                         Dispatcher.Invoke(() =>
                         {
@@ -670,37 +687,37 @@ namespace NodeVideoEffects.Editor
                             node.Height -= 8;
                             Canvas.SetLeft(node, Canvas.GetLeft(node) + 4);
                             Canvas.SetTop(node, Canvas.GetTop(node) + 4);
-                            node.Padding = new(0);
-                            node.BorderThickness = new(0);
+                            node.Padding = new Thickness(0);
+                            node.BorderThickness = new Thickness(0);
                             node.BorderBrush = null;
                         });
                     }
                     if (removingSelection)
                     {
-                        selectingNodes = [];
+                        _selectingNodes = [];
                         return;
                     }
-                    selectingNodes = [selectNode];
+                    _selectingNodes = [selectNode];
                 }
                 else
                 {
-                    if (selectingNodes.Contains(selectNode))
+                    if (!_selectingNodes.Contains(selectNode))
+                        _selectingNodes.Add(selectNode);
+                    else
                     {
                         Dispatcher.Invoke(() =>
                         {
-                            selectingNodes.Remove(selectNode);
+                            _selectingNodes.Remove(selectNode);
                             selectNode.Width -= 8;
                             selectNode.Height -= 8;
                             Canvas.SetLeft(selectNode, Canvas.GetLeft(selectNode) + 4);
                             Canvas.SetTop(selectNode, Canvas.GetTop(selectNode) + 4);
-                            selectNode.Padding = new(0);
-                            selectNode.BorderThickness = new(0);
+                            selectNode.Padding = new Thickness(0);
+                            selectNode.BorderThickness = new Thickness(0);
                             selectNode.BorderBrush = null;
                         });
                         return;
                     }
-                    else
-                        selectingNodes.Add(selectNode);
                 }
                 Dispatcher.Invoke(() =>
                 {
@@ -708,28 +725,28 @@ namespace NodeVideoEffects.Editor
                     selectNode.Height += 8;
                     Canvas.SetLeft(selectNode, Canvas.GetLeft(selectNode) - 4);
                     Canvas.SetTop(selectNode, Canvas.GetTop(selectNode) - 4);
-                    selectNode.Padding = new(2.0);
-                    selectNode.BorderThickness = new(2.0);
+                    selectNode.Padding = new Thickness(2.0);
+                    selectNode.BorderThickness = new Thickness(2.0);
                     selectNode.BorderBrush = SystemColors.HighlightBrush;
                 });
             });
         }
 
-        private Rectangle CreateSelectingRectangleFromPoints(Point p1, Point p2)
+        private static Rectangle CreateSelectingRectangleFromPoints(Point p1, Point p2)
         {
-            double x = Math.Min(p1.X, p2.X);
-            double y = Math.Min(p1.Y, p2.Y);
-            double width = Math.Abs(p2.X - p1.X);
-            double height = Math.Abs(p2.Y - p1.Y);
+            var x = Math.Min(p1.X, p2.X);
+            var y = Math.Min(p1.Y, p2.Y);
+            var width = Math.Abs(p2.X - p1.X);
+            var height = Math.Abs(p2.Y - p1.Y);
 
-            Rectangle rectangle = new Rectangle
+            var rectangle = new Rectangle
             {
                 Width = width,
                 Height = height,
                 Fill = null,
                 Stroke = SystemColors.GrayTextBrush,
                 StrokeThickness = 1,
-                StrokeDashArray = new([5.0, 5.0]),
+                StrokeDashArray = new DoubleCollection([5.0, 5.0]),
                 IsHitTestVisible = false
             };
 
@@ -741,58 +758,57 @@ namespace NodeVideoEffects.Editor
 
         internal void MoveNode(Node node, double dx, double dy)
         {
-            if (!selectingNodes.Contains(node))
+            if (!_selectingNodes.Contains(node))
                 ToggleSelection(node, false);
             else
             {
-                foreach (Node selectedNode in selectingNodes)
+                foreach (var selectedNode in _selectingNodes)
                 {
                     Task.Run(() => Dispatcher.Invoke(() => selectedNode.Move(dx, dy)));
                 }
             }
         }
 
-        internal void SubmitMoving(Node node)
+        internal void SubmitMoving()
         {
-            foreach (Node selectedNode in selectingNodes)
+            foreach (var selectedNode in _selectingNodes)
             {
                 selectedNode.SubmitMoving();
             }
             OnNodesUpdated();
         }
 
-        public List<Node> GetElementsInsideRect(Canvas canvas, Rect rect)
+        private static List<Node> GetElementsInsideRect(Canvas canvas, Rect rect)
         {
             var elementsInsideRect = new List<Node>();
 
             foreach (UIElement element in canvas.Children)
             {
-                if (element is not Node)
+                if (element is not Node node)
                     continue;
-                double left = Canvas.GetLeft(element);
-                double top = Canvas.GetTop(element);
+                var left = Canvas.GetLeft(node);
+                var top = Canvas.GetTop(node);
+                var width = node.RenderSize.Width;
+                var height = node.RenderSize.Height;
 
-                double width = element.RenderSize.Width;
-                double height = element.RenderSize.Height;
-
-                Rect elementRect = new Rect(new Point(left, top), new Size(width, height));
+                var elementRect = new Rect(new Point(left, top), new Size(width, height));
 
                 if (rect.Contains(elementRect))
                 {
-                    elementsInsideRect.Add((Node)element);
+                    elementsInsideRect.Add(node);
                 }
             }
 
             return elementsInsideRect;
         }
 
-        public int GetDirectionIfOutside(Point p)
+        private int GetDirectionIfOutside(Point p)
         {
-            double left = 0;
-            double top = 0;
-            double right = ActualWidth;
-            double bottom = ActualHeight;
-            int n = 0;
+            const double left = 0;
+            const double top = 0;
+            var right = ActualWidth;
+            var bottom = ActualHeight;
+            var n = 0;
             if (p.X < left)
                 n += 8;
             if (p.X > right)
@@ -806,43 +822,42 @@ namespace NodeVideoEffects.Editor
 
         private void Canvas_Zoom(double zoom, Point zoomCenter)
         {
-            double rate = zoom / scale;
-            if (zoom > 4) rate = 4 / scale;
-            if (zoom < 0.1) rate = 0.1 / scale;
+            var rate = zoom switch
+            {
+                > 4 => 4 / _scale,
+                < 0.1 => 0.1 / _scale,
+                _ => zoom / _scale
+            };
 
-            scale *= rate;
-            scaleTransform.ScaleX = scale;
-            scaleTransform.ScaleY = scale;
+            _scale *= rate;
+            _scaleTransform.ScaleX = _scale;
+            _scaleTransform.ScaleY = _scale;
 
-            translateTransform.X += (rate - 1) * (translateTransform.X - zoomCenter.X);
-            translateTransform.Y += (rate - 1) * (translateTransform.Y - zoomCenter.Y);
+            _translateTransform.X += (rate - 1) * (_translateTransform.X - zoomCenter.X);
+            _translateTransform.Y += (rate - 1) * (_translateTransform.Y - zoomCenter.Y);
 
-            zoomValue.Text = ((int)(scale * 100)).ToString() + "%";
+            ZoomValue.Text = ((int)(_scale * 100)) + "%";
         }
 
         private void Canvas_Zoom(double zoom)
         {
-            Point canvasCenter = new Point(wrapper_canvas.ActualWidth / 2, wrapper_canvas.ActualHeight / 2);
+            var canvasCenter = new Point(WrapperCanvas.ActualWidth / 2, WrapperCanvas.ActualHeight / 2);
             Canvas_Zoom(zoom, canvasCenter);
         }
 
         private void Canvas_Zoom(double zoom, MouseWheelEventArgs e)
         {
-            Point mousePosition = e.GetPosition(wrapper_canvas);
+            var mousePosition = e.GetPosition(WrapperCanvas);
             Canvas_Zoom(zoom, mousePosition);
         }
-        private new void PreviewTextInput(object sender, TextCompositionEventArgs e)
-        {
-            Regex regex = new("[^0-9]");
-            e.Handled = regex.IsMatch(e.Text);
-        }
+        private new void PreviewTextInput(object sender, TextCompositionEventArgs e) =>
+            e.Handled = NumberRegex().IsMatch(e.Text);
 
         private void TextBoxPasting(object sender, DataObjectPastingEventArgs e)
         {
             if (e.DataObject.GetDataPresent(typeof(string)))
             {
-                string text = (string)e.DataObject.GetData(typeof(string));
-                if (new Regex("[^0-9]").IsMatch(text))
+                if (e.DataObject.GetData(typeof(string)) is string text && NumberRegex().IsMatch(text))
                 {
                     e.CancelCommand();
                 }
@@ -853,25 +868,26 @@ namespace NodeVideoEffects.Editor
             }
         }
 
-        private void zoomValueSubmit(object sender, KeyEventArgs e)
+        private void ZoomValueSubmit(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Return || e.Key == Key.Enter)
+            if (e.Key != Key.Return) return;
+            if (ZoomValue.Text == "") ZoomValue.Text = "100";
+            if ("%".EndsWith(ZoomValue.Text)) ZoomValue.Text = ZoomValue.Text.Remove(ZoomValue.Text.Length - 1);
+            double zoom;
+            try
             {
-                if (zoomValue.Text == "") zoomValue.Text = "100";
-                if (zoomValue.Text.EndsWith("%")) zoomValue.Text = zoomValue.Text.Remove(zoomValue.Text.Length - 1);
-                double zoom;
-                try
-                {
-                    zoom = double.Parse(zoomValue.Text) / 100;
-                }
-                catch (Exception)
-                {
-                    zoom = 1;
-                }
-                Canvas_Zoom(zoom);
-                Keyboard.ClearFocus();
+                zoom = double.Parse(ZoomValue.Text) / 100;
             }
+            catch (Exception)
+            {
+                zoom = 1;
+            }
+            Canvas_Zoom(zoom);
+            Keyboard.ClearFocus();
         }
+
+        [GeneratedRegex("[^0-9]")]
+        private static partial Regex NumberRegex();
         #endregion
     }
 }

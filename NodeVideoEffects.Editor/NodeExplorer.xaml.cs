@@ -3,7 +3,6 @@ using NodeVideoEffects.Type;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
-using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -15,147 +14,136 @@ namespace NodeVideoEffects.Editor
     /// <summary>
     /// Interaction logic for NodeExplorer.xaml
     /// </summary>
-    public partial class NodeExplorer : UserControl
+    public partial class NodeExplorer
     {
-        public ObservableCollection<NodesTree> Root { get; set; } = new ObservableCollection<NodesTree>();
-        private System.Type? type = null;
-        private Window window;
+        public ObservableCollection<NodesTree> Root { get; } = [];
+        private System.Type? _type;
+        private Window? _window;
         public NodeExplorer()
         {
             InitializeComponent();
 
-            System.Type baseType = typeof(INode);
-
-            Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
-
-            foreach (Assembly assembly in assemblies)
+            Dispatcher.InvokeAsync(() =>
             {
-                IEnumerable<System.Type> types = assembly.GetTypes()
-                                    .Where(t => t.IsClass && !t.IsAbstract && t.IsSubclassOf(baseType));
+                var baseType = typeof(INode);
 
-                foreach (System.Type type in types)
-                {
-                    AddTypeToExplorerRoot(type);
-                }
-            }
+                var assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
-            void AddTypeToExplorerRoot(System.Type type)
-            {
-                INode? obj;
-                try
+                foreach (var assembly in assemblies)
                 {
-                    obj = Activator.CreateInstance(type, [""]) as INode;
-                }
-                catch
-                {
-                    obj = Activator.CreateInstance(type, []) as INode;
-                }
-                string[] category = (obj)?.Category?.Split('/') ?? ["(No Category)"];
-                if ((type.Namespace?.Split('.') ?? Array.Empty<string>())[0] == "NodeVideoEffects")
-                {
-                    string[] temp = new string[category.Length + 1];
-                    temp[0] = "Accessory";
-                    Array.Copy(category, 0, temp, 1, category.Length);
-                    category = temp;
-                }
-                else
-                {
-                    string[] temp = new string[category.Length + 1];
-                    temp[0] = "Expansion";
-                    Array.Copy(category, 0, temp, 1, category.Length);
-                    category = temp;
-                }
-                NodesTree? currentNode = null;
+                    var types = assembly.GetTypes()
+                        .Where(t => t is { IsClass: true, IsAbstract: false } && t.IsSubclassOf(baseType));
 
-                foreach (string ns in category)
-                {
-                    NodesTree? node = currentNode?.Children?.FirstOrDefault(n => n.Text == ns)
-                               ?? Root.FirstOrDefault(n => n.Text == ns);
-
-                    if (node == null)
+                    foreach (var type in types)
                     {
-                        node = new NodesTree { Text = ns };
-                        if (currentNode == null)
-                        {
-                            Root.Add(node);
-                        }
-                        else
-                        {
-                            currentNode.Add(node);
-                        }
+                        AddTypeToExplorerRoot(type);
+                    }
+                }
+
+                DataContext = this;
+                return;
+
+                void AddTypeToExplorerRoot(System.Type type)
+                {
+                    INode? obj;
+                    try
+                    {
+                        obj = Activator.CreateInstance(type, [""]) as INode;
+                    }
+                    catch
+                    {
+                        obj = Activator.CreateInstance(type, []) as INode;
                     }
 
-                    currentNode = node;
+                    var category = obj?.Category?.Split('/') ?? ["(No Category)"];
+                    if ((type.Namespace?.Split('.') ?? [])[0] == "NodeVideoEffects")
+                    {
+                        var temp = new string[category.Length + 1];
+                        temp[0] = "Accessory";
+                        Array.Copy(category, 0, temp, 1, category.Length);
+                        category = temp;
+                    }
+                    else
+                    {
+                        var temp = new string[category.Length + 1];
+                        temp[0] = "Expansion";
+                        Array.Copy(category, 0, temp, 1, category.Length);
+                        category = temp;
+                    }
+
+                    NodesTree? currentNode = null;
+
+                    foreach (var ns in category)
+                    {
+                        var node = currentNode?.Children?.FirstOrDefault(n => n.Text == ns)
+                                   ?? Root.FirstOrDefault(n => n.Text == ns);
+
+                        if (node == null)
+                        {
+                            node = new NodesTree { Text = ns };
+                            if (currentNode == null)
+                            {
+                                Root.Add(node);
+                            }
+                            else
+                            {
+                                currentNode.Add(node);
+                            }
+                        }
+
+                        currentNode = node;
+                    }
+
+                    var typeNode = new NodesTree { Text = obj?.Name ?? type.Name, Type = type };
+                    currentNode?.Add(typeNode);
                 }
+            });
 
-                NodesTree typeNode = new NodesTree { Text = obj?.Name ?? type.Name, Type = type };
-                currentNode?.Add(typeNode);
-            }
-
-            DataContext = this;
-
-            Loaded += (s, e) =>
+            Loaded += (_, _) =>
             {
-                window = FindParent<Window>(this);
+                _window = FindParent<Window>(this);
             };
         }
 
-        private static T FindParent<T>(DependencyObject child) where T : DependencyObject
+        private static T? FindParent<T>(DependencyObject? child) where T : DependencyObject
         {
-            DependencyObject parentObject = VisualTreeHelper.GetParent(child);
+            if (child == null) return null;
+            var parentObject = VisualTreeHelper.GetParent(child);
 
-            if (parentObject == null) return null;
-
-            T parent = parentObject as T;
-            if (parent != null)
-                return parent;
-            else
-                return FindParent<T>(parentObject);
+            return parentObject switch
+            {
+                null => null,
+                T parent => parent,
+                _ => FindParent<T>(parentObject)
+            };
         }
 
         private void TextBlock_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            TextBlock? textBlock = sender as TextBlock;
-
-            if (textBlock != null)
-            {
-                NodesTree? dataContext = textBlock.DataContext as NodesTree;
-
-                if (dataContext != null)
-                {
-                    if (dataContext.Type == typeof(InputNode) || dataContext.Type == typeof(OutputNode))
-                    {
-                        return;
-                    }
-                    type = dataContext.Type;
-                    if (type != null)
-                        textBlock.CaptureMouse();
-                }
-            }
+            if (sender is not TextBlock textBlock) return;
+            if (textBlock.DataContext is not NodesTree dataContext) return;
+            if (dataContext.Type == typeof(InputNode) || dataContext.Type == typeof(OutputNode))
+                return;
+            _type = dataContext.Type;
+            if (_type != null)
+                textBlock.CaptureMouse();
         }
 
         private void TextBlock_MouseMove(object sender, MouseEventArgs e)
         {
-            TextBlock? textBlock = sender as TextBlock;
-
-            if (textBlock != null)
+            if (sender is TextBlock)
             {
-                if (type != null)
+                if (_type != null)
                 {
-                    Point position = e.GetPosition(window);
-                    HitTestResult result = VisualTreeHelper.HitTest(window, position);
-
-                    if (result != null)
+                    var position = e.GetPosition(_window);
+                    if (_window != null)
                     {
-                        var element = result.VisualHit as FrameworkElement;
+                        var result = VisualTreeHelper.HitTest(_window, position);
 
-                        if (element != null)
+                        if (result?.VisualHit is FrameworkElement element)
                         {
-                            Editor? editor = FindParent<Editor>(element);
-                            if (editor != null)
-                                Cursor = Cursors.Arrow;
-                            else
-                                Cursor = Cursors.No;
+                            var editor = FindParent<Editor>(element);
+                            Cursor = editor != null ? Cursors.Arrow : Cursors.No;
                         }
                     }
                 }
@@ -165,44 +153,40 @@ namespace NodeVideoEffects.Editor
 
         private void TextBlock_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            if (type != null)
+            if (_type != null)
             {
-                TextBlock? textBlock = sender as TextBlock;
-
-                if (textBlock != null)
+                if (sender is TextBlock textBlock)
                 {
-                    if (type != null)
+                    if (_type != null)
                     {
-                        Point position = e.GetPosition(window);
-                        HitTestResult result = VisualTreeHelper.HitTest(window, position);
-
-                        if (result != null)
+                        var position = e.GetPosition(_window);
+                        if (_window != null)
                         {
-                            var element = result.VisualHit as FrameworkElement;
+                            var result = VisualTreeHelper.HitTest(_window, position);
 
-                            if (element != null)
+                            if (result?.VisualHit is FrameworkElement element)
                             {
-                                Editor? editor = FindParent<Editor>(element);
+                                var editor = FindParent<Editor>(element);
                                 if (editor != null)
                                 {
                                     INode? node;
                                     try
                                     {
-                                        node = Activator.CreateInstance(type, [editor.ItemID]) as INode;
+                                        node = Activator.CreateInstance(_type, editor.ItemId) as INode;
                                     }
                                     catch
                                     {
-                                        node = Activator.CreateInstance(type, []) as INode;
+                                        node = Activator.CreateInstance(_type, []) as INode;
                                     }
                                     if (node != null)
                                     {
-                                        node.Id = editor.ItemID + "-" + Guid.NewGuid().ToString("N");
-                                        for (int i = 0; i < (node.Inputs?.Length ?? 0); i++)
+                                        node.Id = editor.ItemId + "-" + Guid.NewGuid().ToString("N");
+                                        for (var i = 0; i < (node.Inputs?.Length ?? 0); i++)
                                         {
-                                            node.SetInputConnection(i, new());
+                                            node.SetInputConnection(i, new Connection());
                                         }
                                         NodesManager.AddNode(node.Id, node);
-                                        editor.AddChildren(new(node), editor.ConvertToTransform(e.GetPosition(editor)).X, editor.ConvertToTransform(e.GetPosition(editor)).Y);
+                                        editor.AddChildren(new Node(node), editor.ConvertToTransform(e.GetPosition(editor)).X, editor.ConvertToTransform(e.GetPosition(editor)).Y);
                                         editor.OnNodesUpdated();
                                     }
                                 }
@@ -211,7 +195,7 @@ namespace NodeVideoEffects.Editor
                     }
                     textBlock.ReleaseMouseCapture();
                 }
-                type = null;
+                _type = null;
             }
             e.Handled = true;
         }
@@ -219,40 +203,40 @@ namespace NodeVideoEffects.Editor
 
     public class NodesTree : INotifyPropertyChanged
     {
-        private bool _IsExpanded = true;
-        private string _Text = "";
-        private System.Type? _Type;
-        private NodesTree? _Parent;
-        private ObservableCollection<NodesTree>? _Children;
+        private bool _isExpanded = true;
+        private readonly string _text = "";
+        private readonly System.Type? _type;
+        private NodesTree? _parent;
+        private ObservableCollection<NodesTree>? _children;
 
         public bool IsExpanded
         {
-            get { return _IsExpanded; }
-            set { _IsExpanded = value; OnPropertyChanged("IsExpanded"); }
+            get => _isExpanded;
+            set { _isExpanded = value; OnPropertyChanged("IsExpanded"); }
         }
 
         public string Text
         {
-            get { return _Text; }
-            set { _Text = value; OnPropertyChanged("Text"); }
+            get => _text;
+            init { _text = value; OnPropertyChanged("Text"); }
         }
 
         public System.Type? Type
         {
-            get { return _Type; }
-            set { _Type = value; OnPropertyChanged("Text"); }
+            get => _type;
+            init { _type = value; OnPropertyChanged("Text"); }
         }
 
         public NodesTree? Parent
         {
-            get { return _Parent; }
-            set { _Parent = value; OnPropertyChanged("Parent"); }
+            get => _parent;
+            set { _parent = value; OnPropertyChanged("Parent"); }
         }
 
         public ObservableCollection<NodesTree>? Children
         {
-            get { return _Children; }
-            set { _Children = value; OnPropertyChanged("Children"); }
+            get => _children;
+            set { _children = value; OnPropertyChanged("Children"); }
         }
 
         public Brush Color
@@ -265,13 +249,20 @@ namespace NodeVideoEffects.Editor
                     INode? node;
                     try
                     {
-                        node = Activator.CreateInstance(Type, [""]) as INode;
+                        if (Type != null)
+                        {
+                            node = Activator.CreateInstance(Type, "") as INode;
+                            if (node != null) color = node.Color;
+                        }
                     }
                     catch
                     {
-                        node = Activator.CreateInstance(Type, []) as INode;
+                        if (Type != null)
+                        {
+                            node = Activator.CreateInstance(Type, []) as INode;
+                            if (node != null) color = node.Color;
+                        }
                     }
-                    color = node.Color;
                 }
                 catch
                 {
@@ -282,17 +273,16 @@ namespace NodeVideoEffects.Editor
             }
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         private void OnPropertyChanged(string name)
         {
-            if (PropertyChanged == null) return;
-            PropertyChanged(this, new PropertyChangedEventArgs(name));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
         public void Add(NodesTree child)
         {
-            if (null == Children) Children = new ObservableCollection<NodesTree>();
+            Children ??= [];
             child.Parent = this;
             Children.Add(child);
         }
@@ -302,20 +292,19 @@ namespace NodeVideoEffects.Editor
     {
         public static int GetDepth(this TreeViewItem item)
         {
-            TreeViewItem parent;
-            while ((parent = GetParent(item)) != null)
+            while (GetParent(item) is { } parent)
             {
                 return GetDepth(parent) + 1;
             }
             return 0;
         }
 
-        private static TreeViewItem GetParent(TreeViewItem item)
+        private static TreeViewItem? GetParent(TreeViewItem item)
         {
             var parent = VisualTreeHelper.GetParent(item);
-            while (!(parent is TreeViewItem || parent is TreeView))
+            while (parent is not (TreeViewItem or TreeView))
             {
-                parent = VisualTreeHelper.GetParent(parent);
+                if (parent != null) parent = VisualTreeHelper.GetParent(parent);
             }
             return parent as TreeViewItem;
         }
@@ -325,26 +314,18 @@ namespace NodeVideoEffects.Editor
     {
         public double Length { get; set; }
 
-        public object Convert(object value, System.Type targetType, object parameter, CultureInfo culture)
-        {
-            var item = value as TreeViewItem;
-            if (item == null)
-                return new Thickness(0);
+        public object Convert(object? value, System.Type targetType, object? parameter, CultureInfo culture) =>
+            value is not TreeViewItem item ? new Thickness(0) : new Thickness(Length * item.GetDepth(), 0, 0, 0);
 
-            return new Thickness(Length * item.GetDepth(), 0, 0, 0);
-        }
-
-        public object ConvertBack(object value, System.Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new System.NotImplementedException();
-        }
+        public object ConvertBack(object? value, System.Type targetType, object? parameter, CultureInfo culture) =>
+            value is Thickness thickness ? thickness.Left / Length : 0;
     }
 
     public class WidthToVisibilityConverter : IValueConverter
     {
         public double Threshold { get; set; }
 
-        public object Convert(object value, System.Type targetType, object parameter, CultureInfo culture)
+        public object Convert(object? value, System.Type targetType, object? parameter, CultureInfo culture)
         {
             if (value is double width)
             {
@@ -353,9 +334,11 @@ namespace NodeVideoEffects.Editor
             return Visibility.Collapsed;
         }
 
-        public object ConvertBack(object value, System.Type targetType, object parameter, CultureInfo culture)
+        public object ConvertBack(object? value, System.Type targetType, object? parameter, CultureInfo culture)
         {
-            throw new NotImplementedException();
+            if (value is Visibility visibility)
+                return visibility == Visibility.Visible ? Threshold - 1 : Threshold + 1;
+            return Threshold + 1;
         }
     }
 }

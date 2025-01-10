@@ -7,21 +7,21 @@ namespace NodeVideoEffects.Nodes.Math
     {
         public PowNode() : base(
             [
-                new(new Number(0, null, null, null), "Base"),
-                new(new Number(0, null, null, null), "Exponent")
+                new Input(new Number(0, null, null, null), "Base"),
+                new Input(new Number(0, null, null, null), "Exponent")
             ],
             [
-                new (new Number(0, null, null, null), "Result")
+                new Output(new Number(0, null, null, null), "Result")
             ],
             "Pow",
             Colors.LightCoral,
             "Math/Basic")
         { }
 
-        public override async Task Calculate()
+        public override Task Calculate()
         {
-            this.Outputs[0].Value = System.Math.Pow((double)Inputs[0].Value, (double)Inputs[1].Value);
-            return;
+            Outputs[0].Value = System.Math.Pow((double)(Inputs[0].Value ?? 0), (double)(Inputs[1].Value ?? 0));
+            return Task.CompletedTask;
         }
     }
 }

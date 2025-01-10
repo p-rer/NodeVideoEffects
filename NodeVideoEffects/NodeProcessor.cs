@@ -13,72 +13,70 @@ namespace NodeVideoEffects
 {
     internal class NodeProcessor : IVideoEffectProcessor
     {
-        internal ID2D1DeviceContext6 _context;
-        readonly NodeVideoEffectsPlugin item;
-        public ID2D1Image Output { set; get; }
+        internal ID2D1DeviceContext6 Context;
+        private readonly NodeVideoEffectsPlugin _item;
+        public ID2D1Image Output { private set; get; } = null!;
 
-        Nodes.Basic.InputNode inputNode;
-        Nodes.Basic.OutputNode outputNode;
+        private readonly OutputNode _outputNode = null!;
 
-        ID2D1Bitmap1 bitmap;
+        private ID2D1Bitmap1 _bitmap;
 
         public NodeProcessor(IGraphicsDevicesAndContext context, NodeVideoEffectsPlugin item)
         {
-            _context = context.DeviceContext;
-            if (item.ID == "" ^ !NodesManager.AddItem(item.ID))
+            Context = context.DeviceContext;
+            if (item.Id == "" ^ !NodesManager.AddItem(item.Id))
             {
-                item.ID = Guid.NewGuid().ToString("N");
-                NodesManager.AddItem(item.ID);
-                Logger.Write(LogLevel.Info, $"Created the effect processor, ID: \"{item.ID}\".");
+                item.Id = Guid.NewGuid().ToString("N");
+                NodesManager.AddItem(item.Id);
+                Logger.Write(LogLevel.Info, $"Created the effect processor, ID: \"{item.Id}\".");
             }
             if (item.Nodes.Count == 0)
             {
-                inputNode = new();
-                outputNode = new();
-                inputNode.Id = item.ID + "-" + Guid.NewGuid().ToString("N");
-                outputNode.Id = item.ID + "-" + Guid.NewGuid().ToString("N");
+                var inputNode = new InputNode();
+                _outputNode = new OutputNode();
+                inputNode.Id = item.Id + "-" + Guid.NewGuid().ToString("N");
+                _outputNode.Id = item.Id + "-" + Guid.NewGuid().ToString("N");
                 NodesManager.AddNode(inputNode.Id, inputNode);
-                NodesManager.AddNode(outputNode.Id, outputNode);
-                outputNode.SetInputConnection(0, new(inputNode.Id, 0));
+                NodesManager.AddNode(_outputNode.Id, _outputNode);
+                _outputNode.SetInputConnection(0, new Connection(inputNode.Id, 0));
                 item.EditorNodes = [
-                        new(inputNode.Id, inputNode.GetType(), [], 100, 100, []),
-                        new(outputNode.Id, outputNode.GetType(), [], 500, 100, [new(inputNode.Id, 0)])
+                        new NodeInfo(inputNode.Id, inputNode.GetType(), [], 100, 100, []),
+                        new NodeInfo(_outputNode.Id, _outputNode.GetType(), [], 500, 100,
+                            [new Connection(inputNode.Id, 0)])
                     ];
                 Logger.Write(LogLevel.Info, $"Initializing completed.");
             }
             else
             {
-                for (int i = 0; i < item.Nodes.Count; i++)
+                for (var i = 0; i < item.Nodes.Count; i++)
                 {
-                    NodeInfo info = item.Nodes[i];
-                    INode? node = NodesManager.GetNode(info.ID);
-                    int index = info.ID.IndexOf('-');
-                    if (info.ID[0..index] != item.ID)
-                        info.ID = item.ID + "-" + info.ID[(index + 1)..^0];
-                    System.Type? type = System.Type.GetType(info.Type);
+                    var info = item.Nodes[i];
+                    var node = NodesManager.GetNode(info.Id);
+                    var index = info.Id.IndexOf('-');
+                    if (info.Id[..index] != item.Id)
+                        info.Id = item.Id + "-" + info.Id[(index + 1)..];
+                    var type = System.Type.GetType(info.Type);
                     if (type != null)
                     {
                         object? obj;
                         try
                         {
-                            obj = Activator.CreateInstance(type, [item.ID]);
+                            obj = Activator.CreateInstance(type, item.Id);
                         }
                         catch
                         {
                             obj = Activator.CreateInstance(type, []);
                         }
                         node = obj as INode ?? throw new Exception("Unable to create node instance.");
-                        node.Id = info.ID;
-                        NodesManager.AddNode(info.ID, node);
+                        node.Id = info.Id;
+                        NodesManager.AddNode(info.Id, node);
                     }
 
                     if (node != null)
                     {
-                        if (node.GetType() == typeof(InputNode))
-                            inputNode = (InputNode)node;
                         if (node.GetType() == typeof(OutputNode))
                         {
-                            outputNode = (OutputNode)node;
+                            _outputNode = (OutputNode)node;
                         }
                         for (int j = 0; j < info.Values.Count; j++)
                         {
@@ -86,28 +84,26 @@ namespace NodeVideoEffects
                         }
                     }
                 }
-                foreach (NodeInfo info in item.Nodes)
+                foreach (var info in item.Nodes)
                 {
-                    INode? node = NodesManager.GetNode(info.ID);
-                    for (int i = 0; i < info.Connections.Count; i++)
+                    var node = NodesManager.GetNode(info.Id);
+                    for (var i = 0; i < info.Connections.Count; i++)
                     {
-                        if (info.Connections[i].id != "")
+                        if (info.Connections[i].Id == "") continue;
+                        var index = info.Id.IndexOf('-');
+                        if (info.Connections[i].Id[..index] != item.Id)
                         {
-                            int index = info.ID.IndexOf('-');
-                            if (info.Connections[i].id[0..index] != item.ID)
-                            {
-                                info.Connections[i] = new(item.ID
-                                                          + "-"
-                                                          + info.Connections[i].id[(index + 1)..^0], info.Connections[i].index);
-                            }
-
-                            node?.SetInputConnection(i, info.Connections[i]);
+                            info.Connections[i] = new Connection(item.Id
+                                                                 + "-"
+                                                                 + info.Connections[i].Id[(index + 1)..], info.Connections[i].Index);
                         }
+
+                        node?.SetInputConnection(i, info.Connections[i]);
                     }
                 }
                 Logger.Write(LogLevel.Info, $"Connection restoration completed.");
             }
-            NodesManager.SetContext(item.ID, context);
+            NodesManager.SetContext(item.Id, context);
 
             BitmapProperties1 bitmapProperties = new BitmapProperties1(
                 new PixelFormat(Format.B8G8R8A8_UNorm, AlphaMode.Premultiplied),
@@ -116,100 +112,95 @@ namespace NodeVideoEffects
                 BitmapOptions.Target
             );
 
-            bitmap = _context.CreateBitmap(
+            _bitmap = Context.CreateBitmap(
                 new SizeI(1, 1),
                 IntPtr.Zero,
                 0,
                 bitmapProperties
             );
 
-            this.item = item;
+            this._item = item;
         }
 
-        public void SetInput(ID2D1Image input)
+        public void SetInput(ID2D1Image? input)
         {
-            NodesManager.SetInput(item.ID, input);
-            ID2D1Image? _output = ((ImageAndContext?)outputNode.Inputs[0].Value)?.Image ?? null;
-            if (_output == null || _output.NativePointer == 0)
+            NodesManager.SetInput(_item.Id, input);
+            var output = ((ImageAndContext?)_outputNode.Inputs[0].Value)?.Image ?? null;
+            if (output == null || output.NativePointer == 0)
             {
-                Logger.Write(LogLevel.Warn, $"The output of this item(ID: \"{item.ID}\" is a blank image because the output of OutputNode is null.");
+                Logger.Write(LogLevel.Warn, $"The output of this item(ID: \"{_item.Id}\" is a blank image because the output of OutputNode is null.");
 
-                SetBlankImage(out _output);
+                SetBlankImage(out output);
             }
-            Output = _output;
+            Output = output;
         }
 
         public void ClearInput() { }
 
         public DrawDescription Update(EffectDescription effectDescription)
         {
-            var frame = effectDescription.ItemPosition.Frame;
-            var length = effectDescription.ItemDuration.Frame;
-            var fps = effectDescription.FPS;
             try
             {
-                typeof(NodesManager)
-                    ?.GetMethod("SetInfo",
+                typeof(NodesManager).GetMethod("SetInfo",
                     BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
-                    ?.Invoke(null, [item.ID, effectDescription]);
-                ID2D1Image? _output = ((ImageAndContext?)outputNode.Inputs[0].Value)?.Image ?? null;
-                if (_output == null || _output.NativePointer == 0)
+                    ?.Invoke(null, [_item.Id, effectDescription]);
+                var output = ((ImageAndContext?)_outputNode.Inputs[0].Value)?.Image ?? null;
+                if (output == null || output.NativePointer == 0)
                 {
-                    Logger.Write(LogLevel.Warn, $"The output of this item(ID: \"{item.ID}\" is a blank image because the output of OutputNode is null.");
+                    Logger.Write(LogLevel.Warn, $"The output of this item(ID: \"{_item.Id}\" is a blank image because the output of OutputNode is null.");
 
-                    SetBlankImage(out _output);
+                    SetBlankImage(out output);
                 }
-                Output = _output;
+                Output = output;
             }
             catch (NullReferenceException e)
             {
-                Logger.Write(LogLevel.Error, $"{e.Message}\nItem ID: \"{item.ID}\"");
+                Logger.Write(LogLevel.Error, $"{e.Message}\nItem ID: \"{_item.Id}\"");
 
-                ID2D1Image _output;
-                SetBlankImage(out _output);
-                Output = _output;
+                SetBlankImage(out var output);
+                Output = output;
             }
 
             return effectDescription.DrawDescription;
         }
 
-        private void SetBlankImage(out ID2D1Image _output)
+        private void SetBlankImage(out ID2D1Image output)
         {
-            if (bitmap.NativePointer == 0)
+            if (_bitmap.NativePointer == 0)
             {
-                BitmapProperties1 bitmapProperties = new BitmapProperties1(
+                var bitmapProperties = new BitmapProperties1(
                 new PixelFormat(Format.B8G8R8A8_UNorm, AlphaMode.Premultiplied),
                 96,
                 96,
                 BitmapOptions.Target
             );
 
-                bitmap = _context.CreateBitmap(
+                _bitmap = Context.CreateBitmap(
                     new SizeI(1, 1),
                     IntPtr.Zero,
                     0,
                     bitmapProperties
                 );
             }
-            _context.Target = bitmap;
-            _context.BeginDraw();
-            _context.Clear(new Color(0, 0, 0, 0));
-            _context.EndDraw();
+            Context.Target = _bitmap;
+            Context.BeginDraw();
+            Context.Clear(new Color(0, 0, 0, 0));
+            Context.EndDraw();
 
-            _output = bitmap;
+            output = _bitmap;
         }
 
         public void Dispose()
         {
             ClearInput();
-            bitmap.Dispose();
+            _bitmap.Dispose();
             try
             {
                 Output.Dispose();
             }
-            catch
+            catch (Exception e)
             {
-
+                Logger.Write(LogLevel.Warn, $"{e.Message}\nItem ID: \"{_item.Id}\"");
             }
         }
     }
