@@ -28,11 +28,8 @@ namespace NodeVideoEffects.Editor
             Index = index;
             PortName.Content = input.Name;
             Port.Fill = new SolidColorBrush(input.Color);
-            if (_control is not null)
-            {
-                (_control as System.Windows.Controls.Control)!.Loaded += (_, _) => _control.PropertyChanged += OnControlPropertyChanged;
-                _control = input.Control;
-            }
+            if (_control is not null) _control.PropertyChanged += OnControlPropertyChanged;
+            _control = input.Control;
             PortControl.Content = _control;
             Loaded += (_, _) =>
             {
