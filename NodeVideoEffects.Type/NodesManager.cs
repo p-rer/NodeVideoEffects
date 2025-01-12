@@ -71,34 +71,40 @@ namespace NodeVideoEffects.Type
             return result;
         }
 
-        public static void NoticeOutputChanged(string id, int index)
+        public static void NotifyOutputChanged(string id, int index)
         {
-            Dictionary[id].Inputs[index].UpdatedConnectionValue();
+            Task.Run(() => Dictionary[id].Inputs[index].UpdatedConnectionValue());
         }
-        public static void NoticeInputConnectionAdd(string iid, int iindex, string oid, int oindex)
+        public static void NotifyInputConnectionAdd(string iid, int iindex, string oid, int oindex)
         {
-            try
+            Task.Run(() =>
             {
-                Dictionary[oid].Outputs[oindex].AddConnection(iid, iindex);
-            }
-            catch (Exception e)
-            {
-                Logger.Write(LogLevel.Error, e.Message);
-            }
+                try
+                {
+                    Dictionary[oid].Outputs[oindex].AddConnection(iid, iindex);
+                }
+                catch (Exception e)
+                {
+                    Logger.Write(LogLevel.Error, e.Message);
+                }
+            });
         }
-        public static void NoticeInputConnectionRemove(string inId, int inIndex, string outId, int outIndex)
+        public static void NotifyInputConnectionRemove(string inId, int inIndex, string outId, int outIndex)
         {
-            try
+            Task.Run(() =>
             {
-                Dictionary[outId].Outputs[outIndex].RemoveConnection(inId, inIndex);
-            }
-            catch (Exception e)
-            {
-                Logger.Write(LogLevel.Error, e.Message);
-            }
+                try
+                {
+                    Dictionary[outId].Outputs[outIndex].RemoveConnection(inId, inIndex);
+                }
+                catch (Exception e)
+                {
+                    Logger.Write(LogLevel.Error, e.Message);
+                }
+            });
         }
         public static void AddNode(string id, INode node) => Dictionary.Add(id, node);
-        public static void RemoveNode(string id) => Dictionary.Remove(id);
+        public static void RemoveNode(string id) => Dictionary.Remove(string.IsNullOrEmpty(id) ? id : "");
         public static bool AddItem(string id)
         {
             if (Items.Contains(id)) return false;
@@ -108,7 +114,7 @@ namespace NodeVideoEffects.Type
         }
         public static void RemoveItem(string id)
         {
-            if (Images.TryGetValue(id, out ID2D1Image? image))
+            if (Images.TryGetValue(id, out var image))
             {
                 image?.Dispose();
             }

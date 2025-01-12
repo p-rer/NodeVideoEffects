@@ -17,7 +17,7 @@ namespace NodeVideoEffects.Type
 
         public Color Color => Colors.CornflowerBlue;
 
-        public IControl? Control { get; }
+        public IControl Control { get; }
 
         public void Dispose() { }
 

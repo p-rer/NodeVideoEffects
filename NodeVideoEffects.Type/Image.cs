@@ -6,6 +6,8 @@ namespace NodeVideoEffects.Type
     public class Image : PortValue
     {
         private ImageAndContext _value;
+        private IControl? _control;
+
         /// <summary>
         /// Create new Image object
         /// </summary>
@@ -33,6 +35,6 @@ namespace NodeVideoEffects.Type
             _value.Image?.Dispose();
         }
 
-        public IControl? Control => null;
+        public IControl Control => _control ??= new NoControlPort();
     }
 }

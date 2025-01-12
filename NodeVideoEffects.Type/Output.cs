@@ -54,7 +54,7 @@ namespace NodeVideoEffects.Type
                 if (Connection.Count == 0) return;
                 foreach (var connection in Connection)
                 {
-                    NodesManager.NoticeOutputChanged(connection.Id, connection.Index);
+                    NodesManager.NotifyOutputChanged(connection.Id, connection.Index);
                 }
             }
         }

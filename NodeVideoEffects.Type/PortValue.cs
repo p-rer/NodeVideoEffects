@@ -28,6 +28,6 @@ namespace NodeVideoEffects.Type
         /// <summary>
         /// Control for input port
         /// </summary>
-        public IControl? Control { get; }
+        public IControl Control { get; }
     }
 }

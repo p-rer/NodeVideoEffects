@@ -12,7 +12,7 @@ namespace NodeVideoEffects.Editor
     /// </summary>
     public partial class InputPort
     {
-        private readonly IControl? _control;
+        private readonly IControl _control;
         private readonly Input _input;
 
         private Editor? _editor;
@@ -28,8 +28,8 @@ namespace NodeVideoEffects.Editor
             Index = index;
             PortName.Content = input.Name;
             Port.Fill = new SolidColorBrush(input.Color);
-            if (_control is not null) _control.PropertyChanged += OnControlPropertyChanged;
             _control = input.Control;
+            _control.PropertyChanged += OnControlPropertyChanged;
             PortControl.Content = _control;
             Loaded += (_, _) =>
             {
@@ -52,7 +52,7 @@ namespace NodeVideoEffects.Editor
             };
         }
 
-        public object? Value => _control?.Value;
+        public object? Value => _control.Value;
 
         public string Id { get; }
 
@@ -64,7 +64,7 @@ namespace NodeVideoEffects.Editor
 
         private void OnControlPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            _input.Value = _control?.Value;
+            _input.Value = _control.Value;
             PropertyChanged(this, new PropertyChangedEventArgs(Name));
         }
 

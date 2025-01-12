@@ -7,7 +7,7 @@ namespace NodeVideoEffects.Nodes.Basic
     {
         public InputNode() : base(
             [],
-            [new(new Image(null), "Input")],
+            [new Output(new Image(null), "Input")],
             "Input",
             Colors.PaleVioletRed,
             "Basic")

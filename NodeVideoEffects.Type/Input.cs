@@ -65,7 +65,7 @@ namespace NodeVideoEffects.Type
         /// <summary>
         /// Control of this input port
         /// </summary>
-        public IControl? Control => _value.Control;
+        public IControl Control => _value.Control;
 
         /// <summary>
         /// Node id and output port connected to this port
@@ -88,7 +88,7 @@ namespace NodeVideoEffects.Type
         {
             _connection = new Connection(outId, outIndex);
             if (outId != "")
-                NodesManager.NoticeInputConnectionAdd(inId, inIndex, outId, outIndex);
+                NodesManager.NotifyInputConnectionAdd(inId, inIndex, outId, outIndex);
         }
 
         /// <summary>
@@ -99,7 +99,7 @@ namespace NodeVideoEffects.Type
         public void RemoveConnection(string id, int index)
         {
             if (_connection.Id == "") return;
-            NodesManager.NoticeInputConnectionRemove(id, index, _connection.Id, _connection.Index);
+            NodesManager.NotifyInputConnectionRemove(id, index, _connection.Id, _connection.Index);
             _connection.Id = "";
         }
 
