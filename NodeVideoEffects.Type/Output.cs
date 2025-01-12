@@ -7,7 +7,7 @@ namespace NodeVideoEffects.Type
     /// </summary>
     public class Output : IDisposable
     {
-        private readonly PortValue _value;
+        private readonly IPortValue _value;
         private object? _result;
         private bool _isSuccess;
 
@@ -16,7 +16,7 @@ namespace NodeVideoEffects.Type
         /// </summary>
         /// <param name="value">PortValue</param>
         /// <param name="name">This port's name</param>
-        public Output(PortValue value, string name)
+        public Output(IPortValue value, string name)
         {
             _value = value;
             Name = name;

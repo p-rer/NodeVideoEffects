@@ -3,7 +3,7 @@ using System.Windows.Media;
 
 namespace NodeVideoEffects.Type
 {
-    public class Bool : PortValue
+    public class Bool : IPortValue
     {
         private bool _value;
         /// <summary>

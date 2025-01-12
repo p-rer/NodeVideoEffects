@@ -9,7 +9,7 @@ namespace NodeVideoEffects.Type
     /// </summary>
     public class Input : INotifyPropertyChanged, IDisposable
     {
-        private readonly PortValue _value;
+        private readonly IPortValue _value;
         private Connection _connection = new();
 
         /// <summary>
@@ -17,7 +17,7 @@ namespace NodeVideoEffects.Type
         /// </summary>
         /// <param name="value">PortValue</param>
         /// <param name="name">This port's name</param>
-        public Input(PortValue value, string name)
+        public Input(IPortValue value, string name)
         {
             _value = value;
             Name = name;

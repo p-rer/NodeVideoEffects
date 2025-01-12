@@ -3,7 +3,7 @@ using System.Windows.Media;
 
 namespace NodeVideoEffects.Type
 {
-    public class Enum : PortValue
+    public class Enum : IPortValue
     {
         private int _value;
         public Enum(List<string> items)
