@@ -46,14 +46,14 @@ namespace NodeVideoEffects.Type
             Dispose(false);
         }
         
-        public void SetValue(params object[]? values)
+        public VideoEffectsLoader SetValue(params object[]? values)
         {
-            if (values == null) return;
+            if (values == null) return this;
             switch (_type)
             {
                 case EffectType.VideoEffect when _videoEffect != null:
                 {
-                    return;
+                    return this;
                 }
                 case EffectType.ShaderEffect when _shaderEffect != null:
                 {
@@ -64,11 +64,11 @@ namespace NodeVideoEffects.Type
                             _shaderEffect.SetValueByIndex(i, values[i]);
                         }
                     }
-                    return;
+                    return this;
                 }
 
                 default:
-                    return;
+                    return this;
             }
         }
 

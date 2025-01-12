@@ -24,7 +24,7 @@ namespace NodeVideoEffects.Type
             {
                 var node = Dictionary[id];
                 if (node.GetType().FullName == "NodeVideoEffects.Nodes.Basic.InputNode")
-                    return new ImageAndContext(Images[id[..id.IndexOf('-')]]);
+                    return new ImageWrapper(Images[id[..id.IndexOf('-')]]);
                 if (node.Outputs[index].IsSuccess)
                     return node.GetOutput(index);
                 await node.Calculate();

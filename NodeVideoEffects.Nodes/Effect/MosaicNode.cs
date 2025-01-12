@@ -27,9 +27,9 @@ namespace NodeVideoEffects.Nodes.Effect
         public override async Task Calculate()
         {
             _videoEffect ??= await VideoEffectsLoader.LoadEffect("MosaicEffect", _effectId);
-            if (_videoEffect.Update(((ImageAndContext?)Inputs[0].Value)?.Image, out var output))
+            if (_videoEffect.Update(((ImageWrapper?)Inputs[0].Value)?.Image, out var output))
             {
-                Outputs[0].Value = new ImageAndContext(output);
+                Outputs[0].Value = new ImageWrapper(output);
             }
         }
 

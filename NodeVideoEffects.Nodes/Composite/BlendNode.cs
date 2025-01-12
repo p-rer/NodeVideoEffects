@@ -77,10 +77,10 @@ namespace NodeVideoEffects.Nodes.Composite
                         return;
                     }
 
-                    _blend.SetInput(0, ((ImageAndContext?)Inputs[1].Value)?.Image, true);
-                    _blend.SetInput(1, ((ImageAndContext?)Inputs[2].Value)?.Image, true);
+                    _blend.SetInput(0, ((ImageWrapper?)Inputs[1].Value)?.Image, true);
+                    _blend.SetInput(1, ((ImageWrapper?)Inputs[2].Value)?.Image, true);
                     _blend.Mode = (BlendMode)((int?)Inputs[0].Value ?? 0);
-                    Outputs[0].Value = new ImageAndContext(_blend.Output);
+                    Outputs[0].Value = new ImageWrapper(_blend.Output);
                 }
             });
         }

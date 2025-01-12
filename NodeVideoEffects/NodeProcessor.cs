@@ -125,7 +125,7 @@ namespace NodeVideoEffects
         public void SetInput(ID2D1Image? input)
         {
             NodesManager.SetInput(_item.Id, input);
-            var output = ((ImageAndContext?)_outputNode.Inputs[0].Value)?.Image ?? null;
+            var output = ((ImageWrapper?)_outputNode.Inputs[0].Value)?.Image ?? null;
             if (output == null || output.NativePointer == 0)
             {
                 Logger.Write(LogLevel.Warn, $"The output of this item(ID: \"{_item.Id}\" is a blank image because the output of OutputNode is null.");
@@ -144,7 +144,7 @@ namespace NodeVideoEffects
                 typeof(NodesManager).GetMethod("SetInfo",
                     BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
                     ?.Invoke(null, [_item.Id, effectDescription]);
-                var output = ((ImageAndContext?)_outputNode.Inputs[0].Value)?.Image ?? null;
+                var output = ((ImageWrapper?)_outputNode.Inputs[0].Value)?.Image ?? null;
                 if (output == null || output.NativePointer == 0)
                 {
                     Logger.Write(LogLevel.Warn, $"The output of this item(ID: \"{_item.Id}\" is a blank image because the output of OutputNode is null.");

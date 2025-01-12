@@ -19,6 +19,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NodeVideoEffects.Control", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NodeVideoEffects.Utility", "NodeVideoEffects.Utility\NodeVideoEffects.Utility.csproj", "{EF799753-5A6B-48A0-A803-2978DEE1F1FE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NodeVideoEffects.API", "NodeVideoEffects.API\NodeVideoEffects.API.csproj", "{48CD7124-33CE-43AE-B974-B01F68130626}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +59,10 @@ Global
 		{EF799753-5A6B-48A0-A803-2978DEE1F1FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EF799753-5A6B-48A0-A803-2978DEE1F1FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EF799753-5A6B-48A0-A803-2978DEE1F1FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{48CD7124-33CE-43AE-B974-B01F68130626}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{48CD7124-33CE-43AE-B974-B01F68130626}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{48CD7124-33CE-43AE-B974-B01F68130626}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{48CD7124-33CE-43AE-B974-B01F68130626}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

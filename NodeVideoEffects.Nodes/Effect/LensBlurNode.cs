@@ -42,9 +42,9 @@ public class LensBlurNode : INode
             Convert.ToSingle(Inputs[2].Value),
             Convert.ToSingle(Inputs[3].Value),
             Convert.ToSingle(Inputs[4].Value));
-        if (_videoEffect.Update(((ImageAndContext?)Inputs[0].Value)?.Image, out var output))
+        if (_videoEffect.Update(((ImageWrapper?)Inputs[0].Value)?.Image, out var output))
         {
-            Outputs[0].Value = new ImageAndContext(output);
+            Outputs[0].Value = new ImageWrapper(output);
         }
     }
 }

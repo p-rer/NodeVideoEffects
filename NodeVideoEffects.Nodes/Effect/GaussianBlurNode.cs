@@ -30,9 +30,9 @@ namespace NodeVideoEffects.Nodes.Effect
             {
                 lock (_blur)
                 {
-                    _blur.SetInput(0, ((ImageAndContext?)Inputs[0].Value)?.Image, true);
+                    _blur.SetInput(0, ((ImageWrapper?)Inputs[0].Value)?.Image, true);
                     _blur.StandardDeviation = Convert.ToSingle(Inputs[1].Value);
-                    Outputs[0].Value = new ImageAndContext(_blur.Output);
+                    Outputs[0].Value = new ImageWrapper(_blur.Output);
                 }
             });
         }

@@ -5,19 +5,19 @@ namespace NodeVideoEffects.Type
 {
     public class Image : IPortValue
     {
-        private ImageAndContext _value;
+        private ImageWrapper _value;
         private IControl? _control;
 
         /// <summary>
         /// Create new Image object
         /// </summary>
         /// <param name="value"></param>
-        public Image(ImageAndContext? value)
+        public Image(ImageWrapper? value)
         {
-            _value = value ?? new ImageAndContext();
+            _value = value ?? new ImageWrapper();
         }
 
-        public System.Type Type => typeof(ImageAndContext);
+        public System.Type Type => typeof(ImageWrapper);
         public Color Color => Colors.Green;
 
         /// <summary>
@@ -27,7 +27,7 @@ namespace NodeVideoEffects.Type
 
         public void _SetValue(object? value)
         {
-            _value = (ImageAndContext?)value ?? new ImageAndContext();
+            _value = (ImageWrapper?)value ?? new ImageWrapper();
         }
 
         public void Dispose()

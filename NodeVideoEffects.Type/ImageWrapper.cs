@@ -2,14 +2,14 @@
 
 namespace NodeVideoEffects.Type
 {
-    public struct ImageAndContext
+    public struct ImageWrapper
     {
         /// <summary>
         /// Image
         /// </summary>
         [Newtonsoft.Json.JsonIgnore]
         public ID2D1Image? Image { get; set; }
-        public ImageAndContext(ID2D1Image? image)
+        public ImageWrapper(ID2D1Image? image)
         {
             Image = image;
         }

@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0-windows</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\NodeVideoEffects.Type\NodeVideoEffects.Type.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="Vortice.Direct2D1">
+        <HintPath>..\..\..\Program Files\ymm4\Vortice.Direct2D1.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
+</Project>
