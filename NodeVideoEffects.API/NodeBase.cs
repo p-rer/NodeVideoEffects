@@ -5,27 +5,22 @@ using Vortice.Direct2D1;
 
 namespace NodeVideoEffects.API;
 
+/// <summary>
+/// Base class for all nodes
+/// </summary>
 public abstract class NodeBase : INode
 {
-    private readonly string _shaderId = "";
-    private readonly string _effectId;
-    private readonly List<(System.Type, string)>? _properties;
-    private VideoEffectsLoader? _videoEffect;
-    
-    protected NodeBase(Input[] inputs, Output[] outputs, string name, Color color, string category, string id) : base(inputs,
+    /// <summary>
+    /// Initialize a new instance of <see cref="NodeBase"/>
+    /// </summary>
+    /// <param name="inputs">Array of <see cref="Input"/>. Input ports of this node</param>
+    /// <param name="outputs">Array of <see cref="Output"/>. Output ports of this node</param>
+    /// <param name="name">Name of this node</param>
+    /// <param name="color">Color of this node. Nodes with the same function should be the same color.</param>
+    /// <param name="category">Category of this node. Categories can be nested by separating them with “/”.</param>
+    protected NodeBase(Input[] inputs, Output[] outputs, string name, Color color, string category) : base(inputs,
         outputs, name, color, category)
     {
-        _effectId = id;
-    }
-    
-    protected NodeBase(Input[] inputs, Output[] outputs, string name, Color color, string category, string id,
-        string shaderName, List<(System.Type, string)> properties) :
-        base(inputs, outputs, name, color, category)
-    {
-        _effectId = id;
-        if (id == "") return;
-        _shaderId = VideoEffectsLoader.RegisterShader(shaderName);
-        _properties = properties;
     }
     
     public override async Task Calculate()
@@ -43,13 +38,9 @@ public abstract class NodeBase : INode
         });
     }
 
+    /// <summary>
+    /// Core part of node
+    /// </summary>
+    /// <returns>List of values to be set for outputs.</returns>
     protected abstract Task<List<object?>> CalculateImpl();
-
-    protected async Task<ID2D1Image?> RunEffect(ID2D1Image? input, params object?[] values)
-    {
-        (_videoEffect ??= await VideoEffectsLoader.LoadEffect(_properties!, _shaderId, _effectId))
-            .SetValue(_properties!.Select((property, i) => Convert.ChangeType(values[i], property.Item1)))
-            .Update(input, out var output);
-        return output;
-    }
 }
