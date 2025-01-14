@@ -4,13 +4,13 @@ using NodeVideoEffects.Control;
 
 namespace NodeVideoEffects.API;
 
-public abstract class PortControlBase<T> : System.Windows.Controls.Control, IControl
+public abstract class PortControlBase<T0> : System.Windows.Controls.Control, IControl
 {
-    private T? _value;
+    private T0? _value;
     public object? Value
     {
         get => _value;
-        set => SetField(ref _value, (T?)value);
+        set => SetField(ref _value, (T0?)value);
     }
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -19,9 +19,9 @@ public abstract class PortControlBase<T> : System.Windows.Controls.Control, ICon
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
-    private bool SetField<U>(ref U? field, U? value, [CallerMemberName] string? propertyName = null)
+    private bool SetField<T1>(ref T1? field, T1? value, [CallerMemberName] string? propertyName = null)
     {
-        if (EqualityComparer<U>.Default.Equals(field, value)) return false;
+        if (EqualityComparer<T1>.Default.Equals(field, value)) return false;
         field = value;
         OnPropertyChanged(propertyName);
         return true;
