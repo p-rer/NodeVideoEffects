@@ -6,7 +6,7 @@ using Blend = Vortice.Direct2D1.Effects.Blend;
 
 namespace NodeVideoEffects.Nodes.Composite
 {
-    public class BlendNode : INode
+    public class BlendNode : NodeLogic
     {
         private Blend _blend = null!;
         private readonly string _id;

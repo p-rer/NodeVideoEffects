@@ -3,7 +3,7 @@ using System.Windows.Media;
 
 namespace NodeVideoEffects.Nodes.Math
 {
-    public class MulNode : INode
+    public class MulNode : NodeLogic
     {
         public MulNode() : base(
             [

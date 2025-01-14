@@ -3,7 +3,7 @@ using System.Windows.Media;
 
 namespace NodeVideoEffects.Nodes.Math
 {
-    public class PowNode : INode
+    public class PowNode : NodeLogic
     {
         public PowNode() : base(
             [

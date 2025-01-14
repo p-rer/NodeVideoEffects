@@ -3,7 +3,7 @@ using System.Windows.Media;
 
 namespace NodeVideoEffects.Nodes.Basic
 {
-    public class InputNode : INode
+    public class InputNode : NodeLogic
     {
         public InputNode() : base(
             [],

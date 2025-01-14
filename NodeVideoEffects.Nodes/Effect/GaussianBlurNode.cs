@@ -4,7 +4,7 @@ using Vortice.Direct2D1.Effects;
 
 namespace NodeVideoEffects.Nodes.Effect
 {
-    public class GaussianBlurNode : INode
+    public class GaussianBlurNode : NodeLogic
     {
         private GaussianBlur _blur = null!;
 

@@ -25,7 +25,7 @@ namespace NodeVideoEffects.Editor
 
             Dispatcher.InvokeAsync(() =>
             {
-                var baseType = typeof(INode);
+                var baseType = typeof(NodeLogic);
 
                 var assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
@@ -45,14 +45,14 @@ namespace NodeVideoEffects.Editor
 
                 void AddTypeToExplorerRoot(System.Type type)
                 {
-                    INode? obj;
+                    NodeLogic? obj;
                     try
                     {
-                        obj = Activator.CreateInstance(type, [""]) as INode;
+                        obj = Activator.CreateInstance(type, [""]) as NodeLogic;
                     }
                     catch
                     {
-                        obj = Activator.CreateInstance(type, []) as INode;
+                        obj = Activator.CreateInstance(type, []) as NodeLogic;
                     }
 
                     var category = obj?.Category?.Split('/') ?? ["(No Category)"];
@@ -169,14 +169,14 @@ namespace NodeVideoEffects.Editor
                                 var editor = FindParent<Editor>(element);
                                 if (editor != null)
                                 {
-                                    INode? node;
+                                    NodeLogic? node;
                                     try
                                     {
-                                        node = Activator.CreateInstance(_type, editor.ItemId) as INode;
+                                        node = Activator.CreateInstance(_type, editor.ItemId) as NodeLogic;
                                     }
                                     catch
                                     {
-                                        node = Activator.CreateInstance(_type, []) as INode;
+                                        node = Activator.CreateInstance(_type, []) as NodeLogic;
                                     }
                                     if (node != null)
                                     {
@@ -246,12 +246,12 @@ namespace NodeVideoEffects.Editor
                 Color color;
                 try
                 {
-                    INode? node;
+                    NodeLogic? node;
                     try
                     {
                         if (Type != null)
                         {
-                            node = Activator.CreateInstance(Type, "") as INode;
+                            node = Activator.CreateInstance(Type, "") as NodeLogic;
                             if (node != null) color = node.Color;
                         }
                     }
@@ -259,7 +259,7 @@ namespace NodeVideoEffects.Editor
                     {
                         if (Type != null)
                         {
-                            node = Activator.CreateInstance(Type, []) as INode;
+                            node = Activator.CreateInstance(Type, []) as NodeLogic;
                             if (node != null) color = node.Color;
                         }
                     }

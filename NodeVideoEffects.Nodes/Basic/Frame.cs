@@ -4,7 +4,7 @@ using System.Windows.Media;
 
 namespace NodeVideoEffects.Nodes.Basic
 {
-    public class Frame : INode
+    public class Frame : NodeLogic
     {
         private readonly string _id;
         public Frame(string id = "") : base(

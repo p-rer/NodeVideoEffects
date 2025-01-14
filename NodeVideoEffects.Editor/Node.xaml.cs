@@ -26,7 +26,7 @@ namespace NodeVideoEffects.Editor
 
         public event PropertyChangedEventHandler ValueChanged = delegate { };
 
-        public Node(INode node)
+        public Node(NodeLogic node)
         {
             InitializeComponent();
             NodeName.Content = _name = node.Name;

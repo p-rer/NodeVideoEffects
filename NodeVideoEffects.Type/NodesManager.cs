@@ -8,7 +8,7 @@ namespace NodeVideoEffects.Type
 {
     public static class NodesManager
     {
-        private static readonly Dictionary<string, INode> Dictionary = [];
+        private static readonly Dictionary<string, NodeLogic> Dictionary = [];
         private static readonly List<string> Items = [];
         private static readonly Dictionary<string, ID2D1Image?> Images = [];
 
@@ -37,7 +37,7 @@ namespace NodeVideoEffects.Type
             }
         }
 
-        public static INode? GetNode(string id) => Dictionary.GetValueOrDefault(id);
+        public static NodeLogic? GetNode(string id) => Dictionary.GetValueOrDefault(id);
 
         public static PropertyChangedEventHandler InputUpdated = delegate { };
 
@@ -103,7 +103,7 @@ namespace NodeVideoEffects.Type
                 }
             });
         }
-        public static void AddNode(string id, INode node) => Dictionary.Add(id, node);
+        public static void AddNode(string id, NodeLogic node) => Dictionary.Add(id, node);
         public static void RemoveNode(string id) => Dictionary.Remove(string.IsNullOrEmpty(id) ? id : "");
         public static bool AddItem(string id)
         {

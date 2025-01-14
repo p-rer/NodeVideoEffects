@@ -3,7 +3,7 @@ using System.Windows.Media;
 
 namespace NodeVideoEffects.Nodes.Effect
 {
-    public class MosaicNode : INode
+    public class MosaicNode : NodeLogic
     {
         private VideoEffectsLoader? _videoEffect;
         private readonly string _effectId = "";

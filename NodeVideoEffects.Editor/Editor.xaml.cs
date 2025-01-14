@@ -186,14 +186,14 @@ namespace NodeVideoEffects.Editor
                     if (_nodes.ContainsKey(info.Id)) return;
                     var type = System.Type.GetType(info.Type);
                     if (type == null) return;
-                    INode? obj;
+                    NodeLogic? obj;
                     try
                     {
-                        obj = Activator.CreateInstance(type, [ItemId]) as INode;
+                        obj = Activator.CreateInstance(type, [ItemId]) as NodeLogic;
                     }
                     catch
                     {
-                        obj = Activator.CreateInstance(type, []) as INode;
+                        obj = Activator.CreateInstance(type, []) as NodeLogic;
                     }
 
                     if (obj == null) return;

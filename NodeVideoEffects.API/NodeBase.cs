@@ -8,7 +8,7 @@ namespace NodeVideoEffects.API;
 /// <summary>
 /// Base class for all nodes
 /// </summary>
-public abstract class NodeBase : INode
+public abstract class NodeBase : NodeLogic
 {
     /// <summary>
     /// Initialize a new instance of <see cref="NodeBase"/>

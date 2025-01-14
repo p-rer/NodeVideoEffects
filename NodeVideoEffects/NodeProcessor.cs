@@ -67,7 +67,7 @@ namespace NodeVideoEffects
                         {
                             obj = Activator.CreateInstance(type, []);
                         }
-                        node = obj as INode ?? throw new Exception("Unable to create node instance.");
+                        node = obj as NodeLogic ?? throw new Exception("Unable to create node instance.");
                         node.Id = info.Id;
                         NodesManager.AddNode(info.Id, node);
                     }

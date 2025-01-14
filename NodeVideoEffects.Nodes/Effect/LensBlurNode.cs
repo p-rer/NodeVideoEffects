@@ -3,7 +3,7 @@ using NodeVideoEffects.Type;
 
 namespace NodeVideoEffects.Nodes.Effect;
 
-public class LensBlurNode : INode
+public class LensBlurNode : NodeLogic
 {
     private VideoEffectsLoader? _videoEffect;
     private readonly string _effectId = "";

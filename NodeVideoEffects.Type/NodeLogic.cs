@@ -6,7 +6,7 @@ namespace NodeVideoEffects.Type
     /// <summary>
     /// Base class of nodes
     /// </summary>
-    public abstract class INode : IDisposable
+    public abstract class NodeLogic : IDisposable
     {
         /// <summary>
         /// Get input ports
@@ -42,7 +42,7 @@ namespace NodeVideoEffects.Type
         /// <param name="outputs">Output ports</param>
         /// <param name="name">Name of this node</param>
         /// <param name="category">Category of this node</param>
-        protected INode(Input[] inputs, Output[] outputs, string name, string? category = null)
+        protected NodeLogic(Input[] inputs, Output[] outputs, string name, string? category = null)
         {
             Inputs = inputs;
             Outputs = outputs;
@@ -61,7 +61,7 @@ namespace NodeVideoEffects.Type
         /// <param name="name">Name of this node</param>
         /// <param name="color">Color of this node</param>
         /// <param name="category">Category of this node</param>
-        protected INode(Input[] inputs, Output[] outputs, string name, Color color, string? category = null)
+        protected NodeLogic(Input[] inputs, Output[] outputs, string name, Color color, string? category = null)
         {
             Inputs = inputs;
             Outputs = outputs;
@@ -72,7 +72,7 @@ namespace NodeVideoEffects.Type
             SubscribeToInputChanges();
         }
 
-        ~INode()
+        ~NodeLogic()
         {
             if (Id != "")
                 NodesManager.RemoveNode(Id);

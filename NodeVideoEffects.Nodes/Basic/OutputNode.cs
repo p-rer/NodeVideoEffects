@@ -4,7 +4,7 @@ using System.Windows.Media;
 
 namespace NodeVideoEffects.Nodes.Basic
 {
-    public class OutputNode : INode
+    public class OutputNode : NodeLogic
     {
         public OutputNode() : base(
             [new Input(new Image(null), "Output")],
