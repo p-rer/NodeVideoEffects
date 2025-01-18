@@ -25,12 +25,15 @@ namespace NodeVideoEffects.Type
                 var node = Dictionary[id];
                 if (node.GetType().FullName == "NodeVideoEffects.Nodes.Basic.InputNode")
                     return new ImageWrapper(Images[id[..id.IndexOf('-')]]);
+        
                 if (node.Outputs[index].IsSuccess)
                     return node.GetOutput(index);
+        
                 await node.Calculate();
+                
                 return node.GetOutput(index);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Logger.Write(LogLevel.Error, e.Message);
                 return null;
@@ -47,11 +50,11 @@ namespace NodeVideoEffects.Type
             InputUpdated.Invoke(null, new PropertyChangedEventArgs(null));
         }
 
-        public static bool CheckConnection(string iid, string oid)
+        public static bool CheckConnection(string inId, string outId)
         {
             var result = true;
-            if (Dictionary[iid].Outputs.Length == 0) return result;
-            foreach (var output in Dictionary[iid].Outputs)
+            if (Dictionary[inId].Outputs.Length == 0) return result;
+            foreach (var output in Dictionary[inId].Outputs)
             {
                 if (!result)
                     break;
@@ -59,13 +62,13 @@ namespace NodeVideoEffects.Type
                     break;
                 foreach (var connection in output.Connection)
                 {
-                    if (connection.Id == oid)
+                    if (connection.Id == outId)
                     {
                         result = false;
                         break;
                     }
                     if (result)
-                        result = CheckConnection(connection.Id, oid);
+                        result = CheckConnection(connection.Id, outId);
                 }
             }
             return result;
@@ -75,13 +78,13 @@ namespace NodeVideoEffects.Type
         {
             Task.Run(() => Dictionary[id].Inputs[index].UpdatedConnectionValue());
         }
-        public static void NotifyInputConnectionAdd(string iid, int iindex, string oid, int oindex)
+        public static void NotifyInputConnectionAdd(string inId, int inIndex, string outId, int outIndex)
         {
             Task.Run(() =>
             {
                 try
                 {
-                    Dictionary[oid].Outputs[oindex].AddConnection(iid, iindex);
+                    Dictionary[outId].Outputs[outIndex].AddConnection(inId, inIndex);
                 }
                 catch (Exception e)
                 {

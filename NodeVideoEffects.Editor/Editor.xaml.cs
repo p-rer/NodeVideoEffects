@@ -14,7 +14,7 @@ namespace NodeVideoEffects.Editor
     /// <summary>
     /// Interaction logic for UserControl1.xaml
     /// </summary>
-    public partial class Editor
+    public partial class Editor : INotifyPropertyChanged
     {
         private readonly ScaleTransform _scaleTransform;
         private readonly TranslateTransform _translateTransform;
@@ -34,6 +34,8 @@ namespace NodeVideoEffects.Editor
         private readonly Dictionary<string, Node> _nodes = [];
 
         private List<Node> _selectingNodes = [];
+        private int _runningTaskCount;
+        private string _infoText = "";
 
         private const double Tolerance = 0.001;
 
@@ -55,7 +57,8 @@ namespace NodeVideoEffects.Editor
         public Editor()
         {
             InitializeComponent();
-
+            DataContext = this;
+            
             _scaleTransform = new ScaleTransform();
             _translateTransform = new TranslateTransform();
 
@@ -70,10 +73,51 @@ namespace NodeVideoEffects.Editor
             MouseMove += Canvas_MouseMove;
 
             ZoomValue.Text = ((int)(_scale * 100)) + "%";
-            ShowInfoText("Initializing...");
+            InfoText = "Initializing...";
 
             Loaded += EditorLoaded;
+            TaskTracker.TaskCountChanged += OnTaskCountChanged;
         }
+
+        #region StatusBar
+        private void OnTaskCountChanged(object? sender, int newCount)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                RunningTaskCount = newCount;
+            });
+        }
+        
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        private int RunningTaskCount
+        {
+            set
+            {
+                if (_runningTaskCount == value) return;
+                _runningTaskCount = value;
+                OnPropertyChanged(nameof(RunningTaskText));
+            }
+        }
+
+        public string RunningTaskText => _runningTaskCount == 0 ? "All tasks have completed" : $"Running {_runningTaskCount} task(s)";
+
+        public string InfoText
+        {
+            get => _infoText;
+            set
+            {
+                if (_infoText == value) return;
+                _infoText = value;
+                OnPropertyChanged(nameof(InfoText));
+            }
+        }
+        
+        private void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+        #endregion
 
         public event PropertyChangedEventHandler? NodesUpdated;
 
@@ -117,64 +161,87 @@ namespace NodeVideoEffects.Editor
             canvas.Background = dotBrush;
         }
 
-        private void EditorLoaded(object sender, RoutedEventArgs e)
+        private async void EditorLoaded(object sender, RoutedEventArgs e)
         {
-            UpdateScrollBar();
-            DrawDotPattern(WrapperCanvas, 50, 50, 1, _scale, new Point(_translateTransform.X, _translateTransform.Y));
-
-            Canvas.LayoutUpdated += (_, _) =>
+            try
             {
-                UpdateScrollBar();
-                DrawDotPattern(WrapperCanvas, 50, 50, 1, _scale, new Point(_translateTransform.X, _translateTransform.Y));
-            };
-            WrapperCanvas.SizeChanged += (_, _) =>
+                await Dispatcher.InvokeAsync(() =>
+                {
+                    UpdateScrollBar();
+                    DrawDotPattern(WrapperCanvas, 50, 50, 1, _scale,
+                        new Point(_translateTransform.X, _translateTransform.Y));
+
+                    Canvas.LayoutUpdated += (_, _) =>
+                    {
+                        UpdateScrollBar();
+                        DrawDotPattern(WrapperCanvas, 50, 50, 1, _scale,
+                            new Point(_translateTransform.X, _translateTransform.Y));
+                    };
+                    WrapperCanvas.SizeChanged += (_, _) =>
+                    {
+                        UpdateScrollBar();
+                        DrawDotPattern(WrapperCanvas, 50, 50, 1, _scale,
+                            new Point(_translateTransform.X, _translateTransform.Y));
+                    };
+
+                    BuildNodes();
+                });
+            }
+            catch (Exception exception)
             {
-                UpdateScrollBar();
-                DrawDotPattern(WrapperCanvas, 50, 50, 1, _scale, new Point(_translateTransform.X, _translateTransform.Y));
-            };
-
-            BuildNodes();
-        }
-
-        private void ShowInfoText(string text)
-        {
-            Info.Content = text;
+                InfoText = "Error occurred while initializing editor";
+                Logger.Write(LogLevel.Error, exception.Message);
+            }
         }
 
         private void BuildNodes()
         {
-            foreach (var info in Nodes)
+            try
             {
-                var node = NodesManager.GetNode(info.Id);
-                AddChildren(new Node(node!), info.X, info.Y);
-            }
-            foreach (var info in Nodes)
-            {
-                _nodes[info.Id].Loaded += (_, _) =>
+                foreach (var info in Nodes)
                 {
-                    for (var i = 0; i < info.Connections.Count; i++)
+                    var node = NodesManager.GetNode(info.Id);
+                    AddChildren(new Node(node!), info.X, info.Y);
+                }
+
+                foreach (var info in Nodes)
+                {
+                    _nodes[info.Id].Loaded += (_, _) =>
                     {
-                        if (info.Connections[i].Id == "") continue;
-                        var inputPoint = _nodes[info.Id].GetPortPoint(Node.PortType.Input, i);
-                        var outputPoint = _nodes[info.Connections[i].Id].GetPortPoint(Node.PortType.Output, info.Connections[i].Index);
-                        var node = NodesManager.GetNode(info.Id);
-                        var inputColor = node!.Inputs[i].Color;
-                        var outputColor = NodesManager.GetNode(node.Inputs[i].Connection.Id)!.Outputs[node.Inputs[i].Connection.Index].Color;
-                        AddConnector(outputPoint, inputPoint,
-                            inputColor, outputColor,
-                            new Connection(info.Id, i), new Connection(info.Connections[i].Id, info.Connections[i].Index));
-                        (_nodes[info.Id].InputsPanel.Children[i] as InputPort)!.PortControl.Visibility = Visibility.Hidden;
-                    }
-                };
+                        for (var i = 0; i < info.Connections.Count; i++)
+                        {
+                            if (info.Connections[i].Id == "") continue;
+                            var inputPoint = _nodes[info.Id].GetPortPoint(Node.PortType.Input, i);
+                            var outputPoint = _nodes[info.Connections[i].Id]
+                                .GetPortPoint(Node.PortType.Output, info.Connections[i].Index);
+                            var node = NodesManager.GetNode(info.Id);
+                            var inputColor = node!.Inputs[i].Color;
+                            var outputColor = NodesManager.GetNode(node.Inputs[i].Connection.Id)!
+                                .Outputs[node.Inputs[i].Connection.Index].Color;
+                            AddConnector(outputPoint, inputPoint,
+                                inputColor, outputColor,
+                                new Connection(info.Id, i),
+                                new Connection(info.Connections[i].Id, info.Connections[i].Index));
+                            (_nodes[info.Id].InputsPanel.Children[i] as InputPort)!.PortControl.Visibility =
+                                Visibility.Hidden;
+                        }
+                    };
+                }
+
+                InfoText = "Ready";
             }
-            ShowInfoText("Ready");
+            catch (Exception e)
+            {
+                InfoText = "Error occurred while building nodes";
+                Logger.Write(LogLevel.Error, e.Message);
+            }
         }
 
         public async void RebuildNodes(List<NodeInfo> infos)
         {
             try
             {
-                ShowInfoText("Rebuilding nodes...");
+                InfoText = "Rebuilding nodes...";
                 // Remove deleted nodes
                 var newNodesId = infos.Select(node => node.Id).ToHashSet();
                 foreach (var id in _nodes.Select(node => node.Key).Where(id => !newNodesId.Contains(id)))
@@ -243,6 +310,7 @@ namespace NodeVideoEffects.Editor
             }
             catch (Exception e)
             {
+                InfoText = "Error occurred while rebuilding nodes";
                 Logger.Write(LogLevel.Error, e.Message);
             }
         }
@@ -284,33 +352,41 @@ namespace NodeVideoEffects.Editor
             };
         }
 
-        public void RemoveChildren()
+        public async void RemoveChildren()
         {
-            if (_selectingNodes.Count > 0)
+            try
             {
-                Dispatcher.Invoke(() =>
+                if (_selectingNodes.Count > 0)
                 {
-                    foreach (var node in _selectingNodes.Where(node =>
-                                 node.Type != typeof(InputNode) && node.Type != typeof(OutputNode)))
+                    await Dispatcher.InvokeAsync(() =>
                     {
-                        Canvas.Children.Remove(node);
-                        foreach (OutputPort output in node.OutputsPanel.Children)
+                        foreach (var node in _selectingNodes.Where(node =>
+                                     node.Type != typeof(InputNode) && node.Type != typeof(OutputNode)))
                         {
-                            output.RemoveAllConnection();
+                            Canvas.Children.Remove(node);
+                            foreach (OutputPort output in node.OutputsPanel.Children)
+                            {
+                                output.RemoveAllConnection();
+                            }
+                            foreach (InputPort input in node.InputsPanel.Children)
+                            {
+                                input.RemoveConnection();
+                            }
+                            _infos.Remove(node.Id);
+                            _nodes.Remove(node.Id);
+                            NodesManager.RemoveNode(node.Id);
                         }
-                        foreach (InputPort input in node.InputsPanel.Children)
-                        {
-                            input.RemoveConnection();
-                        }
-                        _infos.Remove(node.Id);
-                        _nodes.Remove(node.Id);
-                        NodesManager.RemoveNode(node.Id);
-                    }
 
-                    _selectingNodes.Clear();
-                });
+                        _selectingNodes.Clear();
+                    });
+                }
+                OnNodesUpdated();
             }
-            OnNodesUpdated();
+            catch (Exception e)
+            {
+                InfoText = "Error occurred while removing nodes";
+                Logger.Write(LogLevel.Error, e.Message);
+            }
         }
 
         public void RestoreChild(Node node)
@@ -321,6 +397,13 @@ namespace NodeVideoEffects.Editor
 
         public void PreviewConnection(Point pos1, Point pos2)
         {
+            Task.Run(async () =>
+            {
+                if (_previewPath != null) return;
+                await Task.Delay(1000);
+                if (_previewPath != null)
+                    await Dispatcher.InvokeAsync(() => InfoText = "Release the mouse button on the port to connect");
+            });
             if (_previewPath != null) Canvas.Children.Remove(_previewPath);
             Canvas.Children.Add(_previewPath = new Path()
             {
@@ -340,39 +423,50 @@ namespace NodeVideoEffects.Editor
         {
             if (_previewPath != null) Canvas.Children.Remove(_previewPath);
             _previewPath = null;
+            InfoText = "Ready";
         }
 
         public void AddConnector(Point pos1, Point pos2, Color col1, Color col2, Connection inputPort, Connection outputPort)
         {
-            if (_connectors.ContainsKey((inputPort.Id + ";" + inputPort.Index, outputPort.Id + ";" + outputPort.Index)))
+            try
             {
-                Canvas.Children.Remove(_connectors[(inputPort.Id + ";" + inputPort.Index, outputPort.Id + ";" + outputPort.Index)]);
-                _connectors.Remove((inputPort.Id + ";" + inputPort.Index, outputPort.Id + ";" + outputPort.Index));
+                InfoText = "Connecting...";
+                if (_connectors.ContainsKey((inputPort.Id + ";" + inputPort.Index, outputPort.Id + ";" + outputPort.Index)))
+                {
+                    Canvas.Children.Remove(_connectors[(inputPort.Id + ";" + inputPort.Index, outputPort.Id + ";" + outputPort.Index)]);
+                    _connectors.Remove((inputPort.Id + ";" + inputPort.Index, outputPort.Id + ";" + outputPort.Index));
+                }
+                if (_connectors.Where(kvp => kvp.Key.Item1 == inputPort.Id + ";" + inputPort.Index).ToList().Count > 0)
+                {
+                    NodesManager.GetNode(_infos[inputPort.Id].Connections[inputPort.Index].Id)
+                        ?.Outputs[_infos[inputPort.Id].Connections[inputPort.Index].Index]
+                        .RemoveConnection(inputPort.Id, inputPort.Index);
+                    RemoveInputConnector(inputPort.Id, inputPort.Index);
+                    NodesManager.GetNode(inputPort.Id)?.SetInputConnection(inputPort.Index, outputPort);
+                }
+                Connector connector;
+                Canvas.Children.Add(connector = new Connector
+                {
+                    StartPoint = ConvertToTransform(PointFromScreen(pos1)),
+                    EndPoint = ConvertToTransform(PointFromScreen(pos2)),
+                    StartColor = col1,
+                    EndColor = col2,
+                    IsHitTestVisible = false
+                });
+                connector.SetValue(Panel.ZIndexProperty, -1);
+                _connectors.Add((inputPort.Id + ";" + inputPort.Index, outputPort.Id + ";" + outputPort.Index), connector);
+                _infos[inputPort.Id] = _infos[inputPort.Id] with
+                {
+                    Connections = _infos[inputPort.Id].Connections.Select((connection, index) =>
+                        index == inputPort.Index ? outputPort : connection).ToList()
+                };
+                InfoText = "Ready";
             }
-            if (_connectors.Where(kvp => kvp.Key.Item1 == inputPort.Id + ";" + inputPort.Index).ToList().Count > 0)
+            catch (Exception e)
             {
-                NodesManager.GetNode(_infos[inputPort.Id].Connections[inputPort.Index].Id)
-                    ?.Outputs[_infos[inputPort.Id].Connections[inputPort.Index].Index]
-                    .RemoveConnection(inputPort.Id, inputPort.Index);
-                RemoveInputConnector(inputPort.Id, inputPort.Index);
-                NodesManager.GetNode(inputPort.Id)?.SetInputConnection(inputPort.Index, outputPort);
+                InfoText = "Error occurred while connecting";
+                Logger.Write(LogLevel.Error, e.Message);
             }
-            Connector connector;
-            Canvas.Children.Add(connector = new Connector()
-            {
-                StartPoint = ConvertToTransform(PointFromScreen(pos1)),
-                EndPoint = ConvertToTransform(PointFromScreen(pos2)),
-                StartColor = col1,
-                EndColor = col2,
-                IsHitTestVisible = false
-            });
-            connector.SetValue(Panel.ZIndexProperty, -1);
-            _connectors.Add((inputPort.Id + ";" + inputPort.Index, outputPort.Id + ";" + outputPort.Index), connector);
-            _infos[inputPort.Id] = _infos[inputPort.Id] with
-            {
-                Connections = _infos[inputPort.Id].Connections.Select((connection, index) =>
-                    index == inputPort.Index ? outputPort : connection).ToList()
-            };
         }
 
         public void RemoveInputConnector(string id, int index)
@@ -404,13 +498,13 @@ namespace NodeVideoEffects.Editor
                     .Where(kvp => kvp.Key.Item2 == id + ";" + index)
                     .Select(kvp => kvp.Value)
                     .ToList();
-                foreach (Connector connector in connectors)
+                foreach (var connector in connectors)
                 {
                     var key = _connectors
                         .Where(kvp => kvp.Value == connector)
                         .Select(kvp => kvp.Key)
                         .ToList()[0];
-                    var sepIndex = key.Item1.IndexOf(";", StringComparison.Ordinal);
+                    var sepIndex = key.Item1.IndexOf(';');
                     (_nodes[key.Item1[..sepIndex]].InputsPanel
                         .Children[int.Parse(key.Item1[(sepIndex + 1)..])] as InputPort)?.RemoveConnection();
                     _infos[key.Item1[..sepIndex]].Connections[int.Parse(key.Item1[(sepIndex + 1)..])] =
@@ -435,7 +529,7 @@ namespace NodeVideoEffects.Editor
                 {
                     connector.EndPoint = new Point(connector.EndPoint.X + d.X, connector.EndPoint.Y + d.Y);
                 }
-                foreach (Connector connector in _connectors
+                foreach (var connector in _connectors
                     .Where(kvp => kvp.Key.Item2.StartsWith(id))
                     .Select(kvp => kvp.Value)
                     .ToList())
@@ -517,11 +611,11 @@ namespace NodeVideoEffects.Editor
                     _isSelecting = true;
                     _selectingRect = CreateSelectingRectangleFromPoints(ConvertToTransform(_lastPos), ConvertToTransform(_lastPos));
                     Canvas.Children.Add(_selectingRect);
-                    Task.Run(() =>
+                    Task.Run(async () =>
                     {
                         while (_isSelecting)
                         {
-                            int f = GetDirectionIfOutside(_nowPos);
+                            var f = GetDirectionIfOutside(_nowPos);
                             Dispatcher.Invoke(() =>
                             {
                                 const int step = 15;
@@ -549,7 +643,7 @@ namespace NodeVideoEffects.Editor
                                 _selectingRect = CreateSelectingRectangleFromPoints(ConvertToTransform(_lastPos), ConvertToTransform(_nowPos));
                                 Canvas.Children.Add(_selectingRect);
                             });
-                            Task.Delay(50).Wait();
+                            await Task.Delay(50);
                         }
                     });
                     CaptureMouse();
@@ -694,6 +788,7 @@ namespace NodeVideoEffects.Editor
                     }
                     if (removingSelection)
                     {
+                        InfoText = "Ready";
                         _selectingNodes = [];
                         return;
                     }

@@ -25,7 +25,7 @@ namespace NodeVideoEffects.Editor
             Index = index;
             PortName.Content = output.Name;
             Port.Fill = new SolidColorBrush(output.Color);
-            ToolTip = new();
+            ToolTip = new object();
             ToolTipOpening += OutputPort_ToolTipOpening;
 
             Loaded += (_, _) =>
@@ -43,7 +43,7 @@ namespace NodeVideoEffects.Editor
         {
             try
             {
-                var @object = await NodesManager.GetOutputValue(Id, Index);
+                var @object = await TaskTracker.RunTrackedTask(() => NodesManager.GetOutputValue(Id, Index));
                 ToolTip = @object?.ToString() ?? "(Null)";
             }
             catch (Exception e)

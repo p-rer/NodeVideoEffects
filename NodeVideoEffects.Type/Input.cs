@@ -1,13 +1,14 @@
 ﻿using NodeVideoEffects.Control;
 using System.ComponentModel;
 using System.Windows.Media;
+using NodeVideoEffects.Utility;
 
 namespace NodeVideoEffects.Type
 {
     /// <summary>
     /// Input port
     /// </summary>
-    public class Input : INotifyPropertyChanged, IDisposable
+    public sealed class Input : INotifyPropertyChanged, IDisposable
     {
         private readonly IPortValue _value;
         private Connection _connection = new();
@@ -105,7 +106,7 @@ namespace NodeVideoEffects.Type
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        protected virtual void OnPropertyChanged(string propertyName)
+        private void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }

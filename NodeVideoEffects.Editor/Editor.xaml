@@ -8,7 +8,8 @@
              Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
              Focusable="True"
              IsHitTestVisible="True"
-             PreviewMouseDown="Editor_PreviewMouseDown">
+             PreviewMouseDown="Editor_PreviewMouseDown"
+             d:DataContext="{d:DesignInstance}">
     <UserControl.Resources>
         <ResourceDictionary Source="pack://application:,,,/NodeVideoEffects.Control;component/Style/Style.xaml" />
     </UserControl.Resources>
@@ -31,11 +32,13 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="50" />
             </Grid.ColumnDefinitions>
-            <Label Name="Info" Grid.Column="0" />
+            <Label Content="{Binding InfoText, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Grid.Column="0" />
+            <Label Content="{Binding RunningTaskText, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Grid.Column="2" Margin="10 0 0 0" />
             <TextBox Name="ZoomValue" PreviewTextInput="PreviewTextInput" KeyDown="ZoomValueSubmit" DataObject.Pasting="TextBoxPasting"
-                     Margin="2,2,2,2" Grid.Column="2" VerticalContentAlignment="Center" />
+                     Margin="2,2,2,2" Grid.Column="3" VerticalContentAlignment="Center" />
         </Grid>
     </Grid>
 </UserControl>
