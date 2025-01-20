@@ -28,7 +28,6 @@ namespace NodeVideoEffects.Type
         
                 if (node.Outputs[index].IsSuccess)
                     return node.GetOutput(index);
-        
                 await node.Calculate();
                 
                 return node.GetOutput(index);

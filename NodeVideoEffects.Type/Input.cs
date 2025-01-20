@@ -34,9 +34,9 @@ namespace NodeVideoEffects.Type
                 if (_connection.Id == "") return _value.Value;
                 try
                 {
-                    var task = NodesManager.GetOutputValue(_connection.Id, _connection.Index);
-                    task.Wait();
-                    return task.Result;
+                    var task = TaskTracker.RunTrackedSynchronousTask(() =>
+                        NodesManager.GetOutputValue(_connection.Id, _connection.Index));
+                    return task;
                 }
                 catch
                 {
