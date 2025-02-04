@@ -43,8 +43,8 @@ namespace NodeVideoEffects.Editor
         {
             try
             {
-                var @object = await TaskTracker.RunTrackedTask(() => NodesManager.GetOutputValue(Id, Index));
-                ToolTip = @object?.ToString() ?? "(Null)";
+                var result = await NodesManager.GetOutputValue(Id, Index);
+                ToolTip = result?.ToString() ?? "(Null)";
             }
             catch (Exception e)
             {

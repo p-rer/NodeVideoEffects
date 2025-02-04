@@ -37,6 +37,8 @@ namespace NodeVideoEffects.Editor
         private int _runningTaskCount;
         private string _infoText = "";
 
+        private static readonly Lock Locker = new();
+
         private const double Tolerance = 0.001;
 
         public List<NodeInfo> Nodes
@@ -82,10 +84,10 @@ namespace NodeVideoEffects.Editor
         #region StatusBar
         private void OnTaskCountChanged(object? sender, int newCount)
         {
-            Dispatcher.Invoke(() =>
+            lock (Locker)
             {
-                RunningTaskCount = newCount;
-            });
+                Dispatcher.Invoke(() => { RunningTaskCount = newCount; });
+            }
         }
         
         public event PropertyChangedEventHandler? PropertyChanged;

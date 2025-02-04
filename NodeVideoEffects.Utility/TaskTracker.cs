@@ -24,20 +24,17 @@ public static class TaskTracker
     /// </summary>
     /// <param name="taskFunc">The asynchronous function to be executed.</param>
     /// <returns>A Task that represents the asynchronous operation.</returns>
-    public static Task RunTrackedTask(Func<Task> taskFunc)
+    public static async Task RunTrackedTask(Func<Task> taskFunc)
     {
         IncrementTaskCount();
-        return Task.Run(async () =>
+        try
         {
-            try
-            {
-                await taskFunc();
-            }
-            finally
-            {
-                DecrementTaskCount();
-            }
-        });
+            await taskFunc();
+        }
+        finally
+        {
+            DecrementTaskCount();
+        }
     }
 
     /// <summary>
@@ -47,55 +44,12 @@ public static class TaskTracker
     /// <typeparam name="T">The type of the result returned by the task.</typeparam>
     /// <param name="taskFunc">The asynchronous function to be executed.</param>
     /// <returns>A Task that represents the asynchronous operation and contains the result.</returns>
-    public static Task<T> RunTrackedTask<T>(Func<Task<T>> taskFunc)
-    {
-        IncrementTaskCount();
-        return Task.Run(async () =>
-        {
-            try
-            {
-                return await taskFunc();
-            }
-            finally
-            {
-                DecrementTaskCount();
-            }
-        });
-    }
-    
-    /// <summary>
-    /// Executes an asynchronous task while tracking it and synchronously waits for its completion.
-    /// This method is for asynchronous functions that do not return a value.
-    /// </summary>
-    /// <param name="taskFunc">The asynchronous function to be executed.</param>
-    public static void RunTrackedSynchronousTask(Func<Task> taskFunc)
+    public static async Task<T> RunTrackedTask<T>(Func<Task<T>> taskFunc)
     {
         IncrementTaskCount();
         try
         {
-            // Execute the asynchronous task and wait synchronously for its completion.
-            Task.Run(taskFunc).GetAwaiter().GetResult();
-        }
-        finally
-        {
-            DecrementTaskCount();
-        }
-    }
-
-    /// <summary>
-    /// Executes an asynchronous task while tracking it and synchronously waits for the result.
-    /// This method is for asynchronous functions that return a value.
-    /// </summary>
-    /// <typeparam name="T">The type of the result returned by the task.</typeparam>
-    /// <param name="taskFunc">The asynchronous function to be executed.</param>
-    /// <returns>The result of the asynchronous task.</returns>
-    public static T RunTrackedSynchronousTask<T>(Func<Task<T>> taskFunc)
-    {
-        IncrementTaskCount();
-        try
-        {
-            // Execute the asynchronous task and wait synchronously for its result.
-            return Task.Run(taskFunc).GetAwaiter().GetResult();
+            return await taskFunc();
         }
         finally
         {

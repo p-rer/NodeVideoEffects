@@ -25,11 +25,11 @@ namespace NodeVideoEffects.Type
                 var node = Dictionary[id];
                 if (node.GetType().FullName == "NodeVideoEffects.Nodes.Basic.InputNode")
                     return new ImageWrapper(Images[id[..id.IndexOf('-')]]);
-        
+
                 if (node.Outputs[index].IsSuccess)
                     return node.GetOutput(index);
-                await node.Calculate();
-                
+                await TaskTracker.RunTrackedTask(node.Calculate);
+
                 return node.GetOutput(index);
             }
             catch (Exception e)

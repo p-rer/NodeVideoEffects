@@ -1,9 +1,11 @@
-﻿using NodeVideoEffects.Nodes.Basic;
+﻿using System.Numerics;
+using NodeVideoEffects.Nodes.Basic;
 using NodeVideoEffects.Type;
 using NodeVideoEffects.Utility;
 using System.Reflection;
 using Vortice.DCommon;
 using Vortice.Direct2D1;
+using Vortice.Direct2D1.Effects;
 using Vortice.DXGI;
 using Vortice.Mathematics;
 using YukkuriMovieMaker.Commons;
@@ -20,6 +22,9 @@ namespace NodeVideoEffects
         private readonly OutputNode _outputNode = null!;
 
         private ID2D1Bitmap1 _bitmap;
+        private readonly AffineTransform2D _affineTransform2D;
+
+        private readonly Lock _locker = new();
 
         public NodeProcessor(IGraphicsDevicesAndContext context, NodeVideoEffectsPlugin item)
         {
@@ -105,7 +110,7 @@ namespace NodeVideoEffects
             }
             NodesManager.SetContext(item.Id, context);
 
-            BitmapProperties1 bitmapProperties = new BitmapProperties1(
+            var bitmapProperties = new BitmapProperties1(
                 new PixelFormat(Format.B8G8R8A8_UNorm, AlphaMode.Premultiplied),
                 96,
                 96,
@@ -119,49 +124,50 @@ namespace NodeVideoEffects
                 bitmapProperties
             );
 
-            this._item = item;
+            _affineTransform2D = new AffineTransform2D(context.DeviceContext){BorderMode = BorderMode.Soft, TransformMatrix = Matrix3x2.Identity};
+
+            _item = item;
         }
 
         public void SetInput(ID2D1Image? input)
         {
-            NodesManager.SetInput(_item.Id, input);
-            var output = ((ImageWrapper?)_outputNode.Inputs[0].Value)?.Image ?? null;
-            if (output == null || output.NativePointer == 0)
+            lock (_locker)
             {
-                Logger.Write(LogLevel.Warn, $"The output of this item(ID: \"{_item.Id}\" is a blank image because the output of OutputNode is null.");
-
-                SetBlankImage(out output);
+                NodesManager.SetInput(_item.Id, input);
             }
-            Output = output;
         }
 
         public void ClearInput() { }
 
         public DrawDescription Update(EffectDescription effectDescription)
         {
-            try
+            lock (_locker)
             {
-                typeof(NodesManager).GetMethod("SetInfo",
-                    BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
-                    ?.Invoke(null, [_item.Id, effectDescription]);
-                var output = ((ImageWrapper?)_outputNode.Inputs[0].Value)?.Image ?? null;
-                if (output == null || output.NativePointer == 0)
+                ID2D1Image? output = null;
+                try
                 {
-                    Logger.Write(LogLevel.Warn, $"The output of this item(ID: \"{_item.Id}\" is a blank image because the output of OutputNode is null.");
+                    typeof(NodesManager).GetMethod("SetInfo",
+                            BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static |
+                            BindingFlags.FlattenHierarchy)
+                        ?.Invoke(null, [_item.Id, effectDescription]);
+                    output = ((ImageWrapper?)_outputNode.Inputs[0].Value)?.Image;
+                    if (output != null && output.NativePointer != 0) return effectDescription.DrawDescription;
+                    throw new InvalidOperationException("Output image is null.");
+                }
+                catch (Exception e)
+                {
+                    Logger.Write(LogLevel.Error, $"{e.Message}\nItem ID: \"{_item.Id}\"");
 
                     SetBlankImage(out output);
+                    return effectDescription.DrawDescription;
                 }
-                Output = output;
-            }
-            catch (NullReferenceException e)
-            {
-                Logger.Write(LogLevel.Error, $"{e.Message}\nItem ID: \"{_item.Id}\"");
+                finally
+                {
+                    _affineTransform2D.SetInput(0, output, true);
 
-                SetBlankImage(out var output);
-                Output = output;
+                    Output = _affineTransform2D.Output;
+                }
             }
-
-            return effectDescription.DrawDescription;
         }
 
         private void SetBlankImage(out ID2D1Image output)
@@ -194,14 +200,9 @@ namespace NodeVideoEffects
         {
             ClearInput();
             _bitmap.Dispose();
-            try
-            {
-                Output.Dispose();
-            }
-            catch (Exception e)
-            {
-                Logger.Write(LogLevel.Warn, $"{e.Message}\nItem ID: \"{_item.Id}\"");
-            }
+            _affineTransform2D.SetInput(0, null, true);
+            _affineTransform2D.Dispose();
+            Output.Dispose();
         }
     }
 }

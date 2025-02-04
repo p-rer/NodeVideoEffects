@@ -1,7 +1,6 @@
 ﻿using NodeVideoEffects.Control;
 using System.ComponentModel;
 using System.Windows.Media;
-using NodeVideoEffects.Utility;
 
 namespace NodeVideoEffects.Type
 {
@@ -12,6 +11,8 @@ namespace NodeVideoEffects.Type
     {
         private readonly IPortValue _value;
         private Connection _connection = new();
+        
+        private readonly Lock _locker = new();
 
         /// <summary>
         /// Create new input port object
@@ -34,9 +35,11 @@ namespace NodeVideoEffects.Type
                 if (_connection.Id == "") return _value.Value;
                 try
                 {
-                    var task = TaskTracker.RunTrackedSynchronousTask(() =>
-                        NodesManager.GetOutputValue(_connection.Id, _connection.Index));
-                    return task;
+                    lock(_locker)
+                    {
+                        var task = NodesManager.GetOutputValue(_connection.Id, _connection.Index);
+                        return task.GetAwaiter().GetResult();
+                    }
                 }
                 catch
                 {
