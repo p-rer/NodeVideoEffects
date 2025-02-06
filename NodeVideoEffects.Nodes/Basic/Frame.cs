@@ -1,6 +1,7 @@
 ﻿using NodeVideoEffects.Type;
 using System.ComponentModel;
 using System.Windows.Media;
+using NodeVideoEffects.Utility;
 
 namespace NodeVideoEffects.Nodes.Basic
 {
@@ -10,7 +11,7 @@ namespace NodeVideoEffects.Nodes.Basic
         public Frame(string id = "") : base(
             [],
             [new Output(new Number(0, 0, null, 0), "Frame")],
-            "Frame",
+            Text.FrameNode,
             Colors.IndianRed,
             "Basic")
         {

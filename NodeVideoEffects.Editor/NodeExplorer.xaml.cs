@@ -48,7 +48,7 @@ namespace NodeVideoEffects.Editor
                     NodeLogic? obj;
                     try
                     {
-                        obj = Activator.CreateInstance(type, [""]) as NodeLogic;
+                        obj = Activator.CreateInstance(type, "") as NodeLogic;
                     }
                     catch
                     {
@@ -66,7 +66,7 @@ namespace NodeVideoEffects.Editor
                     else
                     {
                         var temp = new string[category.Length + 1];
-                        temp[0] = "Expansion";
+                        temp[0] = "Extension";
                         Array.Copy(category, 0, temp, 1, category.Length);
                         category = temp;
                     }

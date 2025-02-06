@@ -1,6 +1,7 @@
 ﻿using NodeVideoEffects.Type;
 using System.ComponentModel;
 using System.Windows.Media;
+using NodeVideoEffects.Utility;
 
 namespace NodeVideoEffects.Nodes.Basic
 {
@@ -9,7 +10,7 @@ namespace NodeVideoEffects.Nodes.Basic
         public OutputNode() : base(
             [new Input(new Image(null), "Output")],
             [],
-            "Output",
+            Text.Output,
             Colors.PaleVioletRed,
             "Basic")
         {

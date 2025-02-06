@@ -1,5 +1,6 @@
 ﻿using NodeVideoEffects.Type;
 using System.Windows.Media;
+using NodeVideoEffects.Utility;
 
 namespace NodeVideoEffects.Nodes.Math
 {
@@ -13,7 +14,7 @@ namespace NodeVideoEffects.Nodes.Math
             [
                 new Output(new Number(0, null, null, null), "Result")
             ],
-            "Pow",
+            Text.PowNode,
             Colors.LightCoral,
             "Math/Basic")
         { }

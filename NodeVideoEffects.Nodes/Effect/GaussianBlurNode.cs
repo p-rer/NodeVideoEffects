@@ -1,5 +1,6 @@
 ﻿using NodeVideoEffects.Type;
 using System.Windows.Media;
+using NodeVideoEffects.Utility;
 using Vortice.Direct2D1.Effects;
 
 namespace NodeVideoEffects.Nodes.Effect
@@ -16,7 +17,7 @@ namespace NodeVideoEffects.Nodes.Effect
             [
                 new Output(new Image(null), "Out")
             ],
-            "Gaussian Blur",
+            Text.GaussianBlurNode,
             Colors.LawnGreen,
             "Effect")
         {

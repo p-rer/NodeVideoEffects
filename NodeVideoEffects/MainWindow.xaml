@@ -3,9 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:utility="clr-namespace:NodeVideoEffects.Utility;assembly=NodeVideoEffects.Utility"
         xmlns:local="clr-namespace:NodeVideoEffects"
         mc:Ignorable="d"
-        Title="{x:Static local:Translate.Editor}" MinHeight="450" MinWidth="800">
+        Title="{x:Static utility:Text.Editor}" MinHeight="450" MinWidth="800">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*" MinWidth="30" MaxWidth="300" />
@@ -17,23 +18,19 @@
             <RowDefinition Height="1*"/>
         </Grid.RowDefinitions>
         <Menu Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3">
-            <MenuItem Header="{x:Static local:Translate.File}">
-                <MenuItem Header="{x:Static local:Translate.Import}" />
-                <MenuItem Header="{x:Static local:Translate.Export}" />
-                <Separator />
-                <MenuItem Header="{x:Static local:Translate.Close}" />
+            <MenuItem Header="{x:Static utility:Text.File}">
+                <MenuItem Header="{x:Static utility:Text.Close}" />
             </MenuItem>
-            <MenuItem Header="{x:Static local:Translate.Edit}">
-                <MenuItem Header="{x:Static local:Translate.Copy}" />
+            <MenuItem Header="{x:Static utility:Text.Edit}">
+                <MenuItem Header="{x:Static utility:Text.Copy}" />
             </MenuItem>
-            <MenuItem Header="{x:Static local:Translate.View}">
-                <MenuItem Header="{x:Static local:Translate.ResetView}" />
+            <MenuItem Header="{x:Static utility:Text.View}">
+                <MenuItem Header="{x:Static utility:Text.ResetView}" />
                 <MenuItem Header="Open Log..." Click="OpenLogViewer"/>
             </MenuItem>
-            <MenuItem Header="{x:Static local:Translate.Help}">
-                <MenuItem Header="{x:Static local:Translate.OpenHelpSite}" />
-                <MenuItem Header="{x:Static local:Translate.CheckUpdate}" />
-                <MenuItem Header="{x:Static local:Translate.ShowAbout}" Click="ShowAbout" />
+            <MenuItem Header="{x:Static utility:Text.Help}">
+                <MenuItem Header="{x:Static utility:Text.CheckUpdate}" />
+                <MenuItem Header="{x:Static utility:Text.ShowAbout}" Click="ShowAbout" />
             </MenuItem>
         </Menu>
         <local:DockablePanelField Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="1">

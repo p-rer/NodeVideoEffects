@@ -8,7 +8,7 @@ using YukkuriMovieMaker.Plugin.Effects;
 
 namespace NodeVideoEffects
 {
-    [VideoEffect("NodeVideoEffects", [nameof(Translate.Node)], [], ResourceType = typeof(Translate))]
+    [VideoEffect("NodeVideoEffects", [VideoEffectCategories.Filtering], ["NVE", "ノード"])]
     public class NodeVideoEffectsPlugin : VideoEffectBase
     {
         private bool _isCreated;
@@ -23,7 +23,7 @@ namespace NodeVideoEffects
 
         public string Id { get; set; } = "";
 
-        [Display(Name = nameof(Translate.NodeEditor), GroupName = nameof(Translate.NodeVideoEffects), ResourceType = typeof(Translate))]
+        [Display(Name = nameof(Text.NodeEditor), GroupName = nameof(Text.NodeVideoEffects), ResourceType = typeof(Text))]
         [OpenNodeEditor]
         public List<NodeInfo> Nodes
         {

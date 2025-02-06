@@ -3,9 +3,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:NodeVideoEffects"
+        xmlns:utility="clr-namespace:NodeVideoEffects.Utility;assembly=NodeVideoEffects.Utility"
         mc:Ignorable="d"
-        Title="{x:Static local:Translate.About}" Height="200" Width="300" BorderBrush="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" BorderThickness="1"
+        Title="{x:Static utility:Text.About}" Height="200" Width="300" BorderBrush="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" BorderThickness="1"
         WindowStyle="None" ResizeMode="NoResize" ShowInTaskbar="False" WindowStartupLocation="CenterOwner">
     <Grid>
         <Grid.RowDefinitions>
@@ -16,6 +16,6 @@
         </Grid.RowDefinitions>
         <Label FontSize="20" Content="NodeVideoEffects" Grid.Row="0"/>
         <Label Name="Ver" Content="" UseLayoutRounding="False" Grid.Row="1"/>
-        <Button Content="{x:Static local:Translate.Close}" Click="Close" Grid.Row="3" HorizontalAlignment="Right" Width="70" Height="30" VerticalAlignment="Center"/>
+        <Button Content="{x:Static utility:Text.Close}" Click="Close" Grid.Row="3" HorizontalAlignment="Right" Width="70" Height="30" VerticalAlignment="Center"/>
     </Grid>
 </Window>

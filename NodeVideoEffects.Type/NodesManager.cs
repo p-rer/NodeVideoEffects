@@ -106,7 +106,11 @@ namespace NodeVideoEffects.Type
             });
         }
         public static void AddNode(string id, NodeLogic node) => Dictionary.Add(id, node);
-        public static void RemoveNode(string id) => Dictionary.Remove(string.IsNullOrEmpty(id) ? id : "");
+        public static void RemoveNode(string id)
+        {
+            if (!string.IsNullOrEmpty(id)) Dictionary.Remove(id);
+        }
+
         public static bool AddItem(string id)
         {
             if (Items.Contains(id)) return false;
