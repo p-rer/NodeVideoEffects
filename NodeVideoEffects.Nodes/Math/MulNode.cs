@@ -21,7 +21,7 @@ namespace NodeVideoEffects.Nodes.Math
 
         public override Task Calculate()
         {
-            Outputs[0].Value = (double)(Inputs[0].Value ?? 0) * (double)(Inputs[1].Value ?? 0);
+            Outputs[0].Value = (float)(Inputs[0].Value ?? 0) * (float)(Inputs[1].Value ?? 0);
             return Task.CompletedTask;
         }
     }

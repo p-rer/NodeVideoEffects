@@ -37,6 +37,9 @@ namespace NodeVideoEffects.Nodes.Effect
         {
             base.Dispose();
             _videoEffect?.Dispose();
+            _videoEffect = null!;
+
+            GC.SuppressFinalize(this);
         }
     }
 }

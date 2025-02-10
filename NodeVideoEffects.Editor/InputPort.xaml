@@ -10,13 +10,18 @@
             <ColumnDefinition Width="30" />
             <ColumnDefinition Width="1*" />
         </Grid.ColumnDefinitions>
-        <ContentControl MouseDoubleClick="Port_MouseDoubleClick" Focusable="False">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition MinHeight="30" MaxHeight="30"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+        </Grid.RowDefinitions>
+        <ContentControl Grid.Column="0" Grid.Row="1" MouseDoubleClick="Port_MouseDoubleClick" Focusable="False">
             <Ellipse Fill="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" Name="Port" Margin="10"
                      MouseLeftButtonDown="port_MouseLeftButtonDown"
                      MouseMove="port_MouseMove"
                      MouseLeftButtonUp="port_MouseLeftButtonUp"/>
         </ContentControl>
-        <StackPanel Orientation="Horizontal" Grid.Column="1">
+        <StackPanel Grid.Row="0" Grid.RowSpan="3" Orientation="Horizontal" Grid.Column="1">
             <Label Name="PortName" VerticalContentAlignment="Center"/>
             <ContentControl Name="PortControl" VerticalContentAlignment="Center" Focusable="False"/>
         </StackPanel>

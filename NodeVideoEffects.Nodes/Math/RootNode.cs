@@ -22,14 +22,14 @@ namespace NodeVideoEffects.Nodes.Math
 
         public override Task Calculate()
         {
-            if ((double)(Inputs[1].Value ?? 0) == 0 && (bool)(Inputs[2].Value ?? 0))
+            if ((float)(Inputs[1].Value ?? 0) == 0 && (bool)(Inputs[2].Value ?? 0))
                 Outputs[0].Value = 0;
             else
-                Outputs[0].Value = (double)(Inputs[0].Value ?? 0) < 0
-                    ? (double)(Inputs[1].Value ?? 0) % 2 != 0
-                        ? -System.Math.Pow(-(double)(Inputs[0].Value ?? 0), 1.0 / (double)(Inputs[1].Value ?? 0))
-                        : double.NaN
-                    : System.Math.Pow((double)(Inputs[0].Value ?? 0), 1.0 / (double)(Inputs[1].Value ?? 0));
+                Outputs[0].Value = (float)(Inputs[0].Value ?? 0) < 0
+                    ? (float)(Inputs[1].Value ?? 0) % 2 != 0
+                        ? -System.Math.Pow(-(float)(Inputs[0].Value ?? 0), 1 / (float)(Inputs[1].Value ?? 0))
+                        : float.NaN
+                    : System.Math.Pow((float)(Inputs[0].Value ?? 0), 1 / (float)(Inputs[1].Value ?? 0));
             return Task.CompletedTask;
         }
     }

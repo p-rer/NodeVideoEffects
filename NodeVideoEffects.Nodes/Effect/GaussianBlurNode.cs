@@ -46,6 +46,8 @@ namespace NodeVideoEffects.Nodes.Effect
             _blur.SetInput(0, null, true);
             _blur.Dispose();
             _blur = null!;
+
+            GC.SuppressFinalize(this);
         }
     }
 }

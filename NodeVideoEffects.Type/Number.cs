@@ -5,10 +5,10 @@ namespace NodeVideoEffects.Type
 {
     public class Number : IPortValue
     {
-        private double _value;
-        private readonly double _default;
-        private readonly double _min;
-        private readonly double _max;
+        private float _value;
+        private readonly float _default;
+        private readonly float _min;
+        private readonly float _max;
         private readonly int _digits;
 
         /// <summary>
@@ -17,35 +17,36 @@ namespace NodeVideoEffects.Type
         /// <param name="default">Default number</param>
         /// <param name="min">Min value</param>
         /// <param name="max">Max value</param>
-        /// <param name="digits">Number of decimal places</param>
-        public Number(double @default, double? min, double? max, int? digits)
+        /// <param name="digits">Number of decimal places(max:6)</param>
+        public Number(float @default, float? min, float? max, int? digits)
         {
-            _min = min ?? Double.NaN;
-            _max = max ?? Double.NaN;
+            _min = min ?? float.NaN;
+            _max = max ?? float.NaN;
             _default = @default;
             _value = @default;
-            _digits = digits ?? 8;
+            var nonNullDigits = digits ?? 6;
+            _digits = nonNullDigits > 6 ? 6 : nonNullDigits < 0 ? 0 : nonNullDigits;
         }
 
-        public System.Type Type => typeof(double);
+        public System.Type Type => typeof(float);
 
         public Color Color => Colors.Coral;
 
         /// <summary>
-        /// Double value
+        /// float value
         /// </summary>
         public object Value => _value;
 
         public void _SetValue(object? value)
         {
-            if (double.IsNaN(Convert.ToDouble(value))) value = _default;
+            if (float.IsNaN(Convert.ToSingle(value))) value = _default;
             else
             {
-                if (!double.IsNaN(_min) && Convert.ToDouble(value) < _min) value = _min;
-                if (!double.IsNaN(_max) && Convert.ToDouble(value) > _max) value = _max;
+                if (!float.IsNaN(_min) && Convert.ToSingle(value) < _min) value = _min;
+                if (!float.IsNaN(_max) && Convert.ToSingle(value) > _max) value = _max;
             }
 
-            _value = Math.Round(Convert.ToDouble(value), _digits);
+            _value = (float)Math.Round(Convert.ToSingle(value), _digits);
         }
 
         public void Dispose() { }

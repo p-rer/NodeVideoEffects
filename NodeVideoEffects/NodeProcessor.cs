@@ -22,7 +22,7 @@ namespace NodeVideoEffects
         private readonly OutputNode _outputNode = null!;
 
         private ID2D1Bitmap1 _bitmap;
-        private readonly AffineTransform2D _affineTransform2D;
+        private AffineTransform2D? _affineTransform2D;
 
         private readonly Lock _locker = new();
 
@@ -124,8 +124,6 @@ namespace NodeVideoEffects
                 bitmapProperties
             );
 
-            _affineTransform2D = new AffineTransform2D(context.DeviceContext){BorderMode = BorderMode.Soft, TransformMatrix = Matrix3x2.Identity};
-
             _item = item;
         }
 
@@ -163,6 +161,7 @@ namespace NodeVideoEffects
                 }
                 finally
                 {
+                    _affineTransform2D ??= new AffineTransform2D(Context){BorderMode = BorderMode.Soft, TransformMatrix = Matrix3x2.Identity};
                     _affineTransform2D.SetInput(0, output, true);
 
                     Output = _affineTransform2D.Output;
@@ -200,8 +199,8 @@ namespace NodeVideoEffects
         {
             ClearInput();
             _bitmap.Dispose();
-            _affineTransform2D.SetInput(0, null, true);
-            _affineTransform2D.Dispose();
+            _affineTransform2D?.SetInput(0, null, true);
+            _affineTransform2D?.Dispose();
             Output.Dispose();
         }
     }

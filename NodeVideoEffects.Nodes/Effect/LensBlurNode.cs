@@ -15,7 +15,7 @@ public class LensBlurNode : NodeLogic
             new Input(new Number(10, 0, 2000, 1), "Radius"),
             new Input(new Number(100, 0, 1000, 1), "Brightness"),
             new Input(new Number(2, 0, 10, 1), "EdgeStrength"),
-            new Input(new Number(16, 0.5, 100, 1), "Quality")
+            new Input(new Number(16, 0.5f, 100, 1), "Quality")
         ],
         [
             new Output(new Image(null), "Out")
@@ -46,5 +46,16 @@ public class LensBlurNode : NodeLogic
         {
             Outputs[0].Value = new ImageWrapper(output);
         }
+    }
+
+    public override void Dispose()
+    {
+        base.Dispose();
+
+        if (_videoEffect == null!) return;
+        _videoEffect.Dispose();
+        _videoEffect = null!;
+
+        GC.SuppressFinalize(this);
     }
 }

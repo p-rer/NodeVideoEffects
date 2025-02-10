@@ -6,7 +6,7 @@ namespace NodeVideoEffects.Type
     public interface IPortValue : IDisposable
     {
         /// <summary>
-        /// Type of value
+        /// Type of value control
         /// </summary>
         public System.Type Type { get; }
         /// <summary>
@@ -16,7 +16,8 @@ namespace NodeVideoEffects.Type
         public Color Color { get; }
         public void SetValue(object? value)
         {
-            _SetValue(value != null ? Convert.ChangeType(value, Type) : value);
+            if (value == null || value.GetType() != Type) return;
+            _SetValue(value);
         }
 
         /// <summary>

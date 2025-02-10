@@ -9,12 +9,12 @@ namespace NodeVideoEffects.Control
     /// <summary>
     /// Interaction logic for NumberPort.xaml
     /// </summary>
-    public partial class NumberPort : IControl
+    public sealed partial class NumberPort : IControl
     {
-        private readonly double _def;
-        private double _value;
-        private readonly double _min;
-        private readonly double _max;
+        private readonly float _def;
+        private float _value;
+        private readonly float _min;
+        private readonly float _max;
         private readonly int _dig;
 
         private bool _isClicking;
@@ -27,9 +27,9 @@ namespace NodeVideoEffects.Control
         [DllImport("User32.dll")]
         private static extern bool SetCursorPos(int x, int y);
 
-        public object? Value { get => _value; set => Update((double?)value ?? _def); }
+        public object? Value { get => _value; set => Update((float?)value ?? _def); }
 
-        public NumberPort(double def, double value, double min, double max, int dig)
+        public NumberPort(float def, float value, float min, float max, int dig)
         {
             InitializeComponent();
 
@@ -41,14 +41,14 @@ namespace NodeVideoEffects.Control
             Box.Text = Math.Round(_value, _dig).ToString("F" + _dig);
         }
 
-        protected virtual void OnPropertyChanged(string propertyName)
+        private void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         private void Update()
         {
-            double v;
+            float v;
             if (Box.Text == "")
             {
                 v = _def;
@@ -57,7 +57,7 @@ namespace NodeVideoEffects.Control
             {
                 try
                 {
-                    v = double.Parse(Box.Text);
+                    v = float.Parse(Box.Text);
                 }
                 catch (Exception)
                 {
@@ -67,12 +67,12 @@ namespace NodeVideoEffects.Control
             Update(v);
         }
 
-        private void Update(double value)
+        private void Update(float value)
         {
             var v = value;
-            if (!double.IsNaN(_min) && value < _min) v = _min;
-            if (!double.IsNaN(_max) && value > _max) v = _max;
-            _value = Math.Round(v, _dig);
+            if (!float.IsNaN(_min) && value < _min) v = _min;
+            if (!float.IsNaN(_max) && value > _max) v = _max;
+            _value = (float)Math.Round(v, _dig);
             Box.Text = _value.ToString("F" + _dig);
             OnPropertyChanged(nameof(Value));
             Keyboard.ClearFocus();
@@ -104,8 +104,8 @@ namespace NodeVideoEffects.Control
             {
                 _isDragging = true;
 
-                const double sensitivity = 0.01;
-                Update(_value + delta * sensitivity);
+                const float sensitivity = 0.01f;
+                Update(_value + (float)delta * sensitivity);
                 SetCursorPos((int)_startPoint.X, (int)_startPoint.Y);
             }
             e.Handled = true;

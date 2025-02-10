@@ -18,7 +18,7 @@ namespace NodeVideoEffects.Nodes.Basic
             _id = id;
             NodesManager.FrameChanged += FRAME_PropertyChanged;
             var value = NodesManager.Frame.GetValueOrDefault(_id, 0);
-            Outputs[0].Value = value;
+            Outputs[0].Value = (float)value;
         }
 
         private void FRAME_PropertyChanged(object? sender, PropertyChangedEventArgs e)
