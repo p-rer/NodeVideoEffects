@@ -218,12 +218,12 @@ namespace NodeVideoEffects.Editor
                                 .GetPortPoint(Node.PortType.Output, info.Connections[i].Index);
                             var node = NodesManager.GetNode(info.Id);
                             var inputColor = node!.Inputs[i].Color;
-                            var outputColor = NodesManager.GetNode(node.Inputs[i].Connection.Id)!
-                                .Outputs[node.Inputs[i].Connection.Index].Color;
+                            var outputColor = NodesManager.GetNode(node.Inputs[i].PortInfo.Id)!
+                                .Outputs[node.Inputs[i].PortInfo.Index].Color;
                             AddConnector(outputPoint, inputPoint,
                                 inputColor, outputColor,
-                                new Connection(info.Id, i),
-                                new Connection(info.Connections[i].Id, info.Connections[i].Index));
+                                new PortInfo(info.Id, i),
+                                new PortInfo(info.Connections[i].Id, info.Connections[i].Index));
                             (_nodes[info.Id].InputsPanel.Children[i] as InputPort)!.PortControl.Visibility =
                                 Visibility.Hidden;
                         }
@@ -253,12 +253,12 @@ namespace NodeVideoEffects.Editor
                 infos.ForEach(info =>
                 {
                     if (_nodes.ContainsKey(info.Id)) return;
-                    var type = System.Type.GetType(info.Type);
+                    var type = info.Type;
                     if (type == null) return;
                     NodeLogic? obj;
                     try
                     {
-                        obj = Activator.CreateInstance(type, [ItemId]) as NodeLogic;
+                        obj = Activator.CreateInstance(type, ItemId) as NodeLogic;
                     }
                     catch
                     {
@@ -326,7 +326,7 @@ namespace NodeVideoEffects.Editor
             Canvas.SetTop(node, y);
             Canvas.Children.Add(node);
             var inputs = NodesManager.GetNode(node.Id)?.Inputs ?? [];
-            var connections = inputs.Select(t => t.Connection).ToList();
+            var connections = inputs.Select(t => t.PortInfo).ToList();
             if (!_infos.TryAdd(node.Id, new NodeInfo(node.Id, node.Type, node.Values, x, y, connections)))
                 _infos[node.Id] = new NodeInfo(node.Id, node.Type, node.Values, x, y, connections);
             if (!_nodes.TryAdd(node.Id, node))
@@ -365,7 +365,6 @@ namespace NodeVideoEffects.Editor
                         foreach (var node in _selectingNodes.Where(node =>
                                      node.Type != typeof(InputNode) && node.Type != typeof(OutputNode)))
                         {
-                            Canvas.Children.Remove(node);
                             foreach (OutputPort output in node.OutputsPanel.Children)
                             {
                                 output.RemoveAllConnection();
@@ -374,6 +373,13 @@ namespace NodeVideoEffects.Editor
                             {
                                 input.RemoveConnection();
                             }
+
+                            _ = _infos.Select(info =>
+                                info.Value.Connections.Where(connection => connection.Id == node.Id)
+                                    .Select(connection => connection)
+                                    .Select(connection => info.Value.Connections.Remove(connection)));
+
+                            Canvas.Children.Remove(node);
                             _infos.Remove(node.Id);
                             _nodes.Remove(node.Id);
                             NodesManager.RemoveNode(node.Id);
@@ -428,7 +434,7 @@ namespace NodeVideoEffects.Editor
             InfoText = "Ready";
         }
 
-        public void AddConnector(Point pos1, Point pos2, Color col1, Color col2, Connection inputPort, Connection outputPort)
+        public void AddConnector(Point pos1, Point pos2, Color col1, Color col2, PortInfo inputPort, PortInfo outputPort)
         {
             try
             {
@@ -462,6 +468,7 @@ namespace NodeVideoEffects.Editor
                     Connections = _infos[inputPort.Id].Connections.Select((connection, index) =>
                         index == inputPort.Index ? outputPort : connection).ToList()
                 };
+                OnNodesUpdated();
                 InfoText = "Ready";
             }
             catch (Exception e)
@@ -484,7 +491,7 @@ namespace NodeVideoEffects.Editor
                     .Where(kvp => kvp.Value == connector)
                     .Select(kvp => kvp.Key)
                     .ToList()[0]);
-                _infos[id].Connections[index] = new Connection();
+                _infos[id].Connections[index] = new PortInfo();
             }
             catch (Exception e)
             {
@@ -510,7 +517,7 @@ namespace NodeVideoEffects.Editor
                     (_nodes[key.Item1[..sepIndex]].InputsPanel
                         .Children[int.Parse(key.Item1[(sepIndex + 1)..])] as InputPort)?.RemoveConnection();
                     _infos[key.Item1[..sepIndex]].Connections[int.Parse(key.Item1[(sepIndex + 1)..])] =
-                        new Connection();
+                        new PortInfo();
                     _connectors.Remove(key);
                 }
             }

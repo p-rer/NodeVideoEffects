@@ -117,8 +117,7 @@ namespace NodeVideoEffects.Editor
 
                 if (result?.VisualHit is FrameworkElement element)
                 {
-                    if (AddConnectionToOutputPort(element, Port.PointToScreen(new Point(5, 5))))
-                        _editor.OnNodesUpdated();
+                    AddConnectionToOutputPort(element, Port.PointToScreen(new Point(5, 5)));
                 }
             }
 
@@ -126,22 +125,20 @@ namespace NodeVideoEffects.Editor
             e.Handled = true;
         }
 
-        private bool AddConnectionToOutputPort(DependencyObject element, Point pos1)
+        private void AddConnectionToOutputPort(DependencyObject element, Point pos1)
         {
             var outputPort = FindParent<OutputPort>(element);
-            if (outputPort == null) return false;
-            if (!outputPort.Type.IsAssignableFrom(Type)) return false;
-            if (!NodesManager.CheckConnection(Id, outputPort.Id)) return false;
+            if (outputPort == null
+                || !outputPort.Type.IsAssignableFrom(Type)
+                || !NodesManager.CheckConnection(Id, outputPort.Id)) return;
             SetConnection(outputPort.Id, outputPort.Index);
             outputPort.AddConnection(Id, Index);
             _editor?.AddConnector(outputPort.Port.PointToScreen(new Point(5, 5)),
                 pos1,
                 ((SolidColorBrush)outputPort.Port.Fill).Color,
                 ((SolidColorBrush)Port.Fill).Color,
-                new Connection(Id, Index),
-                new Connection(outputPort.Id, outputPort.Index));
-
-            return true;
+                new PortInfo(Id, Index),
+                new PortInfo(outputPort.Id, outputPort.Index));
         }
     }
 }

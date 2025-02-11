@@ -81,7 +81,7 @@ namespace NodeVideoEffects
             new About(_tag, _commit) { Owner = this }.ShowDialog();
         }
 
-        internal event PropertyChangedEventHandler NodesUpdated = delegate { };
+        public event PropertyChangedEventHandler NodesUpdated = delegate { };
 
         private void EditSpace_NodesUpdated(object sender, PropertyChangedEventArgs e)
         {

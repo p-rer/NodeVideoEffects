@@ -40,7 +40,7 @@ namespace NodeVideoEffects.Type
         /// <summary>
         /// List of node id and output port connected to this port
         /// </summary>
-        public List<Connection> Connection { get; } = new();
+        public List<PortInfo> Connection { get; } = new();
 
         /// <summary>
         /// Was the calculation successful
@@ -66,7 +66,7 @@ namespace NodeVideoEffects.Type
         /// <param name="index">Index of input port will be connected to this port</param>
         public void AddConnection(string id, int index)
         {
-            Connection.Add(new Connection(id, index));
+            Connection.Add(new PortInfo(id, index));
         }
 
         /// <summary>
@@ -76,7 +76,7 @@ namespace NodeVideoEffects.Type
         /// <param name="index">Index of input port was connected to this port</param>
         public void RemoveConnection(string id, int index)
         {
-            Connection.Remove(new Connection(id, index));
+            Connection.Remove(new PortInfo(id, index));
         }
 
         public void Dispose()

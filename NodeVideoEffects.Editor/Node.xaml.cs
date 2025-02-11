@@ -48,7 +48,7 @@ namespace NodeVideoEffects.Editor
                     InputPort inputPort = new InputPort(input, node.Id, index);
                     InputsPanel.Children.Add(inputPort);
                     Values.Add(input.Value);
-                    if (input.Connection.Id != "")
+                    if (input.PortInfo.Id != "")
                         inputPort.Loaded += (_, _) => inputPort.PortControl.Visibility = Visibility.Hidden;
                     input.PropertyChanged += (_, _) => ValueChanged(this, new PropertyChangedEventArgs(_name));
                     index++;

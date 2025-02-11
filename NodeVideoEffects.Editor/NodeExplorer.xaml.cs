@@ -183,7 +183,7 @@ namespace NodeVideoEffects.Editor
                                         node.Id = editor.ItemId + "-" + Guid.NewGuid().ToString("N");
                                         for (var i = 0; i < (node.Inputs?.Length ?? 0); i++)
                                         {
-                                            node.SetInputConnection(i, new Connection());
+                                            node.SetInputConnection(i, new PortInfo());
                                         }
                                         NodesManager.AddNode(node.Id, node);
                                         editor.AddChildren(new Node(node), editor.ConvertToTransform(e.GetPosition(editor)).X, editor.ConvertToTransform(e.GetPosition(editor)).Y);

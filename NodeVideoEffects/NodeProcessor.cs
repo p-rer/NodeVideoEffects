@@ -43,50 +43,44 @@ namespace NodeVideoEffects
                 _outputNode.Id = item.Id + "-" + Guid.NewGuid().ToString("N");
                 NodesManager.AddNode(inputNode.Id, inputNode);
                 NodesManager.AddNode(_outputNode.Id, _outputNode);
-                _outputNode.SetInputConnection(0, new Connection(inputNode.Id, 0));
+                _outputNode.SetInputConnection(0, new PortInfo(inputNode.Id, 0));
                 item.EditorNodes = [
                         new NodeInfo(inputNode.Id, inputNode.GetType(), [], 100, 100, []),
                         new NodeInfo(_outputNode.Id, _outputNode.GetType(), [], 500, 100,
-                            [new Connection(inputNode.Id, 0)])
+                            [new PortInfo(inputNode.Id, 0)])
                     ];
-                Logger.Write(LogLevel.Info, $"Initializing completed.");
+                Logger.Write(LogLevel.Info, "Initializing completed.");
             }
             else
             {
                 for (var i = 0; i < item.Nodes.Count; i++)
                 {
                     var info = item.Nodes[i];
-                    var node = NodesManager.GetNode(info.Id);
                     var index = info.Id.IndexOf('-');
                     if (info.Id[..index] != item.Id)
                         info.Id = item.Id + "-" + info.Id[(index + 1)..];
-                    var type = System.Type.GetType(info.Type);
-                    if (type != null)
+                    var type = info.Type;
+                    object? obj;
+                    try
                     {
-                        object? obj;
-                        try
-                        {
-                            obj = Activator.CreateInstance(type, item.Id);
-                        }
-                        catch
-                        {
-                            obj = Activator.CreateInstance(type, []);
-                        }
-                        node = obj as NodeLogic ?? throw new Exception("Unable to create node instance.");
-                        node.Id = info.Id;
-                        NodesManager.AddNode(info.Id, node);
+                        obj = Activator.CreateInstance(type, item.Id);
+                    }
+                    catch
+                    {
+                        obj = Activator.CreateInstance(type, []);
                     }
 
-                    if (node != null)
+                    var node = obj as NodeLogic ?? throw new Exception("Unable to create node instance.");
+                    node.Id = info.Id;
+                    NodesManager.AddNode(info.Id, node);
+                    if (node.GetType() == typeof(OutputNode))
                     {
-                        if (node.GetType() == typeof(OutputNode))
-                        {
-                            _outputNode = (OutputNode)node;
-                        }
-                        for (int j = 0; j < info.Values.Count; j++)
-                        {
-                            node.SetInput(j, info.Values[j]);
-                        }
+                        _outputNode = (OutputNode)node;
+                    }
+
+                    for (var j = 0; j < info.Values.Count; j++)
+                    {
+                        node.SetInput(j, info.Values[j]);
                     }
                 }
                 foreach (var info in item.Nodes)
@@ -98,7 +92,7 @@ namespace NodeVideoEffects
                         var index = info.Id.IndexOf('-');
                         if (info.Connections[i].Id[..index] != item.Id)
                         {
-                            info.Connections[i] = new Connection(item.Id
+                            info.Connections[i] = new PortInfo(item.Id
                                                                  + "-"
                                                                  + info.Connections[i].Id[(index + 1)..], info.Connections[i].Index);
                         }
@@ -161,6 +155,8 @@ namespace NodeVideoEffects
                 }
                 finally
                 {
+                    if (_affineTransform2D == null || _affineTransform2D.NativePointer == 0)
+                        _affineTransform2D = new AffineTransform2D(Context){BorderMode = BorderMode.Soft, TransformMatrix = Matrix3x2.Identity};
                     _affineTransform2D ??= new AffineTransform2D(Context){BorderMode = BorderMode.Soft, TransformMatrix = Matrix3x2.Identity};
                     _affineTransform2D.SetInput(0, output, true);
 

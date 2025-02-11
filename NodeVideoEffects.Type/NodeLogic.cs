@@ -111,9 +111,9 @@ namespace NodeVideoEffects.Type
             return Outputs[index].Value;
         }
 
-        public void SetInputConnection(int index, Connection connection)
+        public void SetInputConnection(int index, PortInfo portInfo)
         {
-            Inputs[index].SetConnection(Id, index, connection.Id, connection.Index);
+            Inputs[index].SetConnection(Id, index, portInfo.Id, portInfo.Index);
         }
 
         public void RemoveInputConnection(int index)

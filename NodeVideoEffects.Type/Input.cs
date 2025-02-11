@@ -10,7 +10,7 @@ namespace NodeVideoEffects.Type
     public sealed class Input : INotifyPropertyChanged, IDisposable
     {
         private readonly IPortValue _value;
-        private Connection _connection = new();
+        private PortInfo _portInfo = new();
         
         private readonly Lock _locker = new();
 
@@ -32,12 +32,12 @@ namespace NodeVideoEffects.Type
         {
             get
             {
-                if (_connection.Id == "") return _value.Value;
+                if (_portInfo.Id == "") return _value.Value;
                 try
                 {
                     lock(_locker)
                     {
-                        var task = NodesManager.GetOutputValue(_connection.Id, _connection.Index);
+                        var task = NodesManager.GetOutputValue(_portInfo.Id, _portInfo.Index);
                         return task.GetAwaiter().GetResult();
                     }
                 }
@@ -74,7 +74,7 @@ namespace NodeVideoEffects.Type
         /// <summary>
         /// Node id and output port connected to this port
         /// </summary>
-        public Connection Connection => _connection;
+        public PortInfo PortInfo => _portInfo;
 
         public void UpdatedConnectionValue()
         {
@@ -90,7 +90,7 @@ namespace NodeVideoEffects.Type
         /// <param name="outIndex">Index of output port will be connected to this port</param>
         public void SetConnection(string inId, int inIndex, string outId, int outIndex)
         {
-            _connection = new Connection(outId, outIndex);
+            _portInfo = new PortInfo(outId, outIndex);
             if (outId != "")
                 NodesManager.NotifyInputConnectionAdd(inId, inIndex, outId, outIndex);
         }
@@ -102,9 +102,9 @@ namespace NodeVideoEffects.Type
         /// <param name="index">Index of this port</param>
         public void RemoveConnection(string id, int index)
         {
-            if (_connection.Id == "") return;
-            NodesManager.NotifyInputConnectionRemove(id, index, _connection.Id, _connection.Index);
-            _connection.Id = "";
+            if (_portInfo.Id == "") return;
+            NodesManager.NotifyInputConnectionRemove(id, index, _portInfo.Id, _portInfo.Index);
+            _portInfo.Id = "";
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

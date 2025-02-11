@@ -16,4 +16,10 @@
     <ProjectReference Include="..\NodeVideoEffects\NodeVideoEffects.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\..\Program Files\ymm4\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

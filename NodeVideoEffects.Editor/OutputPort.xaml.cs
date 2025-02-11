@@ -91,33 +91,31 @@ namespace NodeVideoEffects.Editor
 
             if (result?.VisualHit is FrameworkElement element)
             {
-                if (SetConnectionToInputPort(element, Port.PointToScreen(new Point(5, 5))))
-                    _editor!.OnNodesUpdated();
+                SetConnectionToInputPort(element, Port.PointToScreen(new Point(5, 5)));
             }
             Port.ReleaseMouseCapture();
             e.Handled = true;
         }
 
-        private bool SetConnectionToInputPort(DependencyObject element, Point pos1)
+        private void SetConnectionToInputPort(DependencyObject element, Point pos1)
         {
             var inputPort = FindParent<InputPort>(element);
-            if (inputPort == null) return false;
-            if (!inputPort.Type.IsAssignableFrom(Type)) return false;
-            if (!NodesManager.CheckConnection(inputPort.Id, Id)) return false;
+            if (inputPort == null
+                || !inputPort.Type.IsAssignableFrom(Type)
+                || !NodesManager.CheckConnection(inputPort.Id, Id)) return;
             inputPort.SetConnection(Id, Index);
             _output.AddConnection(inputPort.Id, inputPort.Index);
             _editor!.AddConnector(pos1, inputPort.Port.PointToScreen(new Point(5, 5)),
                 ((SolidColorBrush)Port.Fill).Color,
                 ((SolidColorBrush)inputPort.Port.Fill).Color,
-                new Connection(inputPort.Id, inputPort.Index), new Connection(Id, Index));
-            return true;
+                new PortInfo(inputPort.Id, inputPort.Index), new PortInfo(Id, Index));
         }
 
         public void AddConnection(string id, int index) => _output.AddConnection(id, index);
 
         public void RemoveAllConnection()
         {
-            var connections = new List<Connection>(_output.Connection);
+            var connections = new List<PortInfo>(_output.Connection);
             connections.ForEach(connection => NodesManager.GetNode(connection.Id)?.RemoveInputConnection(connection.Index));
             _output.Connection.Clear();
             _editor!.RemoveOutputConnector(Id, Index);
