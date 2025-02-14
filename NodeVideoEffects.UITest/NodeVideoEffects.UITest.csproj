@@ -18,7 +18,7 @@
 
   <ItemGroup>
     <Reference Include="Newtonsoft.Json">
-      <HintPath>..\..\..\Program Files\ymm4\Newtonsoft.Json.dll</HintPath>
+      <HintPath>$(YMM4DirPath)Newtonsoft.Json.dll</HintPath>
     </Reference>
   </ItemGroup>
 

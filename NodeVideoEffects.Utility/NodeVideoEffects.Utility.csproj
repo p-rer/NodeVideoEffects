@@ -13,13 +13,13 @@
 
   <ItemGroup>
     <Reference Include="Vortice.Direct2D1">
-      <HintPath>C:\Program Files\ymm4\Vortice.Direct2D1.dll</HintPath>
+      <HintPath>$(YMM4DirPath)Vortice.Direct2D1.dll</HintPath>
     </Reference>
     <Reference Include="YukkuriMovieMaker">
-      <HintPath>C:\Program Files\ymm4\YukkuriMovieMaker.dll</HintPath>
+      <HintPath>$(YMM4DirPath)YukkuriMovieMaker.dll</HintPath>
     </Reference>
     <Reference Include="YukkuriMovieMaker.Plugin">
-      <HintPath>C:\Program Files\ymm4\YukkuriMovieMaker.Plugin.dll</HintPath>
+      <HintPath>$(YMM4DirPath)YukkuriMovieMaker.Plugin.dll</HintPath>
     </Reference>
   </ItemGroup>
 

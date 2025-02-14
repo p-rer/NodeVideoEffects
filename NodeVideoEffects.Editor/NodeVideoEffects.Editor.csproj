@@ -24,7 +24,7 @@
   
   <ItemGroup>
     <Reference Include="YukkuriMovieMaker.Plugin">
-      <HintPath>C:\Program Files\ymm4\YukkuriMovieMaker.Plugin.dll</HintPath>
+      <HintPath>$(YMM4DirPath)YukkuriMovieMaker.Plugin.dll</HintPath>
     </Reference>
   </ItemGroup>
 
