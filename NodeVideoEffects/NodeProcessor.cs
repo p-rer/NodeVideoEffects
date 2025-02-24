@@ -25,16 +25,18 @@ namespace NodeVideoEffects
         private AffineTransform2D? _affineTransform2D;
 
         private readonly Lock _locker = new();
+        private bool _hasError;
 
         public NodeProcessor(IGraphicsDevicesAndContext context, NodeVideoEffectsPlugin item)
         {
-            Context = context.DeviceContext;
             if (item.Id == "" ^ !NodesManager.AddItem(item.Id))
             {
                 item.Id = Guid.NewGuid().ToString("N");
                 NodesManager.AddItem(item.Id);
                 Logger.Write(LogLevel.Info, $"Created the effect processor, ID: \"{item.Id}\".");
             }
+            Context = context.DeviceContext;
+            NodesManager.SetContext(item.Id, context);
             if (item.Nodes.Count == 0)
             {
                 var inputNode = new InputNode();
@@ -56,9 +58,7 @@ namespace NodeVideoEffects
                 for (var i = 0; i < item.Nodes.Count; i++)
                 {
                     var info = item.Nodes[i];
-                    var index = info.Id.IndexOf('-');
-                    if (info.Id[..index] != item.Id)
-                        info.Id = item.Id + "-" + info.Id[(index + 1)..];
+                    info = item.Nodes[i] = info with { Id = item.Id + "-" + info.Id[(info.Id.IndexOf('-') + 1)..] };
                     var type = info.Type;
                     object? obj;
                     try
@@ -100,9 +100,8 @@ namespace NodeVideoEffects
                         node?.SetInputConnection(i, info.Connections[i]);
                     }
                 }
-                Logger.Write(LogLevel.Info, $"Connection restoration completed.");
+                Logger.Write(LogLevel.Info, "Connection restoration completed.");
             }
-            NodesManager.SetContext(item.Id, context);
 
             var bitmapProperties = new BitmapProperties1(
                 new PixelFormat(Format.B8G8R8A8_UNorm, AlphaMode.Premultiplied),
@@ -143,12 +142,17 @@ namespace NodeVideoEffects
                             BindingFlags.FlattenHierarchy)
                         ?.Invoke(null, [_item.Id, effectDescription]);
                     output = ((ImageWrapper?)_outputNode.Inputs[0].Value)?.Image;
-                    if (output != null && output.NativePointer != 0) return effectDescription.DrawDescription;
-                    throw new InvalidOperationException("Output image is null.");
+                    if (output == null || output.NativePointer == 0)
+                        throw new InvalidOperationException("Output image is null.");
+                    _hasError = false;
+                    return effectDescription.DrawDescription;
+
                 }
                 catch (Exception e)
                 {
-                    Logger.Write(LogLevel.Error, $"{e.Message}\nItem ID: \"{_item.Id}\"");
+                    if(_hasError == false)
+                        Logger.Write(LogLevel.Error, $"{e.Message}\nItem ID: \"{_item.Id}\"", e);
+                    _hasError = true;
 
                     SetBlankImage(out output);
                     return effectDescription.DrawDescription;

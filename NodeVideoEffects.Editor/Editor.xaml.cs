@@ -192,7 +192,7 @@ namespace NodeVideoEffects.Editor
             catch (Exception exception)
             {
                 InfoText = "Error occurred while initializing editor";
-                Logger.Write(LogLevel.Error, exception.Message);
+                Logger.Write(LogLevel.Error, exception.Message, exception);
             }
         }
 
@@ -235,7 +235,7 @@ namespace NodeVideoEffects.Editor
             catch (Exception e)
             {
                 InfoText = "Error occurred while building nodes";
-                Logger.Write(LogLevel.Error, e.Message);
+                Logger.Write(LogLevel.Error, e.Message, e);
             }
         }
 
@@ -254,7 +254,6 @@ namespace NodeVideoEffects.Editor
                 {
                     if (_nodes.ContainsKey(info.Id)) return;
                     var type = info.Type;
-                    if (type == null) return;
                     NodeLogic? obj;
                     try
                     {
@@ -313,7 +312,7 @@ namespace NodeVideoEffects.Editor
             catch (Exception e)
             {
                 InfoText = "Error occurred while rebuilding nodes";
-                Logger.Write(LogLevel.Error, e.Message);
+                Logger.Write(LogLevel.Error, e.Message, e);
             }
         }
 
@@ -349,7 +348,7 @@ namespace NodeVideoEffects.Editor
                 }
                 catch (Exception e)
                 {
-                    Logger.Write(LogLevel.Error, e.Message);
+                    Logger.Write(LogLevel.Error, e.Message, e);
                 }
             };
         }
@@ -393,7 +392,7 @@ namespace NodeVideoEffects.Editor
             catch (Exception e)
             {
                 InfoText = "Error occurred while removing nodes";
-                Logger.Write(LogLevel.Error, e.Message);
+                Logger.Write(LogLevel.Error, e.Message, e);
             }
         }
 
@@ -474,7 +473,7 @@ namespace NodeVideoEffects.Editor
             catch (Exception e)
             {
                 InfoText = "Error occurred while connecting";
-                Logger.Write(LogLevel.Error, e.Message);
+                Logger.Write(LogLevel.Error, e.Message, e);
             }
         }
 
@@ -495,7 +494,7 @@ namespace NodeVideoEffects.Editor
             }
             catch (Exception e)
             {
-                Logger.Write(LogLevel.Error, e.Message);
+                Logger.Write(LogLevel.Error, e.Message, e);
             }
         }
 
@@ -523,7 +522,7 @@ namespace NodeVideoEffects.Editor
             }
             catch (Exception e)
             {
-                Logger.Write(LogLevel.Error, e.Message);
+                Logger.Write(LogLevel.Error, e.Message, e);
             }
         }
 
@@ -548,7 +547,7 @@ namespace NodeVideoEffects.Editor
             }
             catch (Exception e)
             {
-                Logger.Write(LogLevel.Error, e.Message);
+                Logger.Write(LogLevel.Error, e.Message, e);
             }
         }
 

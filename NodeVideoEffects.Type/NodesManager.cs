@@ -34,7 +34,7 @@ namespace NodeVideoEffects.Type
             }
             catch (Exception e)
             {
-                Logger.Write(LogLevel.Error, e.Message);
+                Logger.Write(LogLevel.Error, e.Message, e);
                 return null;
             }
         }
@@ -87,7 +87,7 @@ namespace NodeVideoEffects.Type
                 }
                 catch (Exception e)
                 {
-                    Logger.Write(LogLevel.Error, e.Message);
+                    Logger.Write(LogLevel.Error, e.Message, e);
                 }
             });
         }
@@ -101,7 +101,7 @@ namespace NodeVideoEffects.Type
                 }
                 catch (Exception e)
                 {
-                    Logger.Write(LogLevel.Error, e.Message);
+                    Logger.Write(LogLevel.Error, e.Message, e);
                 }
             });
         }

@@ -1,7 +1,7 @@
 ﻿using NodeVideoEffects.Nodes.Math;
 using NodeVideoEffects.Type;
 using System.Runtime.InteropServices;
-using Newtonsoft.Json;
+using NodeVideoEffects.Utility;
 
 namespace NodeVideoEffects.UITest
 {
@@ -39,16 +39,8 @@ namespace NodeVideoEffects.UITest
 
             editor.Nodes = nodes;
             AllocConsole();
-            var settings = new JsonSerializerSettings
-            {
-                Formatting = Formatting.Indented
-            };
-            editor.NodesUpdated += (_, _) =>
-            {
-                Console.WriteLine($@"[{DateTime.Now}]");
-                Console.WriteLine(JsonConvert.SerializeObject(editor.Nodes, settings));
-                Console.WriteLine();
-            };
+            editor.NodesUpdated += (_, _) => Logger.Write(LogLevel.Info, "Nodes updated", editor.Nodes);
+            Updater _ = new();
 
             editor.ShowDialog();
             Close();

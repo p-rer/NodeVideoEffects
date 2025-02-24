@@ -4,11 +4,11 @@ namespace NodeVideoEffects.Utility
 {
     public static class Logger
     {
-        private static readonly LinkedList<(DateTime, LogLevel, string)> Logs = [];
+        private static readonly LinkedList<(DateTime, LogLevel, string, object?)> Logs = [];
 
-        public static void Write(LogLevel level, string message)
+        public static void Write(LogLevel level, string message, object? obj = null)
         {
-            Logs.AddLast((DateTime.Now, level, message));
+            Logs.AddLast((DateTime.Now, level, message, obj));
             if (Logs.Count > 1500)
             {
                 Logs.RemoveFirst();
@@ -16,7 +16,7 @@ namespace NodeVideoEffects.Utility
             LogUpdated.Invoke(null, EventArgs.Empty);
         }
 
-        public static ImmutableList<(DateTime, LogLevel, string)> Read() => Logs.ToImmutableList();
+        public static ImmutableList<(DateTime, LogLevel, string, object?)> Read() => Logs.ToImmutableList();
 
         public static EventHandler LogUpdated = delegate { };
     }

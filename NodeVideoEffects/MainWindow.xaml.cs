@@ -1,10 +1,9 @@
 ﻿using NodeVideoEffects.Editor;
 using NodeVideoEffects.Type;
 using System.ComponentModel;
-using System.IO;
-using System.Reflection;
 using System.Windows;
 using System.Windows.Input;
+using NodeVideoEffects.Utility;
 
 namespace NodeVideoEffects
 {
@@ -35,8 +34,8 @@ namespace NodeVideoEffects
         {
             InitializeComponent();
 
-            _tag = FileLoad("git_tag.txt");
-            _commit = FileLoad("git_id.txt");
+            _tag = ResourceLoader.FileLoad("git_tag.txt");
+            _commit = ResourceLoader.FileLoad("git_id.txt");
 
             Task.Run(() =>
             {
@@ -61,19 +60,6 @@ namespace NodeVideoEffects
             InputBindings.Add(new KeyBinding(
                 RemoveCommand,
                 new KeyGesture(Key.Delete)));
-            return;
-
-            string FileLoad(string fileName)
-            {
-                var asm = Assembly.GetExecutingAssembly();
-                var resName = asm.GetManifestResourceNames().FirstOrDefault(a => a.EndsWith(fileName));
-                if (resName == null)
-                    return string.Empty;
-                using var st = asm.GetManifestResourceStream(resName);
-                if (st == null) return string.Empty;
-                var reader = new StreamReader(st);
-                return reader.ReadToEnd().Trim('\r', '\n');
-            }
         }
 
         private void ShowAbout(object sender, RoutedEventArgs e)

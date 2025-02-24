@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
+using NodeVideoEffects.Utility;
 
 namespace NodeVideoEffects.Control
 {
@@ -96,24 +97,36 @@ namespace NodeVideoEffects.Control
 
         private void Box_PreviewMouseMove(object _, MouseEventArgs e)
         {
-            if (!_isClicking || _isEditing) return;
-            var currentPoint = Box.PointToScreen(e.GetPosition(Box));
-            var delta = currentPoint.X - _startPoint.X;
-
-            if (Math.Abs(delta) > SystemParameters.MinimumHorizontalDragDistance || _isDragging)
+            try
             {
-                _isDragging = true;
+                if (!_isClicking || _isEditing) return;
+                var currentPoint = Box.PointToScreen(e.GetPosition(Box));
+                var delta = currentPoint.X - _startPoint.X;
 
-                const float sensitivity = 0.01f;
-                Update(_value + (float)delta * sensitivity);
-                SetCursorPos((int)_startPoint.X, (int)_startPoint.Y);
+                if (Math.Abs(delta) > SystemParameters.MinimumHorizontalDragDistance || _isDragging)
+                {
+                    _isDragging = true;
+
+                    const float sensitivity = 0.01f;
+                    Update(_value + (float)delta * sensitivity);
+                    SetCursorPos((int)_startPoint.X, (int)_startPoint.Y);
+                }
+
+                e.Handled = true;
             }
-            e.Handled = true;
+            catch (Exception ex)
+            {
+                Mouse.OverrideCursor = null;
+                Box.ReleaseMouseCapture();
+                Logger.Write(LogLevel.Error, ex.Message, ex);
+            }
         }
 
         private void Box_PreviewMouseLeftButtonUp(object _, MouseButtonEventArgs e)
         {
             _isClicking = false;
+            Mouse.OverrideCursor = null;
+            Box.ReleaseMouseCapture();
 
             if (_isDragging)
             {
@@ -127,8 +140,7 @@ namespace NodeVideoEffects.Control
                 Box.Focusable = true;
                 Keyboard.Focus(Box);
             }
-            Mouse.OverrideCursor = null;
-            Box.ReleaseMouseCapture();
+            OnPropertyChanged(nameof(Value));
         }
 
         private void Box_LostFocus(object sender, RoutedEventArgs e)

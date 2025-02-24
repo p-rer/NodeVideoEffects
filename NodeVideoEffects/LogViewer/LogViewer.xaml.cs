@@ -13,7 +13,7 @@ namespace NodeVideoEffects.LogViewer;
 public partial class LogViewer
 {
     private static LogViewer? _openedWindow;
-    private ImmutableList<(DateTime, LogLevel, string)> _logs = ImmutableList<(DateTime, LogLevel, string)>.Empty;
+    private ImmutableList<(DateTime, LogLevel, string, object?)> _logs = [];
     private double _currentTargetOffset;
 
     public LogViewer()
@@ -54,16 +54,14 @@ public partial class LogViewer
 
     private void OnPreviewMouseWheel(object sender, MouseWheelEventArgs e)
     {
-        if (sender is ScrollViewer scrollViewer)
-        {
-            _currentTargetOffset = Math.Max(0, Math.Min(
-                _currentTargetOffset - e.Delta, scrollViewer.ScrollableHeight));
+        if (sender is not ScrollViewer scrollViewer) return;
+        _currentTargetOffset = Math.Max(0, Math.Min(
+            _currentTargetOffset - e.Delta, scrollViewer.ScrollableHeight));
 
-            scrollViewer.BeginAnimation(ScrollViewerBehavior.VerticalOffsetProperty, null);
-            AnimateScroll(scrollViewer, _currentTargetOffset);
+        scrollViewer.BeginAnimation(ScrollViewerBehavior.VerticalOffsetProperty, null);
+        AnimateScroll(scrollViewer, _currentTargetOffset);
 
-            e.Handled = true;
-        }
+        e.Handled = true;
     }
 
     private void OnPreviewKeyDown(object sender, KeyEventArgs e)

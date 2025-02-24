@@ -1,3 +1,6 @@
 [submodule "YukkuriMovieMaker.Generator"]
 	path = YukkuriMovieMaker.Generator
 	url = https://github.com/manju-summoner/YukkuriMovieMaker.Generator.git
+[submodule "UtilityControls"]
+	path = UtilityControls
+	url = https://github.com/p-rer/UtilityControls.git

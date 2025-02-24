@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using Timer = System.Threading.Timer;
 
 namespace NodeVideoEffects.Editor
 {
@@ -20,6 +21,10 @@ namespace NodeVideoEffects.Editor
 
         private bool _isMouseDown;
 
+        private DateTime _lastExecution = DateTime.MinValue;
+        private Timer? _debounceTimer;
+        private const int DebounceInterval = 200; // [ms]
+
         public InputPort(Input input, string id, int index)
         {
             InitializeComponent();
@@ -29,7 +34,41 @@ namespace NodeVideoEffects.Editor
             PortName.Content = input.Name;
             Port.Fill = new SolidColorBrush(input.Color);
             _control = input.Control;
-            _control.PropertyChanged += OnControlPropertyChanged;
+            _control.PropertyChanged += (_, _) =>
+            {
+                // Debounce the property changed event
+                var now = DateTime.UtcNow;
+                if ((now - _lastExecution).TotalMilliseconds >= DebounceInterval)
+                {
+                    // Execute immediately
+                    _lastExecution = now;
+                    if (_debounceTimer != null)
+                    {
+                        _debounceTimer.Dispose();
+                        _debounceTimer = null;
+                    }
+
+                    Dispatcher.Invoke(OnControlPropertyChanged);
+                }
+
+                if (_debounceTimer != null)
+                {
+                    // Reset the timer
+                    _debounceTimer.Change(DebounceInterval, Timeout.Infinite);
+                }
+                else
+                {
+                    // Start the timer
+                    _debounceTimer = new Timer(_ =>
+                    {
+                        Dispatcher.Invoke(OnControlPropertyChanged);
+                        _lastExecution = DateTime.UtcNow;
+                        _debounceTimer?.Dispose();
+                        _debounceTimer = null;
+                    }, null, DebounceInterval, Timeout.Infinite);
+                }
+            };
+
             PortControl.Content = _control;
             Loaded += (_, _) =>
             {
@@ -62,7 +101,7 @@ namespace NodeVideoEffects.Editor
 
         public event PropertyChangedEventHandler PropertyChanged = delegate { };
 
-        private void OnControlPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        private void OnControlPropertyChanged()
         {
             _input.Value = _control.Value;
             PropertyChanged(this, new PropertyChangedEventArgs(Name));

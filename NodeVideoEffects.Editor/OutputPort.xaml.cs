@@ -48,7 +48,7 @@ namespace NodeVideoEffects.Editor
             }
             catch (Exception e)
             {
-                Logger.Write(LogLevel.Error, e.Message);
+                Logger.Write(LogLevel.Error, e.Message, e);
             }
         }
 

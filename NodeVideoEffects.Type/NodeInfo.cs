@@ -1,34 +1,48 @@
-﻿namespace NodeVideoEffects.Type
-{
-    public record struct NodeInfo
-    {
-        public string Id { get; set; }
-        public System.Type Type { get; }
-        public List<object?> Values { get; init; }
-        public double X { get; init; }
-        public double Y { get; init; }
-        public List<PortInfo> Connections { get; init; }
+﻿using Newtonsoft.Json;
 
-        public NodeInfo(string id, System.Type type, List<object?> values, double x, double y, List<PortInfo> connections)
-        {
-            Id = id;
-            Type = type;
-            Values = values;
-            X = x;
-            Y = y;
-            Connections = connections;
-        }
+namespace NodeVideoEffects.Type
+{
+    public record struct NodeInfo(
+        string Id,
+        System.Type Type,
+        List<object?> Values,
+        double X,
+        double Y,
+        List<PortInfo> Connections)
+    {
+        public System.Type Type { get; init; } = Type;
+
+        public List<object?> Values { get; init; } = Values;
+        public double X { get; init; } = X;
+        public double Y { get; init; } = Y;
+        public List<PortInfo> Connections { get; init; } = Connections;
 
         public NodeInfo DeepCopy()
         {
-            return new NodeInfo(Id,
-                                Type,
-                                Values?.Select(value => value is ICloneable cloneable ? cloneable.Clone() : value).ToList() ?? [],
-                                X,
-                                Y,
-                                Connections ?? []);
+            return this with
+            {
+                Values =
+                Values?.Select(value => value is ICloneable cloneable ? cloneable.Clone() : value).ToList() ?? [],
+                Connections = Connections ?? []
+            };
         }
 
         public override string? ToString() => base.ToString();
+
+        public class TypeJsonConverter : JsonConverter
+        {
+            public override bool CanConvert(System.Type objectType)
+            {
+                return objectType == typeof(System.Type);
+            }
+
+            public override object? ReadJson(JsonReader reader, System.Type objectType, object? existingValue,
+                JsonSerializer serializer) => reader.Value is string typeName ? System.Type.GetType(typeName) : null;
+
+            public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
+            {
+                if (value is System.Type type) writer.WriteValue(type.AssemblyQualifiedName); else writer.WriteNull();
+            }
+        }
     }
 }
