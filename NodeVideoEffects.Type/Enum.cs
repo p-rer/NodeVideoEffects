@@ -6,9 +6,9 @@ namespace NodeVideoEffects.Type
     public class Enum : IPortValue
     {
         private int _value;
-        public Enum(List<string> items)
+        public Enum(List<string> items, int value = 0)
         {
-            Control = new EnumPort(items);
+            Control = new EnumPort(items, value);
         }
 
         public System.Type Type => typeof(int);

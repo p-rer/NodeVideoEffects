@@ -3,15 +3,16 @@ using System.Windows.Controls;
 
 namespace NodeVideoEffects.Control
 {
-    public partial class EnumPort : IControl
+    public sealed partial class EnumPort : IControl
     {
         private int _value;
-        public EnumPort(List<string> items)
+        public EnumPort(List<string> items, int value)
         {
             InitializeComponent();
 
             Box.ItemsSource = items;
-            Value = _value;
+            Box.SelectedIndex = value;
+            Value = value;
         }
 
         public object? Value
@@ -31,7 +32,7 @@ namespace NodeVideoEffects.Control
             Value = Box.SelectedIndex;
         }
 
-        protected virtual void OnPropertyChanged(string propertyName)
+        private void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }

@@ -1,4 +1,6 @@
-﻿using System.Reflection;
+﻿using System.Collections.Immutable;
+using System.ComponentModel.DataAnnotations;
+using System.Reflection;
 using System.Reflection.Emit;
 using Vortice.Direct2D1;
 using YukkuriMovieMaker.Player.Video;
@@ -28,14 +30,14 @@ namespace NodeVideoEffects.Type
         
         private VideoEffectsLoader(IVideoEffect? effect, string id)
         {
-            _videoEffect = effect ?? throw new ArgumentNullException(nameof(effect), "Unable load effect");
+            _videoEffect = effect ?? throw new ArgumentNullException(nameof(effect), @"Unable load effect");
             _type = EffectType.VideoEffect;
             _id = id;
         }
 
         private VideoEffectsLoader(ShaderEffect? effect, string id)
         {
-            if (effect == null) throw new ArgumentNullException(nameof(effect), "Unable generate effect");
+            if (effect == null) throw new ArgumentNullException(nameof(effect), @"Unable generate effect");
             _shaderEffect = effect;
             _type = EffectType.ShaderEffect;
             _id = id;
@@ -43,7 +45,7 @@ namespace NodeVideoEffects.Type
         
         ~VideoEffectsLoader()
         {
-            Dispose(false);
+            Dispose();
         }
         
         public VideoEffectsLoader SetValue(params object[]? values)
@@ -69,6 +71,113 @@ namespace NodeVideoEffects.Type
 
                 default:
                     return this;
+            }
+        }
+        public async Task<VideoEffectsLoader> SetValue(string propertyName, object? value)
+        {
+            switch (_type)
+            {
+                case EffectType.ShaderEffect when _shaderEffect != null:
+                    lock (_shaderEffect)
+                    {
+                        _shaderEffect.SetValueByName(propertyName, value);
+                    }
+                    break;
+                case EffectType.VideoEffect when _videoEffect != null:
+                {
+                    // _videoEffectの階層内から、DisplayAttributeが付与されたプロパティのうち、
+                    // プロパティ名（識別子）が引数のpropertyNameと一致するものを再帰的に探索する
+                    var result = FindPropertyByDisplay(_videoEffect, propertyName);
+                    if (result == null)
+                        throw new ArgumentException($@"指定されたプロパティ '{propertyName}' が見つかりません。", nameof(propertyName));
+
+                    var (targetObject, propInfo) = result.Value;
+
+                    // Animation型の場合、プロパティ自体に値をセットするのではなく、
+                    // そのAnimationオブジェクトのValuesプロパティを直接更新する
+                    if (propInfo.PropertyType == typeof(Animation))
+                    {
+                        // Animationオブジェクトを取得。存在しない場合は新規生成する
+                        if (propInfo.GetValue(targetObject) is not Animation animObj)
+                        {
+                            if (!propInfo.CanWrite)
+                                throw new InvalidOperationException($"プロパティ '{propertyName}' は書き込み不可です。");
+                            animObj = Activator.CreateInstance<Animation>()
+                                      ?? throw new InvalidOperationException("Animation型のインスタンスを生成できません。");
+                            // Animationオブジェクトが存在しなかった場合のみ、対象プロパティに初回設定する
+                            propInfo.SetValue(targetObject, animObj);
+                        }
+
+                        // Animationオブジェクト内のValuesプロパティを取得する
+                        var valuesProp = animObj.GetType()
+                            .GetProperty("Values", BindingFlags.Public | BindingFlags.Instance);
+                        if (valuesProp == null || !valuesProp.CanRead || !valuesProp.CanWrite)
+                            throw new InvalidOperationException("AnimationオブジェクトのValuesプロパティが見つからないか、読み書き不可です。");
+
+                        // 新たなAnimationValueを生成し、既存リストに追加する
+                        var newList = ImmutableList<AnimationValue>.Empty.Add(new AnimationValue(Convert.ToDouble(value ?? 0)));
+                        // AnimationオブジェクトのValuesプロパティを直接更新する
+                        animObj.BeginEdit();
+                        valuesProp.SetValue(animObj, newList);
+                        await animObj.EndEditAsync();
+                    }
+                    else
+                    {
+                        if (!propInfo.CanWrite)
+                            throw new InvalidOperationException($"プロパティ '{propertyName}' は書き込み不可です。");
+                        // Animation型以外は従来通りプロパティに値を設定する
+                        propInfo.SetValue(targetObject, value);
+                    }
+
+                    if (_videoEffect is YukkuriMovieMaker.ItemEditor.IEditable editable)
+                    {
+                        await editable.EndEditAsync();
+                    }
+                }
+                    break;
+                default:
+                    return this;
+            }
+            return this;
+
+            (object target, PropertyInfo property)? FindPropertyByDisplay(object? obj, string name)
+            {
+                if (obj == null) return null;
+
+                // obj直下のプロパティを走査
+                foreach (var prop in obj.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
+                {
+                    // インデクサ（添字付きプロパティ）など、パラメータを必要とするプロパティは除外する
+                    if (prop.GetIndexParameters().Length > 0)
+                        continue;
+
+                    // DisplayAttributeが付与されていることを確認し、かつプロパティ名と一致するか比較する
+                    var displayAttr = prop.GetCustomAttribute<DisplayAttribute>();
+                    if (displayAttr != null && prop.Name == name)
+                    {
+                        return (obj, prop);
+                    }
+
+                    // 再帰的に探索する（文字列型は除外）
+                    if (prop is not { CanRead: true, PropertyType.IsClass: true } ||
+                        prop.PropertyType == typeof(string)) continue;
+                    object? subObj;
+                    try
+                    {
+                        subObj = prop.GetValue(obj);
+                    }
+                    catch
+                    {
+                        // プロパティ取得中に例外が発生した場合はスキップ
+                        continue;
+                    }
+
+                    if (subObj == null) continue;
+                    var result = FindPropertyByDisplay(subObj, name);
+                    if (result != null)
+                        return result;
+                }
+                return null;
             }
         }
 
@@ -124,16 +233,10 @@ namespace NodeVideoEffects.Type
 
         public void Dispose()
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposing) return;
             _processor?.ClearInput();
             _processor?.Dispose();
             _processor = null;
+            GC.SuppressFinalize(this);
         }
 
         public static async Task<VideoEffectsLoader> LoadEffect(string name, string id) =>
@@ -183,6 +286,21 @@ namespace NodeVideoEffects.Type
                 if (!property.CanWrite)
                     throw new InvalidOperationException($"The property '{property.Name}' is not writable.");
 
+                property.SetValue(this, value);
+            }
+
+            public void SetValueByName(string propertyName, object? value)
+            {
+                // 指定されたプロパティ名（名前文字列）に対応するプロパティを取得する（BindingFlags: 公開・インスタンス）
+                var property = this.GetType().GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
+                if (property == null)
+                {
+                    throw new ArgumentException($@"指定されたプロパティ '{propertyName}' が見つかりません。", nameof(propertyName));
+                }
+                if (!property.CanWrite)
+                {
+                    throw new InvalidOperationException($"プロパティ '{propertyName}' は書き込み不可です。");
+                }
                 property.SetValue(this, value);
             }
 
