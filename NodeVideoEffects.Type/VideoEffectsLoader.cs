@@ -73,6 +73,7 @@ namespace NodeVideoEffects.Type
                     return this;
             }
         }
+
         public async Task<VideoEffectsLoader> SetValue(string propertyName, object? value)
         {
             switch (_type)
@@ -82,41 +83,45 @@ namespace NodeVideoEffects.Type
                     {
                         _shaderEffect.SetValueByName(propertyName, value);
                     }
+
                     break;
                 case EffectType.VideoEffect when _videoEffect != null:
                 {
-                    // _videoEffectの階層内から、DisplayAttributeが付与されたプロパティのうち、
-                    // プロパティ名（識別子）が引数のpropertyNameと一致するものを再帰的に探索する
+                    // Recursively search for properties with DisplayAttribute within the _videoEffect hierarchy,
+                    // and match the property name (identifier) with the argument propertyName
                     var result = FindPropertyByDisplay(_videoEffect, propertyName);
                     if (result == null)
-                        throw new ArgumentException($@"指定されたプロパティ '{propertyName}' が見つかりません。", nameof(propertyName));
+                        throw new ArgumentException($@"The specified property '{propertyName}' was not found.",
+                            nameof(propertyName));
 
                     var (targetObject, propInfo) = result.Value;
 
-                    // Animation型の場合、プロパティ自体に値をセットするのではなく、
-                    // そのAnimationオブジェクトのValuesプロパティを直接更新する
+                    // If the property type is Animation, update the Values property of the Animation object directly
                     if (propInfo.PropertyType == typeof(Animation))
                     {
-                        // Animationオブジェクトを取得。存在しない場合は新規生成する
+                        // Retrieve the Animation object. If it does not exist, create a new one
                         if (propInfo.GetValue(targetObject) is not Animation animObj)
                         {
                             if (!propInfo.CanWrite)
-                                throw new InvalidOperationException($"プロパティ '{propertyName}' は書き込み不可です。");
+                                throw new InvalidOperationException($"The property '{propertyName}' is read-only.");
                             animObj = Activator.CreateInstance<Animation>()
-                                      ?? throw new InvalidOperationException("Animation型のインスタンスを生成できません。");
-                            // Animationオブジェクトが存在しなかった場合のみ、対象プロパティに初回設定する
+                                      ?? throw new InvalidOperationException(
+                                          "Unable to create an instance of Animation type.");
+                            // Set the Animation object to the target property only if it did not exist
                             propInfo.SetValue(targetObject, animObj);
                         }
 
-                        // Animationオブジェクト内のValuesプロパティを取得する
+                        // Retrieve the Values property of the Animation object
                         var valuesProp = animObj.GetType()
                             .GetProperty("Values", BindingFlags.Public | BindingFlags.Instance);
                         if (valuesProp == null || !valuesProp.CanRead || !valuesProp.CanWrite)
-                            throw new InvalidOperationException("AnimationオブジェクトのValuesプロパティが見つからないか、読み書き不可です。");
+                            throw new InvalidOperationException(
+                                "The Values property of the Animation object was not found or is read-only.");
 
-                        // 新たなAnimationValueを生成し、既存リストに追加する
-                        var newList = ImmutableList<AnimationValue>.Empty.Add(new AnimationValue(Convert.ToDouble(value ?? 0)));
-                        // AnimationオブジェクトのValuesプロパティを直接更新する
+                        // Create a new AnimationValue and add it to the existing list
+                        var newList =
+                            ImmutableList<AnimationValue>.Empty.Add(new AnimationValue(Convert.ToDouble(value ?? 0)));
+                        // Update the Values property of the Animation object directly
                         animObj.BeginEdit();
                         valuesProp.SetValue(animObj, newList);
                         await animObj.EndEditAsync();
@@ -124,8 +129,8 @@ namespace NodeVideoEffects.Type
                     else
                     {
                         if (!propInfo.CanWrite)
-                            throw new InvalidOperationException($"プロパティ '{propertyName}' は書き込み不可です。");
-                        // Animation型以外は従来通りプロパティに値を設定する
+                            throw new InvalidOperationException($"The property '{propertyName}' is read-only.");
+                        // For non-Animation types, set the value to the property as usual
                         propInfo.SetValue(targetObject, value);
                     }
 
@@ -138,27 +143,28 @@ namespace NodeVideoEffects.Type
                 default:
                     return this;
             }
+
             return this;
 
             (object target, PropertyInfo property)? FindPropertyByDisplay(object? obj, string name)
             {
                 if (obj == null) return null;
 
-                // obj直下のプロパティを走査
+                // Traverse the properties directly under obj
                 foreach (var prop in obj.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
                 {
-                    // インデクサ（添字付きプロパティ）など、パラメータを必要とするプロパティは除外する
+                    // Exclude properties that require parameters, such as indexers
                     if (prop.GetIndexParameters().Length > 0)
                         continue;
 
-                    // DisplayAttributeが付与されていることを確認し、かつプロパティ名と一致するか比較する
+                    // Check if DisplayAttribute is applied and compare the property name
                     var displayAttr = prop.GetCustomAttribute<DisplayAttribute>();
                     if (displayAttr != null && prop.Name == name)
                     {
                         return (obj, prop);
                     }
 
-                    // 再帰的に探索する（文字列型は除外）
+                    // Recursively search (excluding string type)
                     if (prop is not { CanRead: true, PropertyType.IsClass: true } ||
                         prop.PropertyType == typeof(string)) continue;
                     object? subObj;
@@ -168,7 +174,7 @@ namespace NodeVideoEffects.Type
                     }
                     catch
                     {
-                        // プロパティ取得中に例外が発生した場合はスキップ
+                        // Skip if an exception occurs while retrieving the property
                         continue;
                     }
 
@@ -177,6 +183,7 @@ namespace NodeVideoEffects.Type
                     if (result != null)
                         return result;
                 }
+
                 return null;
             }
         }
