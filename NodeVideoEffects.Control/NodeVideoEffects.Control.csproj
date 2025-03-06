@@ -32,6 +32,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\NodeVideoEffects.Utility\NodeVideoEffects.Utility.csproj" />
+    <ProjectReference Include="..\UtilityControls\UtilityControls\UtilityControls.csproj" />
   </ItemGroup>
 
 </Project>

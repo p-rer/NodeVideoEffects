@@ -7,7 +7,7 @@ namespace NodeVideoEffects.API;
 /// <summary>
 /// Base class for nodes that use shaders
 /// </summary>
-public abstract class ShaderEffectNodeBase : NodeBase
+public abstract class ShaderEffectNodeBase : NodeLogic
 {
     private readonly string _shaderId = "";
     private readonly string _effectId = "";
@@ -15,7 +15,7 @@ public abstract class ShaderEffectNodeBase : NodeBase
     private VideoEffectsLoader? _videoEffect;
     
     /// <summary>
-    /// Initialize a new instance of <see cref="NodeBase"/>
+    /// Initialize a new instance of <see cref="NodeLogic"/>
     /// </summary>
     /// <param name="inputs">Array of <see cref="Input"/>. Input ports of this node</param>
     /// <param name="outputs">Array of <see cref="Output"/>. Output ports of this node</param>
@@ -34,7 +34,7 @@ public abstract class ShaderEffectNodeBase : NodeBase
         _shaderId = VideoEffectsLoader.RegisterShader(shaderName);
         _properties = properties;
     }
-    
+
     /// <summary>
     /// Execute shaders
     /// </summary>

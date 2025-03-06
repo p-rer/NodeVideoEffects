@@ -129,11 +129,18 @@ namespace NodeVideoEffects.Type
 
         public virtual void Dispose()
         {
-            foreach (var input in Inputs)
-                input.Dispose();
-            foreach (var output in Outputs)
-                output.Dispose();
-            NodesManager.RemoveNode(Id);
+            try
+            {
+                foreach (var input in Inputs)
+                    input.Dispose();
+                foreach (var output in Outputs)
+                    output.Dispose();
+                NodesManager.RemoveNode(Id);
+            }
+            catch
+            {
+                // ignored
+            }
         }
     }
 }
