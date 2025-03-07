@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace NodeVideoEffects.Control;
@@ -101,6 +102,11 @@ public partial class ColorPort : IControl
     private void Popup_OnClosed(object? sender, EventArgs e)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Value)));
+    }
+
+    private void UIElement_OnPreviewMouseDown(object sender, MouseButtonEventArgs e)
+    {
+        e.Handled = true;
     }
 }
 

@@ -34,6 +34,9 @@
                         <ColumnDefinition Width="10"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
+                    <!-- This is the focusable element not to make the popup close when clicking inside -->
+                    <Grid Grid.ColumnSpan="3" Background="Transparent" IsHitTestVisible="True" Focusable="True" PreviewMouseDown="UIElement_OnPreviewMouseDown"/>
+
                     <utilityControls:ColorPicker Grid.Column="0"
                           SelectedColor="{Binding SelectedColor, Mode=TwoWay, ElementName=ColorPortControl}"/>
                     <StackPanel Grid.Column="2" VerticalAlignment="Center">
