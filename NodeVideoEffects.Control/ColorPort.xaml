@@ -16,7 +16,34 @@
             <Button x:Name="BtnColor" Width="25" Height="25" Click="btnColor_Click"
                     BorderThickness="1" Margin="0">
                 <Button.Background>
-                    <SolidColorBrush Color="{Binding SelectedColor, Mode=TwoWay, ElementName=ColorPortControl}"/>
+                    <DrawingBrush Stretch="None" TileMode="Tile" Viewport="0,0,10,10" ViewportUnits="Absolute">
+                        <DrawingBrush.Drawing>
+                            <DrawingGroup>
+                                <GeometryDrawing Brush="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
+                                    <GeometryDrawing.Geometry>
+                                        <RectangleGeometry Rect="0,0,10,10" />
+                                    </GeometryDrawing.Geometry>
+                                </GeometryDrawing>
+                                <GeometryDrawing Brush="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}">
+                                    <GeometryDrawing.Geometry>
+                                        <GeometryGroup>
+                                            <RectangleGeometry Rect="0,0,5,5" />
+                                            <RectangleGeometry Rect="5,5,5,5" />
+                                        </GeometryGroup>
+                                    </GeometryDrawing.Geometry>
+                                </GeometryDrawing>
+
+                                <GeometryDrawing>
+                                    <GeometryDrawing.Brush>
+                                        <SolidColorBrush Color="{Binding SelectedColor, Mode=TwoWay, ElementName=ColorPortControl}"/>
+                                    </GeometryDrawing.Brush>
+                                    <GeometryDrawing.Geometry>
+                                        <RectangleGeometry Rect="0,0,10,10" />
+                                    </GeometryDrawing.Geometry>
+                                </GeometryDrawing>
+                            </DrawingGroup>
+                        </DrawingBrush.Drawing>
+                    </DrawingBrush>
                 </Button.Background>
             </Button>
             <TextBox Width="75" Height="25"

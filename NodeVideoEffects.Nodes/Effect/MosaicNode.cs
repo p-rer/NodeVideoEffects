@@ -13,7 +13,7 @@ namespace NodeVideoEffects.Nodes.Effect
             [
                 new Input(new Image(null), "In"),
                 new Input(new Enum(["Circle", "Triangle", "Rectangle", "Hexagon", "Delaunay", "Voronoi"], 2), "Mosaic Type"),
-                new Input(new Number(10, 0, 250,4), "Level")
+                new Input(new Number(10, 1, 250,4), "Level")
             ],
             [
                 new Output(new Image(null), "Out")

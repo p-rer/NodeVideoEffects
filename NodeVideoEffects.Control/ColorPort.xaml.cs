@@ -113,9 +113,9 @@ public partial class ColorPort : IControl
 public class ColorToHexConverter : IValueConverter {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) {
         if (value is Color color) {
-            return $"#{color.A:X2}{color.R:X2}{color.G:X2}{color.B:X2}";
+            return $"#{color.R:x2}{color.G:x2}{color.B:x2}{color.A:x2}";
         }
-        return "#FFFFFFFF";
+        return "#ffffffff";
     }
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
@@ -130,10 +130,10 @@ public class ColorToHexConverter : IValueConverter {
             {
                 case 8:
                 {
-                    var a = byte.Parse(s[..2], NumberStyles.HexNumber);
-                    var r = byte.Parse(s.Substring(2, 2), NumberStyles.HexNumber);
-                    var g = byte.Parse(s.Substring(4, 2), NumberStyles.HexNumber);
-                    var b = byte.Parse(s.Substring(6, 2), NumberStyles.HexNumber);
+                    var r = byte.Parse(s[..2], NumberStyles.HexNumber);
+                    var g = byte.Parse(s.Substring(2, 2), NumberStyles.HexNumber);
+                    var b = byte.Parse(s.Substring(4, 2), NumberStyles.HexNumber);
+                    var a = byte.Parse(s.Substring(6, 2), NumberStyles.HexNumber);
                     return Color.FromArgb(a, r, g, b);
                 }
                 case 6:
