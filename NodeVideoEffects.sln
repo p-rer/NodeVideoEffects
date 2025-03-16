@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NodeVideoEffects.API", "Nod
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UtilityControls", "UtilityControls\UtilityControls\UtilityControls.csproj", "{4DD42997-2E03-4005-9907-EDB1644A6DA4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NodeVideoEffects.Updater", "NodeVideoEffects.Updater\NodeVideoEffects.Updater.csproj", "{6EA4A21A-32A1-4B57-B535-DE21AF6FCEFD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +71,10 @@ Global
 		{4DD42997-2E03-4005-9907-EDB1644A6DA4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4DD42997-2E03-4005-9907-EDB1644A6DA4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4DD42997-2E03-4005-9907-EDB1644A6DA4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6EA4A21A-32A1-4B57-B535-DE21AF6FCEFD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6EA4A21A-32A1-4B57-B535-DE21AF6FCEFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6EA4A21A-32A1-4B57-B535-DE21AF6FCEFD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6EA4A21A-32A1-4B57-B535-DE21AF6FCEFD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

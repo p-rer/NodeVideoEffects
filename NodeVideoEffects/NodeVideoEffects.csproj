@@ -16,6 +16,7 @@
 	  <ProjectReference Include="..\NodeVideoEffects.Nodes\NodeVideoEffects.Nodes.csproj" />
 	  <ProjectReference Include="..\NodeVideoEffects.Type\NodeVideoEffects.Type.csproj" />
 	  <AdditionalFiles Include="**\*.csv" />
+	  <ProjectReference Include="..\NodeVideoEffects.Updater\NodeVideoEffects.Updater.csproj" />
 	  <ProjectReference Include="..\UtilityControls\UtilityControls\UtilityControls.csproj" />
 	</ItemGroup>
 

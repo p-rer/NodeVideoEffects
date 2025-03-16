@@ -1,15 +1,17 @@
+using System.Diagnostics;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
+using System.Windows;
 using Newtonsoft.Json.Linq;
 using NodeVideoEffects.Utility;
 using YukkuriMovieMaker.Plugin;
 
 namespace NodeVideoEffects;
 
-public partial class Updater : IPlugin
+public partial class UpdaterService : IPlugin
 {
-    public Updater()
+    public UpdaterService()
     {
         Task.Run(async () =>
         {
@@ -19,7 +21,7 @@ public partial class Updater : IPlugin
 
             try
             {
-                var responseBody = await GetLatestRelease(client, "dotnet", "runtime", false);
+                var responseBody = await GetLatestRelease(client, "opencv", "opencv", false);
                 var json = JObject.Parse(responseBody ??
                                          throw new InvalidOperationException("Failed to get the latest release."));
                 var newVersion = ParseVersion(json["tag_name"]?.ToString());
@@ -28,6 +30,22 @@ public partial class Updater : IPlugin
                 var currentVersion = new Version(0, 0, 1);
                 if (newVersion <= currentVersion) return;
                 Logger.Write(LogLevel.Info, $"A new version is available.\nCurrent version: {currentVersion}, Latest version: {newVersion}");
+                var result = MessageBox.Show($"A new version is available. Do you want to update?\n{currentVersion} -> {newVersion}",
+                    "Update", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (result == MessageBoxResult.Yes)
+                {
+                    var downloadUrl = json["assets"]?.First?["browser_download_url"]?.ToString();
+                    if (downloadUrl != null)
+                    {
+                        var app = new ProcessStartInfo
+                        {
+                            FileName = "NodeVideoEffects.Updater.exe",
+                            Arguments = downloadUrl
+                        };
+
+                        Process.Start(app);
+                    }
+                }
             }
             catch (HttpRequestException ex)
             {

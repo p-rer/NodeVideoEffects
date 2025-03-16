@@ -40,7 +40,7 @@ namespace NodeVideoEffects.UITest
             editor.Nodes = nodes;
             AllocConsole();
             editor.NodesUpdated += (_, _) => Logger.Write(LogLevel.Info, "Nodes updated", editor.Nodes);
-            Updater _ = new();
+            _ = new UpdaterService();
 
             editor.ShowDialog();
             Close();
