@@ -39,7 +39,7 @@ namespace NodeVideoEffects
 
         internal List<NodeInfo> EditorNodes
         {
-            set => Set(ref _nodes, value, nameof(Nodes), "Nodes");
+            set => Set(ref _nodes, value, nameof(Nodes), nameof(EditorNodes));
         }
 
         public override IEnumerable<string> CreateExoVideoFilters(int keyFrameIndex, ExoOutputDescription exoOutputDescription)
@@ -53,7 +53,10 @@ namespace NodeVideoEffects
             {
                 NodesManager.SetContext(Id, devices);
                 _processor!.Context = devices.DeviceContext;
-                Logger.Write(LogLevel.Info, $"Reloaded the effect processor, ID: \"{Id}\".");
+#if DEBUG
+                Logger.Write(LogLevel.Debug, $"Reloaded the effect processor, ID: \"{Id}\".");
+                Logger.Write(LogLevel.Debug, "Nodes", Nodes);
+#endif // Debug
                 return _processor;
             }
             _isCreated = true;

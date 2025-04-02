@@ -5,10 +5,10 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:utilityControls="clr-namespace:UtilityControls;assembly=UtilityControls"
              mc:Ignorable="d" 
-             d:DesignHeight="30" d:DesignWidth="800" Margin="1">
+             d:DesignHeight="30" d:DesignWidth="800" Margin="0">
     <UserControl.Resources>
         <Style TargetType="{x:Type TextBox}">
-            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Margin" Value="1"/>
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="HorizontalAlignment" Value="Left"/>

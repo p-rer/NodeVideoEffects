@@ -23,6 +23,7 @@ namespace NodeVideoEffects.Utility
 
     public enum LogLevel
     {
+        Debug,
         Info,
         Warn,
         Error

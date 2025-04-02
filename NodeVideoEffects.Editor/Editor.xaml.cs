@@ -198,25 +198,66 @@ namespace NodeVideoEffects.Editor
 
         private void BuildNodes()
         {
+#if DEBUG
+            Logger.Write(LogLevel.Debug, $"BuildNodes started.\nNodesCount={Nodes.Count}");
+#endif
             try
             {
+#if DEBUG
+                Logger.Write(LogLevel.Debug, "Starting to add children for each node in Nodes.", Nodes);
+#endif
                 foreach (var info in Nodes)
                 {
+#if DEBUG
+                    Logger.Write(LogLevel.Debug, $"Processing node with ID: {info.Id}.", info);
+#endif
                     var node = NodesManager.GetNode(info.Id);
+#if DEBUG
+                    Logger.Write(LogLevel.Debug, $"Retrieved node from NodesManager for ID: {info.Id}.", node);
+#endif
                     AddChildren(new Node(node!), info.X, info.Y);
+#if DEBUG
+                    Logger.Write(LogLevel.Debug, $"Added children for node ID: {info.Id}.", new { info.X, info.Y });
+#endif
                 }
 
+#if DEBUG
+                Logger.Write(LogLevel.Debug, "Starting to set up connections for each node.", Nodes);
+#endif
                 foreach (var info in Nodes)
                 {
+#if DEBUG
+                    Logger.Write(LogLevel.Debug, $"Setting up connections for node ID: {info.Id}.", info);
+#endif
                     _nodes[info.Id].Loaded += (_, _) =>
                     {
+#if DEBUG
+                        Logger.Write(LogLevel.Debug, $"Node loaded event triggered for ID: {info.Id}.", info);
+#endif
                         for (var i = 0; i < info.Connections.Count; i++)
                         {
                             if (info.Connections[i].Id == "") continue;
+#if DEBUG
+                            Logger.Write(LogLevel.Debug, $"Processing connection {i} for node ID: {info.Id}.",
+                                info.Connections[i]);
+#endif
                             var inputPoint = _nodes[info.Id].GetPortPoint(Node.PortType.Input, i);
+#if DEBUG
+                            Logger.Write(LogLevel.Debug,
+                                $"Retrieved input point for node ID: {info.Id}, port index: {i}.", inputPoint);
+#endif
                             var outputPoint = _nodes[info.Connections[i].Id]
                                 .GetPortPoint(Node.PortType.Output, info.Connections[i].Index);
+#if DEBUG
+                            Logger.Write(LogLevel.Debug,
+                                $"Retrieved output point for connection ID: {info.Connections[i].Id}, port index: {info.Connections[i].Index}.",
+                                outputPoint);
+#endif
                             var node = NodesManager.GetNode(info.Id);
+#if DEBUG
+                            Logger.Write(LogLevel.Debug, $"Retrieved node for connection setup for ID: {info.Id}.",
+                                node);
+#endif
                             var inputColor = node!.Inputs[i].Color;
                             var outputColor = NodesManager.GetNode(node.Inputs[i].PortInfo.Id)!
                                 .Outputs[node.Inputs[i].PortInfo.Index].Color;
@@ -224,16 +265,34 @@ namespace NodeVideoEffects.Editor
                                 inputColor, outputColor,
                                 new PortInfo(info.Id, i),
                                 new PortInfo(info.Connections[i].Id, info.Connections[i].Index));
+#if DEBUG
+                            Logger.Write(LogLevel.Debug,
+                                $"Connector added between node {info.Id} and connection {info.Connections[i].Id}.",
+                                new { info.Id, ConnectionIndex = i });
+#endif
                             (_nodes[info.Id].InputsPanel.Children[i] as InputPort)!.PortControl.Visibility =
                                 Visibility.Hidden;
+#if DEBUG
+                            Logger.Write(LogLevel.Debug,
+                                $"Set visibility hidden for InputPort at node ID: {info.Id}, port index: {i}.");
+#endif
                         }
+#if DEBUG
+                        Logger.Write(LogLevel.Debug, $"Connection setup completed for node ID: {info.Id}.", info);
+#endif
                     };
                 }
 
                 InfoText = "Ready";
+#if DEBUG
+                Logger.Write(LogLevel.Debug, "BuildNodes completed successfully.");
+#endif
             }
             catch (Exception e)
             {
+#if DEBUG
+                Logger.Write(LogLevel.Error, $"Exception in BuildNodes: {e.Message}", e);
+#endif
                 InfoText = "Error occurred while building nodes";
                 Logger.Write(LogLevel.Error, e.Message, e);
             }
@@ -241,76 +300,192 @@ namespace NodeVideoEffects.Editor
 
         public async void RebuildNodes(List<NodeInfo> infos)
         {
+#if DEBUG
+            Logger.Write(LogLevel.Debug, "RebuildNodes started.", new { NodesToRebuildCount = infos.Count });
+#endif
             try
             {
                 InfoText = "Rebuilding nodes...";
+#if DEBUG
+                Logger.Write(LogLevel.Debug, "Rebuilding nodes: removing deleted nodes.", infos);
+#endif
                 // Remove deleted nodes
                 var newNodesId = infos.Select(node => node.Id).ToHashSet();
                 foreach (var id in _nodes.Select(node => node.Key).Where(id => !newNodesId.Contains(id)))
+                {
+#if DEBUG
+                    Logger.Write(LogLevel.Debug, $"Removing node with ID: {id} as it no longer exists in new infos.",
+                        id);
+#endif
                     NodesManager.RemoveNode(id);
+                }
 
+#if DEBUG
+                Logger.Write(LogLevel.Debug, "Rebuilding nodes: creating new nodes.", infos);
+#endif
                 // Create new node
                 infos.ForEach(info =>
                 {
-                    if (_nodes.ContainsKey(info.Id)) return;
+#if DEBUG
+                    Logger.Write(LogLevel.Debug, $"Processing new node info for ID: {info.Id}.", info);
+#endif
+                    if (_nodes.ContainsKey(info.Id))
+                    {
+#if DEBUG
+                        Logger.Write(LogLevel.Debug, $"Node with ID: {info.Id} already exists. Skipping creation.",
+                            info);
+#endif
+                        return;
+                    }
+
                     var type = info.Type;
                     NodeLogic? obj;
                     try
                     {
+#if DEBUG
+                        Logger.Write(LogLevel.Debug,
+                            $"Attempting to create instance of type {type} using Activator with ItemId.", type);
+#endif
                         obj = Activator.CreateInstance(type, ItemId) as NodeLogic;
+#if DEBUG
+                        Logger.Write(LogLevel.Debug, "Instance creation succeeded using first method.", obj);
+#endif
                     }
                     catch
                     {
+#if DEBUG
+                        Logger.Write(LogLevel.Debug,
+                            $"Exception during instance creation for node ID: {info.Id}. Trying alternative constructor.",
+                            info);
+#endif
                         obj = Activator.CreateInstance(type, []) as NodeLogic;
+#if DEBUG
+                        Logger.Write(LogLevel.Debug, "Instance creation succeeded using alternative method.", obj);
+#endif
                     }
 
-                    if (obj == null) return;
+                    if (obj == null)
+                    {
+#if DEBUG
+                        Logger.Write(LogLevel.Debug,
+                            $"Instance creation returned null for node ID: {info.Id}. Skipping.", info);
+#endif
+                        return;
+                    }
+
                     obj.Id = info.Id;
                     NodesManager.AddNode(info.Id, obj);
+#if DEBUG
+                    Logger.Write(LogLevel.Debug, $"New node with ID: {info.Id} added to NodesManager.", obj);
+#endif
                     for (var i = 0; i < info.Values.Count; i++)
                     {
+#if DEBUG
+                        Logger.Write(LogLevel.Debug,
+                            $"Setting input value and connection for node ID: {info.Id}, input index: {i}.",
+                            new { Value = info.Values[i], Connection = info.Connections[i] });
+#endif
                         obj.SetInput(i, info.Values[i]);
                         obj.SetInputConnection(i, info.Connections[i]);
+#if DEBUG
+                        Logger.Write(LogLevel.Debug,
+                            $"Input value and connection set for node ID: {info.Id}, input index: {i}.");
+#endif
                     }
                 });
 
+#if DEBUG
+                Logger.Write(LogLevel.Debug, "Awaiting tasks for connection updates.", infos);
+#endif
                 await Task.WhenAll(infos.Select(info =>
                 {
                     return Task.Run(() =>
                     {
-                        if (!_infos.TryGetValue(info.Id, out var value)) return;
+#if DEBUG
+                        Logger.Write(LogLevel.Debug, $"Updating connections in background for node ID: {info.Id}.",
+                            info);
+#endif
+                        if (!_infos.TryGetValue(info.Id, out var value))
+                        {
+#if DEBUG
+                            Logger.Write(LogLevel.Debug, $"No existing info found for node ID: {info.Id} in _infos.",
+                                info);
+#endif
+                            return;
+                        }
+
                         var i = 0;
                         foreach (var connection in value.Connections)
                         {
                             if (connection.Id != info.Connections[i].Id)
                             {
+#if DEBUG
+                                Logger.Write(LogLevel.Debug,
+                                    $"Connection mismatch for node ID: {info.Id} at index {i}. Removing and resetting connection.",
+                                    new
+                                    {
+                                        NodeId = info.Id, Index = i, OldConnection = connection,
+                                        NewConnection = info.Connections[i]
+                                    });
+#endif
                                 NodesManager.GetNode(info.Id)?.RemoveInputConnection(i);
                                 if (info.Connections[i].Id != "")
                                     NodesManager.GetNode(info.Id)?.SetInputConnection(i, info.Connections[i]);
+#if DEBUG
+                                Logger.Write(LogLevel.Debug, $"Connection updated for node ID: {info.Id} at index {i}.",
+                                    info.Connections[i]);
+#endif
                             }
+
                             i++;
                         }
+#if DEBUG
+                        Logger.Write(LogLevel.Debug, $"Background connection update completed for node ID: {info.Id}.",
+                            info);
+#endif
                     });
                 }));
 
+#if DEBUG
+                Logger.Write(LogLevel.Debug, "Clearing _infos dictionary.", _infos);
+#endif
                 _infos.Clear();
                 infos.ForEach(value =>
                 {
+#if DEBUG
+                    Logger.Write(LogLevel.Debug, $"Adding node info to _infos for node ID: {value.Id}.", value);
+#endif
                     _infos.Add(value.Id, value);
                 });
 
+#if DEBUG
+                Logger.Write(LogLevel.Debug, "Invoking Dispatcher to update UI elements.");
+#endif
                 Dispatcher.Invoke(() =>
                 {
+#if DEBUG
+                    Logger.Write(LogLevel.Debug, "Clearing Canvas and node collections.",
+                        new { CanvasChildrenCount = Canvas.Children.Count, NodesCount = _nodes.Count });
+#endif
                     Canvas.Children.Clear();
                     _nodes.Clear();
                     _selectingNodes.Clear();
                     _connectors.Clear();
 
+#if DEBUG
+                    Logger.Write(LogLevel.Debug, "Calling BuildNodes from Dispatcher.Invoke.");
+#endif
                     BuildNodes();
                 });
+#if DEBUG
+                Logger.Write(LogLevel.Debug, "RebuildNodes completed successfully.");
+#endif
             }
             catch (Exception e)
             {
+#if DEBUG
+                Logger.Write(LogLevel.Error, $"Exception in RebuildNodes: {e.Message}", e);
+#endif
                 InfoText = "Error occurred while rebuilding nodes";
                 Logger.Write(LogLevel.Error, e.Message, e);
             }

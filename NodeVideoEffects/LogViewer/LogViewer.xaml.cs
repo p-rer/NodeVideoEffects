@@ -15,6 +15,7 @@ public partial class LogViewer
     private static LogViewer? _openedWindow;
     private ImmutableList<(DateTime, LogLevel, string, object?)> _logs = [];
     private double _currentTargetOffset;
+    private bool _isBottom = true;
 
     public LogViewer()
     {
@@ -23,6 +24,8 @@ public partial class LogViewer
             _openedWindow.Activate();
             return;
         }
+
+        Owner = Application.Current.MainWindow;
         InitializeComponent();
         _openedWindow = this;
         Logger.LogUpdated += (_, _) => Update();
@@ -49,6 +52,8 @@ public partial class LogViewer
         {
             Dispatcher.Invoke(() => Viewer.Children.Add(new LogItem(log)));
         }
+        if(_isBottom)
+            Dispatcher.Invoke(ScrollViewer.ScrollToBottom);
         _logs = currentLogs;
     }
 
@@ -56,7 +61,7 @@ public partial class LogViewer
     {
         if (sender is not ScrollViewer scrollViewer) return;
         _currentTargetOffset = Math.Max(0, Math.Min(
-            _currentTargetOffset - e.Delta, scrollViewer.ScrollableHeight));
+            scrollViewer.VerticalOffset - e.Delta, scrollViewer.ScrollableHeight));
 
         scrollViewer.BeginAnimation(ScrollViewerBehavior.VerticalOffsetProperty, null);
         AnimateScroll(scrollViewer, _currentTargetOffset);
@@ -68,25 +73,16 @@ public partial class LogViewer
     {
         if (sender is not ScrollViewer scrollViewer) return;
         const double scrollStep = 30;
-        switch (e.Key)
+        _currentTargetOffset = e.Key switch
         {
-            case Key.Up:
-                _currentTargetOffset = Math.Max(0, _currentTargetOffset - scrollStep);
-                e.Handled = true;
-                break;
-            case Key.Down:
-                _currentTargetOffset = Math.Min(scrollViewer.ScrollableHeight, _currentTargetOffset + scrollStep);
-                e.Handled = true;
-                break;
-            case Key.PageUp:
-                _currentTargetOffset = Math.Max(0, _currentTargetOffset - scrollViewer.ActualHeight);
-                e.Handled = true;
-                break;
-            case Key.PageDown:
-                _currentTargetOffset = Math.Min(scrollViewer.ScrollableHeight, _currentTargetOffset + scrollViewer.ActualHeight);
-                e.Handled = true;
-                break;
-        }
+            Key.Up => Math.Max(0, scrollViewer.VerticalOffset - scrollStep),
+            Key.Down => Math.Min(scrollViewer.ScrollableHeight, scrollViewer.VerticalOffset + scrollStep),
+            Key.PageUp => Math.Max(0, scrollViewer.VerticalOffset - scrollViewer.ActualHeight),
+            Key.PageDown => Math.Min(scrollViewer.ScrollableHeight, scrollViewer.VerticalOffset + scrollViewer.ActualHeight),
+            _ => _currentTargetOffset
+        };
+
+        e.Handled = true;
 
         if (!e.Handled) return;
         scrollViewer.BeginAnimation(ScrollViewerBehavior.VerticalOffsetProperty, null);
@@ -106,6 +102,11 @@ public partial class LogViewer
         animation.Completed += (_, _) => scrollViewer.ScrollToVerticalOffset(targetOffset);
 
         scrollViewer.BeginAnimation(ScrollViewerBehavior.VerticalOffsetProperty, animation);
+    }
+
+    private void ScrollViewer_OnScrollChanged(object sender, ScrollChangedEventArgs e)
+    {
+        _isBottom = sender is ScrollViewer scrollViewer && scrollViewer.VerticalOffset >= scrollViewer.ScrollableHeight;
     }
 }
 

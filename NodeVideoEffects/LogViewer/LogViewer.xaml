@@ -6,7 +6,7 @@
         mc:Ignorable="d"
         Title="LogViewer" Height="450" Width="800">
     <Grid>
-        <ScrollViewer SnapsToDevicePixels="False" PreviewMouseWheel="OnPreviewMouseWheel" PreviewKeyDown="OnPreviewKeyDown">
+        <ScrollViewer x:Name="ScrollViewer" SnapsToDevicePixels="False" ScrollChanged="ScrollViewer_OnScrollChanged" PreviewMouseWheel="OnPreviewMouseWheel" PreviewKeyDown="OnPreviewKeyDown">
             <StackPanel x:Name="Viewer" VerticalAlignment="Top"/>
         </ScrollViewer>
     </Grid>

@@ -20,6 +20,11 @@ namespace NodeVideoEffects.LogViewer
             TimeText = $"{log.Item1.GetDateTimeFormats('d')[0]} {log.Item1.ToLocalTime():HH:mm:ss.fff}";
             switch (log.Item2)
             {
+                case LogLevel.Debug:
+                                 Border.Background = new SolidColorBrush(new Color { R = 0, G = 0, B = 0, A = 0 });
+                                 Border.BorderBrush = new SolidColorBrush(new Color { R = 0, G = 0, B = 0, A = 0 });
+                                 InfoText = "[Debug]";
+                                 break;
                 case LogLevel.Info:
                     Border.Background = new SolidColorBrush(new Color { R = 28, G = 177, B = 200, A = 75 });
                     Border.BorderBrush = new SolidColorBrush(new Color { R = 28, G = 177, B = 200, A = 255 });
