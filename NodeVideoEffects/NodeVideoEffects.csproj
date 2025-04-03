@@ -1,65 +1,76 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFramework>net9.0-windows</TargetFramework>
-	    <Nullable>enable</Nullable>
-	    <ImplicitUsings>enable</ImplicitUsings>
-		<UseWPF>true</UseWPF>
-	</PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net9.0-windows</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <UseWPF>true</UseWPF>
+        <Configurations>Debug;Release;Preview Release</Configurations>
+        <Platforms>AnyCPU</Platforms>
+    </PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-	  <DebugType>none</DebugType>
-	</PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+        <DebugType>none</DebugType>
+        <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+        <PlatformTarget>x64</PlatformTarget>
+    </PropertyGroup>
 
-	<ItemGroup>
-	  <ProjectReference Include="..\NodeVideoEffects.Editor\NodeVideoEffects.Editor.csproj" />
-	  <ProjectReference Include="..\NodeVideoEffects.Nodes\NodeVideoEffects.Nodes.csproj" />
-	  <ProjectReference Include="..\NodeVideoEffects.Type\NodeVideoEffects.Type.csproj" />
-	  <AdditionalFiles Include="**\*.csv" />
-	  <ProjectReference Include="..\NodeVideoEffects.Updater\NodeVideoEffects.Updater.csproj" />
-	  <ProjectReference Include="..\UtilityControls\UtilityControls\UtilityControls.csproj" />
-	</ItemGroup>
+    <PropertyGroup Condition=" '$(Configuration)' == 'Preview Release' ">
+      <Optimize>true</Optimize>
+      <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+      <PlatformTarget>x64</PlatformTarget>
+      <DebugType>none</DebugType>
+    </PropertyGroup>
 
-	<ItemGroup>
-	  <None Remove="translate.csv" />
-	</ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\NodeVideoEffects.Editor\NodeVideoEffects.Editor.csproj"/>
+        <ProjectReference Include="..\NodeVideoEffects.Nodes\NodeVideoEffects.Nodes.csproj"/>
+        <ProjectReference Include="..\NodeVideoEffects.Core\NodeVideoEffects.Core.csproj"/>
+        <AdditionalFiles Include="**\*.csv"/>
+        <ProjectReference Include="..\NodeVideoEffects.Updater\NodeVideoEffects.Updater.csproj"/>
+        <ProjectReference Include="..\UtilityControls\UtilityControls\UtilityControls.csproj"/>
+    </ItemGroup>
 
-	<ItemGroup>
-		<Reference Include="Newtonsoft.Json">
-		  <HintPath>$(YMM4DirPath)Newtonsoft.Json.dll</HintPath>
-		</Reference>
-		<Reference Include="SharpGen.Runtime">
-			<HintPath>$(YMM4DirPath)SharpGen.Runtime.dll</HintPath>
-		</Reference>
-		<Reference Include="Vortice.Direct2D1">
-			<HintPath>$(YMM4DirPath)Vortice.Direct2D1.dll</HintPath>
-		</Reference>
-		<Reference Include="Vortice.DirectX">
-			<HintPath>$(YMM4DirPath)Vortice.DirectX.dll</HintPath>
-		</Reference>
-		<Reference Include="Vortice.Mathematics">
-			<HintPath>$(YMM4DirPath)Vortice.Mathematics.dll</HintPath>
-		</Reference>
-		<Reference Include="YukkuriMovieMaker.Controls">
-			<HintPath>$(YMM4DirPath)YukkuriMovieMaker.Controls.dll</HintPath>
-		</Reference>
-		<Reference Include="YukkuriMovieMaker.Plugin">
-			<HintPath>$(YMM4DirPath)YukkuriMovieMaker.Plugin.dll</HintPath>
-		</Reference>
-	</ItemGroup>
+    <ItemGroup>
+        <None Remove="translate.csv"/>
+    </ItemGroup>
 
-	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-		<Exec Command="git rev-parse --short HEAD &gt;$(ProjectDir)git_id.txt&#xD;" />
-		<Exec Command="git describe --tags --abbrev=0 2&gt;/dev/null &amp;&amp; git describe --tags --abbrev=0 &gt; $(ProjectDir)git_tag.txt&#xD;" />
-	</Target>
+    <ItemGroup>
+        <Reference Include="Newtonsoft.Json">
+            <HintPath>$(YMM4DirPath)Newtonsoft.Json.dll</HintPath>
+        </Reference>
+        <Reference Include="SharpGen.Runtime">
+            <HintPath>$(YMM4DirPath)SharpGen.Runtime.dll</HintPath>
+        </Reference>
+        <Reference Include="Vortice.Direct2D1">
+            <HintPath>$(YMM4DirPath)Vortice.Direct2D1.dll</HintPath>
+        </Reference>
+        <Reference Include="Vortice.DirectX">
+            <HintPath>$(YMM4DirPath)Vortice.DirectX.dll</HintPath>
+        </Reference>
+        <Reference Include="Vortice.Mathematics">
+            <HintPath>$(YMM4DirPath)Vortice.Mathematics.dll</HintPath>
+        </Reference>
+        <Reference Include="YukkuriMovieMaker.Controls">
+            <HintPath>$(YMM4DirPath)YukkuriMovieMaker.Controls.dll</HintPath>
+        </Reference>
+        <Reference Include="YukkuriMovieMaker.Plugin">
+            <HintPath>$(YMM4DirPath)YukkuriMovieMaker.Plugin.dll</HintPath>
+        </Reference>
+    </ItemGroup>
 
-	<ItemGroup>
-		<None Remove="git_id.txt" />
-		<None Remove="git_tag.txt" />
-	</ItemGroup>
+    <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+        <Exec Command="git rev-parse --short HEAD &gt;$(ProjectDir)git_id.txt&#xD;"/>
+        <Exec Command="git describe --tags --abbrev=0 2&gt;/dev/null &amp;&amp; git describe --tags --abbrev=0 &gt; $(ProjectDir)git_tag.txt&#xD;"/>
+    </Target>
 
-	<ItemGroup>
-		<EmbeddedResource Include="git_id.txt" />
-		<EmbeddedResource Include="git_tag.txt" />
-	</ItemGroup>
+    <ItemGroup>
+        <None Remove="git_id.txt"/>
+        <None Remove="git_tag.txt"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <EmbeddedResource Include="git_id.txt"/>
+        <EmbeddedResource Include="git_tag.txt"/>
+    </ItemGroup>
 </Project>

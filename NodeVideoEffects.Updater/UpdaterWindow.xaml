@@ -5,24 +5,27 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:NodeVideoEffects.Updater"
         mc:Ignorable="d"
-        Title="" ShowInTaskbar="False" Height="65" Width="400" WindowStyle="None" ResizeMode="NoResize" Closing="UpdaterWindow_OnClosing"
+        Title="" ShowInTaskbar="False" Height="65" Width="400" WindowStyle="None" ResizeMode="NoResize"
+        Closing="UpdaterWindow_OnClosing"
         BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}">
     <Window.DataContext>
-        <local:UpdateViewModel/>
+        <local:UpdateViewModel />
     </Window.DataContext>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="4"/>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="4" />
         </Grid.RowDefinitions>
         <Label Grid.Row="0" Height="35" VerticalContentAlignment="Center" Content="{Binding Status, Mode=OneWay}"
                HorizontalAlignment="Left" FontSize="20" />
-        <TextBlock Grid.Row="1" Padding="5 0 0 0" Height="26" HorizontalAlignment="Left" FontSize="12" Visibility="{Binding ProgressVisible, Mode=OneWay}">
-            <Run Text="{Binding DownloadProgress, Mode=OneWay, StringFormat=N1}"/><Run Text="%"/>
+        <TextBlock Grid.Row="1" Padding="5 0 0 0" Height="26" HorizontalAlignment="Left" FontSize="12"
+                   Visibility="{Binding ProgressVisible, Mode=OneWay}">
+            <Run Text="{Binding DownloadProgress, Mode=OneWay, StringFormat=N1}" /><Run Text="%" />
         </TextBlock>
-        <ProgressBar Grid.Row="2" Background="Transparent" BorderThickness="0" Value="{Binding DownloadProgress, Mode=OneWay}"
+        <ProgressBar Grid.Row="2" Background="Transparent" BorderThickness="0"
+                     Value="{Binding DownloadProgress, Mode=OneWay}"
                      Foreground="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" Height="4"
-                     IsIndeterminate="{Binding IsIndeterminate, Mode=OneWay}"/>
+                     IsIndeterminate="{Binding IsIndeterminate, Mode=OneWay}" />
     </Grid>
 </Window>

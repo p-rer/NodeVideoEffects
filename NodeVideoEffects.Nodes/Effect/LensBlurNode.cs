@@ -1,5 +1,5 @@
 using System.Windows.Media;
-using NodeVideoEffects.Type;
+using NodeVideoEffects.Core;
 
 namespace NodeVideoEffects.Nodes.Effect;
 
@@ -32,10 +32,10 @@ public class LensBlurNode : NodeLogic
     public override async Task Calculate()
     {
         _videoEffect ??= await VideoEffectsLoader.LoadEffect([
-                (typeof(float), "Radius"),
-                (typeof(float), "Brightness"),
-                (typeof(float), "EdgeStrength"),
-                (typeof(float), "Quality")
+            (typeof(float), "Radius"),
+            (typeof(float), "Brightness"),
+            (typeof(float), "EdgeStrength"),
+            (typeof(float), "Quality")
         ], _shaderId, _effectId);
         _videoEffect.SetValue(
             Convert.ToSingle(Inputs[1].Value),
@@ -43,9 +43,7 @@ public class LensBlurNode : NodeLogic
             Convert.ToSingle(Inputs[3].Value),
             Convert.ToSingle(Inputs[4].Value));
         if (_videoEffect.Update(((ImageWrapper?)Inputs[0].Value)?.Image, out var output))
-        {
             Outputs[0].Value = new ImageWrapper(output);
-        }
     }
 
     public override void Dispose()

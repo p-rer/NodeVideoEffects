@@ -1,6 +1,6 @@
 using System.Windows.Media;
 using NodeVideoEffects.Control;
-using NodeVideoEffects.Type;
+using NodeVideoEffects.Core;
 
 namespace NodeVideoEffects.API;
 
@@ -20,7 +20,7 @@ public abstract class PortValueBase : IPortValue
         GC.SuppressFinalize(this);
     }
 
-    public abstract System.Type Type { get; }
+    public abstract Type Type { get; }
     public abstract object Value { get; }
     public abstract Color Color { get; }
     public abstract void _SetValue(object? value);

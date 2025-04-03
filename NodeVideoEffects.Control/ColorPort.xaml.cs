@@ -13,64 +13,83 @@ public partial class ColorPort : IControl
     private bool _suppressRgbChannelCallback;
     private bool _suppressSelectedColorCallback;
     public object? Value { get; set; }
+
     public static readonly DependencyProperty SelectedColorProperty =
         DependencyProperty.Register(nameof(SelectedColor), typeof(Color), typeof(ColorPort),
-            new FrameworkPropertyMetadata(Colors.White, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnSelectedColorChanged));
+            new FrameworkPropertyMetadata(Colors.White, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
+                OnSelectedColorChanged));
 
-    public Color SelectedColor {
+    public Color SelectedColor
+    {
         get => (Color)GetValue(SelectedColorProperty);
         set => SetValue(SelectedColorProperty, value);
     }
 
     public static readonly DependencyProperty RedProperty =
         DependencyProperty.Register(nameof(Red), typeof(byte), typeof(ColorPort),
-            new FrameworkPropertyMetadata((byte)255, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnRgbChannelChanged));
+            new FrameworkPropertyMetadata((byte)255, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
+                OnRgbChannelChanged));
 
     public static readonly DependencyProperty GreenProperty =
         DependencyProperty.Register(nameof(Green), typeof(byte), typeof(ColorPort),
-            new FrameworkPropertyMetadata((byte)255, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnRgbChannelChanged));
+            new FrameworkPropertyMetadata((byte)255, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
+                OnRgbChannelChanged));
 
     public static readonly DependencyProperty BlueProperty =
         DependencyProperty.Register(nameof(Blue), typeof(byte), typeof(ColorPort),
-            new FrameworkPropertyMetadata((byte)255, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnRgbChannelChanged));
+            new FrameworkPropertyMetadata((byte)255, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
+                OnRgbChannelChanged));
 
     public static readonly DependencyProperty AlphaProperty =
         DependencyProperty.Register(nameof(Alpha), typeof(byte), typeof(ColorPort),
-            new FrameworkPropertyMetadata((byte)255, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnRgbChannelChanged));
+            new FrameworkPropertyMetadata((byte)255, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
+                OnRgbChannelChanged));
 
-    public byte Red {
+    public byte Red
+    {
         get => (byte)GetValue(RedProperty);
         set => SetValue(RedProperty, value);
     }
-    public byte Green {
+
+    public byte Green
+    {
         get => (byte)GetValue(GreenProperty);
         set => SetValue(GreenProperty, value);
     }
-    public byte Blue {
+
+    public byte Blue
+    {
         get => (byte)GetValue(BlueProperty);
         set => SetValue(BlueProperty, value);
     }
-    public byte Alpha {
+
+    public byte Alpha
+    {
         get => (byte)GetValue(AlphaProperty);
         set => SetValue(AlphaProperty, value);
     }
 
-    public ColorPort(Color color) {
+    public ColorPort(Color color)
+    {
         InitializeComponent();
         Value = color;
         DataContext = this;
     }
 
-    public ColorPort() : this(Colors.White) { }
+    public ColorPort() : this(Colors.White)
+    {
+    }
 
-    private static void OnRgbChannelChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
+    private static void OnRgbChannelChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
         var cp = (ColorPort)d;
         if (cp._suppressRgbChannelCallback)
             return;
         cp.UpdateColorFromRgbChannels();
     }
 
-    private void UpdateColorFromRgbChannels() {
+    private void UpdateColorFromRgbChannels()
+    {
         var newColor = Color.FromArgb(Alpha, Red, Green, Blue);
         _suppressSelectedColorCallback = true;
         SelectedColor = newColor;
@@ -85,7 +104,8 @@ public partial class ColorPort : IControl
         cp.UpdateRgbFromSelectedColor();
     }
 
-    private void UpdateRgbFromSelectedColor() {
+    private void UpdateRgbFromSelectedColor()
+    {
         _suppressRgbChannelCallback = true;
         Alpha = SelectedColor.A;
         Red = SelectedColor.R;
@@ -110,13 +130,14 @@ public partial class ColorPort : IControl
     }
 }
 
-public class ColorToHexConverter : IValueConverter {
-    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) {
-        if (value is Color color) {
-            return $"#{color.R:x2}{color.G:x2}{color.B:x2}{color.A:x2}";
-        }
+public class ColorToHexConverter : IValueConverter
+{
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        if (value is Color color) return $"#{color.R:x2}{color.G:x2}{color.B:x2}{color.A:x2}";
         return "#ffffffff";
     }
+
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         if (value is not string s) return DependencyProperty.UnsetValue;
@@ -149,6 +170,7 @@ public class ColorToHexConverter : IValueConverter {
         {
             return DependencyProperty.UnsetValue;
         }
+
         return DependencyProperty.UnsetValue;
     }
 }

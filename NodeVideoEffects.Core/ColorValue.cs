@@ -1,7 +1,7 @@
 using System.Windows.Media;
 using NodeVideoEffects.Control;
 
-namespace NodeVideoEffects.Type;
+namespace NodeVideoEffects.Core;
 
 public class ColorValue : IPortValue
 {
@@ -13,11 +13,15 @@ public class ColorValue : IPortValue
         Control = new ColorPort(_value);
     }
 
-    public void Dispose() => GC.SuppressFinalize(this);
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+    }
 
-    public System.Type Type => typeof(Color);
+    public Type Type => typeof(Color);
     public object Value => _value;
     public Color Color => Colors.Olive;
+
     public void _SetValue(object? value)
     {
         _value = (Color?)value ?? Colors.White;

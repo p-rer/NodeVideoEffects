@@ -1,9 +1,8 @@
 ﻿using System.ComponentModel;
 
-namespace NodeVideoEffects.Control
+namespace NodeVideoEffects.Control;
+
+public interface IControl : INotifyPropertyChanged
 {
-    public interface IControl : INotifyPropertyChanged
-    {
-        public object? Value { get; set; }
-    }
+    public object? Value { get; set; }
 }

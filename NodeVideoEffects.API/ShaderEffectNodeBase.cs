@@ -1,5 +1,5 @@
 using System.Windows.Media;
-using NodeVideoEffects.Type;
+using NodeVideoEffects.Core;
 using Vortice.Direct2D1;
 
 namespace NodeVideoEffects.API;
@@ -11,9 +11,9 @@ public abstract class ShaderEffectNodeBase : NodeLogic
 {
     private readonly string _shaderId = "";
     private readonly string _effectId = "";
-    private readonly List<(System.Type, string)>? _properties;
+    private readonly List<(Type, string)>? _properties;
     private VideoEffectsLoader? _videoEffect;
-    
+
     /// <summary>
     /// Initialize a new instance of <see cref="NodeLogic"/>
     /// </summary>
@@ -25,8 +25,9 @@ public abstract class ShaderEffectNodeBase : NodeLogic
     /// <param name="id">ID of the effect given when a class inheriting from this class has only a string argument.</param>
     /// <param name="shaderName">Name of compiled shader file registered in resource</param>
     /// <param name="properties">Collection of effect property types and name</param>
-    protected ShaderEffectNodeBase(Input[] inputs, Output[] outputs, string name, Color color, string category, string id,
-        string shaderName, List<(System.Type, string)> properties)
+    protected ShaderEffectNodeBase(Input[] inputs, Output[] outputs, string name, Color color, string category,
+        string id,
+        string shaderName, List<(Type, string)> properties)
         : base(inputs, outputs, name, color, category)
     {
         if (id == "") return;

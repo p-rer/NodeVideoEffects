@@ -9,28 +9,32 @@
                     <Border x:Name="Border" BorderThickness="1">
                         <Grid>
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="25"/>
-                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="25" />
+                                <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
                             <Border Grid.Row="0" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
                                 <TextBlock Text="{TemplateBinding Title}"
                                            x:Name="Title"
-                                           VerticalAlignment="Center" 
-                                           Margin="5"/>
+                                           VerticalAlignment="Center"
+                                           Margin="5" />
                             </Border>
-                            <ContentPresenter Grid.Row="1" Content="{TemplateBinding Content}"/>
+                            <ContentPresenter Grid.Row="1" Content="{TemplateBinding Content}" />
                         </Grid>
                     </Border>
                     <ControlTemplate.Triggers>
                         <!-- Trigger for focus within -->
                         <Trigger Property="IsKeyboardFocusWithin" Value="True">
-                            <Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
-                            <Setter TargetName="Title" Property="Foreground" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                            <Setter TargetName="Border" Property="BorderBrush"
+                                    Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" />
+                            <Setter TargetName="Title" Property="Foreground"
+                                    Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" />
                         </Trigger>
                         <!-- Default background -->
                         <Trigger Property="IsKeyboardFocusWithin" Value="False">
-                            <Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"/>
-                            <Setter TargetName="Title" Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                            <Setter TargetName="Border" Property="BorderBrush"
+                                    Value="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" />
+                            <Setter TargetName="Title" Property="Foreground"
+                                    Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

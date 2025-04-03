@@ -21,16 +21,22 @@ public partial class UpdaterService : IPlugin
 
             try
             {
-                var responseBody = await GetLatestRelease(client, "opencv", "opencv", false);
+#if PREVIEW_RELEASE
+                const bool isRelease = true;
+#else
+                const bool isRelease = false;
+#endif // PREVIEW_RELEASE
+                var responseBody = await GetLatestRelease(client, "p-rer", "NodeVideoEffects", isRelease);
                 var json = JObject.Parse(responseBody ??
                                          throw new InvalidOperationException("Failed to get the latest release."));
                 var newVersion = ParseVersion(json["tag_name"]?.ToString());
 
-                //var currentVersion = ParseVersion(ResourceLoader.FileLoad("git_tag.txt"));
-                var currentVersion = new Version(0, 0, 1);
+                var currentVersion = ParseVersion(ResourceLoader.FileLoad("git_tag.txt"));
                 if (newVersion <= currentVersion) return;
-                Logger.Write(LogLevel.Info, $"A new version is available.\nCurrent version: {currentVersion}, Latest version: {newVersion}");
-                var result = MessageBox.Show($"A new version is available. Do you want to update?\n{currentVersion} -> {newVersion}",
+                Logger.Write(LogLevel.Info,
+                    $"A new version is available.\nCurrent version: {currentVersion}, Latest version: {newVersion}");
+                var result = MessageBox.Show(
+                    $"A new version is available. Do you want to update?\n{currentVersion} -> {newVersion}",
                     "Update", MessageBoxButton.YesNo, MessageBoxImage.Question);
                 if (result == MessageBoxResult.Yes)
                 {
@@ -51,8 +57,13 @@ public partial class UpdaterService : IPlugin
             {
                 Logger.Write(LogLevel.Error, ex.Message, ex);
             }
+            catch (InvalidOperationException)
+            {
+                // ignore
+            }
         }).ConfigureAwait(false).GetAwaiter().GetResult();
     }
+
     public string Name => "NodeVideoEffects.Updater";
 
     private static async Task<string?> GetLatestRelease(HttpClient client, string owner, string repo, bool isPreRelease)
@@ -81,8 +92,8 @@ public partial class UpdaterService : IPlugin
         var build = match.Groups[3].Success ? int.Parse(match.Groups[3].Value) : -1;
         var revision = match.Groups[4].Success ? int.Parse(match.Groups[4].Value) : -1;
         return revision == -1 ? new Version(major, minor, build) :
-               build == -1 ? new Version(major, minor) : 
-               new Version(major, minor, build, revision);
+            build == -1 ? new Version(major, minor) :
+            new Version(major, minor, build, revision);
     }
 
     [GeneratedRegex(@"(?:[vV](?:er(?:sion)?)?|version)?\.?\s*(\d+)(?:\.(\d+))?(?:\.(\d+))?(?:\.(\d+))?")]

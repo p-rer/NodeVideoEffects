@@ -15,6 +15,7 @@ namespace NodeVideoEffects.Updater;
 public partial class UpdaterWindow
 {
     private readonly UpdateViewModel _vm = new();
+
     public UpdaterWindow()
     {
         InitializeComponent();
@@ -58,7 +59,7 @@ public class UpdateViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(DownloadProgress));
         }
     }
-    
+
     public bool IsIndeterminate
     {
         get => _isIndeterminate;
@@ -172,13 +173,9 @@ public class UpdateViewModel : INotifyPropertyChanged
                         await fileStream.WriteAsync(buffer.AsMemory(0, read));
                         totalRead += read;
                         if (totalBytes > 0)
-                        {
                             DownloadProgress = (double)totalRead / totalBytes * 100;
-                        }
                         else
-                        {
                             DownloadProgress = 0; // Unknown total size
-                        }
                     }
                 }
             }
@@ -198,10 +195,7 @@ public class UpdateViewModel : INotifyPropertyChanged
     /// </summary>
     private async Task WaitForFileUnlockAsync(string filePath)
     {
-        while (IsFileLocked(filePath, out _stream))
-        {
-            await Task.Delay(1000); // Wait 1 second before retrying
-        }
+        while (IsFileLocked(filePath, out _stream)) await Task.Delay(1000); // Wait 1 second before retrying
     }
 
     /// <summary>
@@ -233,14 +227,9 @@ public class UpdateViewModel : INotifyPropertyChanged
     {
         try
         {
-            var progress = new Progress<double>(completed => {
-                DownloadProgress = completed * 100;
-            });
+            var progress = new Progress<double>(completed => { DownloadProgress = completed * 100; });
             // Delete the extraction folder if it exists
-            if (Directory.Exists(extractFolder))
-            {
-                Directory.Delete(extractFolder, true);
-            }
+            if (Directory.Exists(extractFolder)) Directory.Delete(extractFolder, true);
 
             Directory.CreateDirectory(extractFolder);
             await ZipExtractor.ExtractToDirectoryAsync(zipPath, extractFolder, progress);
@@ -249,7 +238,8 @@ public class UpdateViewModel : INotifyPropertyChanged
         {
             //ignore
         }
-        finally{
+        finally
+        {
             try
             {
                 File.Delete(zipPath);
@@ -299,9 +289,9 @@ public class UpdateViewModel : INotifyPropertyChanged
 public static class ZipExtractor
 {
     public static async Task ExtractToDirectoryAsync(
-        string zipFilePath, 
-        string destinationPath, 
-        IProgress<double>? progress = null, 
+        string zipFilePath,
+        string destinationPath,
+        IProgress<double>? progress = null,
         CancellationToken cancellationToken = default)
     {
         Directory.CreateDirectory(destinationPath);
@@ -318,10 +308,7 @@ public static class ZipExtractor
             var fullPath = Path.Combine(destinationPath, entry.FullName);
             var directory = Path.GetDirectoryName(fullPath);
 
-            if (!string.IsNullOrEmpty(directory))
-            {
-                Directory.CreateDirectory(directory);
-            }
+            if (!string.IsNullOrEmpty(directory)) Directory.CreateDirectory(directory);
 
             if (entry.FullName.EndsWith('/') || entry.FullName.EndsWith('\\'))
             {
@@ -340,4 +327,3 @@ public static class ZipExtractor
         }
     }
 }
-

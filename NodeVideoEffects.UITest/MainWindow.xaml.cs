@@ -1,53 +1,52 @@
 ﻿using NodeVideoEffects.Nodes.Math;
-using NodeVideoEffects.Type;
+using NodeVideoEffects.Core;
 using System.Runtime.InteropServices;
 using NodeVideoEffects.Utility;
 
-namespace NodeVideoEffects.UITest
+namespace NodeVideoEffects.UITest;
+
+/// <summary>
+/// Interaction logic for MainWindow.xaml
+/// </summary>
+public partial class MainWindow
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
-    public partial class MainWindow
+    public MainWindow()
     {
-        public MainWindow()
+        Hide();
+
+        var id = Guid.NewGuid().ToString("N");
+
+        var editor = new NodeEditor()
         {
-            Hide();
+            ItemId = id
+        };
+        var nodes = new List<NodeInfo>();
 
-            var id = Guid.NewGuid().ToString("N");
+        var node1 = new AddNode();
+        var node2 = new PowNode();
 
-            var editor = new NodeEditor()
-            {
-                ItemId = id
-            };
-            var nodes = new List<NodeInfo>();
+        node1.Id = id + "-" + Guid.NewGuid().ToString("N");
+        node2.Id = id + "-" + Guid.NewGuid().ToString("N");
 
-            var node1 = new AddNode();
-            var node2 = new PowNode();
+        NodesManager.AddNode(node1.Id, node1);
+        NodesManager.AddNode(node2.Id, node2);
 
-            node1.Id = id + "-" + Guid.NewGuid().ToString("N");
-            node2.Id = id + "-" + Guid.NewGuid().ToString("N");
+        node2.SetInputConnection(1, new PortInfo(node1.Id, 0));
 
-            NodesManager.AddNode(node1.Id, node1);
-            NodesManager.AddNode(node2.Id, node2);
+        nodes.Add(new NodeInfo(node1.Id, node1.GetType(), [], 100, 100, [new PortInfo(), new PortInfo()]));
+        nodes.Add(new NodeInfo(node2.Id, node2.GetType(), [], 500, 100,
+            [new PortInfo(), new PortInfo(node1.Id, 0)]));
 
-            node2.SetInputConnection(1, new PortInfo(node1.Id, 0));
+        editor.Nodes = nodes;
+        AllocConsole();
+        editor.NodesUpdated += (_, _) => Logger.Write(LogLevel.Info, "Nodes updated", editor.Nodes);
+        _ = new UpdaterService();
 
-            nodes.Add(new NodeInfo(node1.Id, node1.GetType(), [], 100, 100, [new PortInfo(), new PortInfo()]));
-            nodes.Add(new NodeInfo(node2.Id, node2.GetType(), [], 500, 100,
-                [new PortInfo(), new PortInfo(node1.Id, 0)]));
+        editor.ShowDialog();
+        Close();
+        return;
 
-            editor.Nodes = nodes;
-            AllocConsole();
-            editor.NodesUpdated += (_, _) => Logger.Write(LogLevel.Info, "Nodes updated", editor.Nodes);
-            _ = new UpdaterService();
-
-            editor.ShowDialog();
-            Close();
-            return;
-
-            [DllImport("Kernel32")]
-            static extern void AllocConsole();
-        }
+        [DllImport("Kernel32")]
+        static extern void AllocConsole();
     }
 }

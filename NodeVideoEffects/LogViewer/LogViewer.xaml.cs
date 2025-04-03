@@ -41,6 +41,7 @@ public partial class LogViewer
             window = _openedWindow;
             return false;
         }
+
         window = new LogViewer();
         return true;
     }
@@ -49,10 +50,8 @@ public partial class LogViewer
     {
         var currentLogs = Logger.Read();
         foreach (var log in currentLogs.Where(log => !_logs.Contains(log)))
-        {
             Dispatcher.Invoke(() => Viewer.Children.Add(new LogItem(log)));
-        }
-        if(_isBottom)
+        if (_isBottom)
             Dispatcher.Invoke(ScrollViewer.ScrollToBottom);
         _logs = currentLogs;
     }
@@ -78,7 +77,8 @@ public partial class LogViewer
             Key.Up => Math.Max(0, scrollViewer.VerticalOffset - scrollStep),
             Key.Down => Math.Min(scrollViewer.ScrollableHeight, scrollViewer.VerticalOffset + scrollStep),
             Key.PageUp => Math.Max(0, scrollViewer.VerticalOffset - scrollViewer.ActualHeight),
-            Key.PageDown => Math.Min(scrollViewer.ScrollableHeight, scrollViewer.VerticalOffset + scrollViewer.ActualHeight),
+            Key.PageDown => Math.Min(scrollViewer.ScrollableHeight,
+                scrollViewer.VerticalOffset + scrollViewer.ActualHeight),
             _ => _currentTargetOffset
         };
 
@@ -133,9 +133,6 @@ public static class ScrollViewerBehavior
 
     private static void OnVerticalOffsetChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-        if (d is ScrollViewer scrollViewer)
-        {
-            scrollViewer.ScrollToVerticalOffset((double)e.NewValue);
-        }
+        if (d is ScrollViewer scrollViewer) scrollViewer.ScrollToVerticalOffset((double)e.NewValue);
     }
 }

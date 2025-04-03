@@ -35,7 +35,8 @@ public class StackPanelPort : StackPanel, IControl
                             Text = child.Item2,
                             VerticalAlignment = VerticalAlignment.Center,
                             Margin = new Thickness(10, 0, 10, 0)
-                        }, child.Item1
+                        },
+                        child.Item1
                     },
                     Orientation = Orientation.Horizontal
                 }

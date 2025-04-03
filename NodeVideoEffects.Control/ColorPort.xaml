@@ -9,7 +9,7 @@
              d:DesignHeight="Auto" d:DesignWidth="Auto"
              x:Name="ColorPortControl" d:DataContext="{d:DesignInstance local:ColorPort}">
     <UserControl.Resources>
-        <local:ColorToHexConverter x:Key="ColorToHexConverter"/>
+        <local:ColorToHexConverter x:Key="ColorToHexConverter" />
     </UserControl.Resources>
     <Grid>
         <StackPanel Orientation="Horizontal" Margin="10">
@@ -35,7 +35,8 @@
 
                                 <GeometryDrawing>
                                     <GeometryDrawing.Brush>
-                                        <SolidColorBrush Color="{Binding SelectedColor, Mode=TwoWay, ElementName=ColorPortControl}"/>
+                                        <SolidColorBrush
+                                            Color="{Binding SelectedColor, Mode=TwoWay, ElementName=ColorPortControl}" />
                                     </GeometryDrawing.Brush>
                                     <GeometryDrawing.Geometry>
                                         <RectangleGeometry Rect="0,0,10,10" />
@@ -47,8 +48,8 @@
                 </Button.Background>
             </Button>
             <TextBox Width="75" Height="25"
-                     Text="{Binding SelectedColor, Converter={StaticResource ColorToHexConverter}, Mode=TwoWay}" 
-                     VerticalContentAlignment="Center" FontFamily="Consolas"/>
+                     Text="{Binding SelectedColor, Converter={StaticResource ColorToHexConverter}, Mode=TwoWay}"
+                     VerticalContentAlignment="Center" FontFamily="Consolas" />
         </StackPanel>
         <Popup x:Name="Popup" AllowsTransparency="True" PlacementTarget="{Binding ElementName=BtnColor}"
                Placement="Bottom" StaysOpen="False" Closed="Popup_OnClosed">
@@ -57,39 +58,40 @@
                     BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="10"/>
-                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="10" />
+                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <!-- This is the focusable element not to make the popup close when clicking inside -->
-                    <Grid Grid.ColumnSpan="3" Background="Transparent" IsHitTestVisible="True" Focusable="True" PreviewMouseDown="UIElement_OnPreviewMouseDown"/>
+                    <Grid Grid.ColumnSpan="3" Background="Transparent" IsHitTestVisible="True" Focusable="True"
+                          PreviewMouseDown="UIElement_OnPreviewMouseDown" />
 
                     <utilityControls:ColorPicker Grid.Column="0"
-                          SelectedColor="{Binding SelectedColor, Mode=TwoWay, ElementName=ColorPortControl}"/>
+                                                 SelectedColor="{Binding SelectedColor, Mode=TwoWay, ElementName=ColorPortControl}" />
                     <StackPanel Grid.Column="2" VerticalAlignment="Center">
                         <StackPanel Orientation="Horizontal" Margin="0,5">
-                            <TextBlock Text="R:" Width="20" VerticalAlignment="Center"/>
-                            <TextBox Text="{Binding Red, Mode=TwoWay, ElementName=ColorPortControl}" Width="50"/>
-                            <Slider Minimum="0" Maximum="255" Width="150" 
-                                    Value="{Binding Red, Mode=TwoWay, ElementName=ColorPortControl}"/>
+                            <TextBlock Text="R:" Width="20" VerticalAlignment="Center" />
+                            <TextBox Text="{Binding Red, Mode=TwoWay, ElementName=ColorPortControl}" Width="50" />
+                            <Slider Minimum="0" Maximum="255" Width="150"
+                                    Value="{Binding Red, Mode=TwoWay, ElementName=ColorPortControl}" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,5">
-                            <TextBlock Text="G:" Width="20" VerticalAlignment="Center"/>
-                            <TextBox Text="{Binding Green, Mode=TwoWay, ElementName=ColorPortControl}" Width="50"/>
-                            <Slider Minimum="0" Maximum="255" Width="150" 
-                                    Value="{Binding Green, Mode=TwoWay, ElementName=ColorPortControl}"/>
+                            <TextBlock Text="G:" Width="20" VerticalAlignment="Center" />
+                            <TextBox Text="{Binding Green, Mode=TwoWay, ElementName=ColorPortControl}" Width="50" />
+                            <Slider Minimum="0" Maximum="255" Width="150"
+                                    Value="{Binding Green, Mode=TwoWay, ElementName=ColorPortControl}" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,5">
-                            <TextBlock Text="B:" Width="20" VerticalAlignment="Center"/>
-                            <TextBox Text="{Binding Blue, Mode=TwoWay, ElementName=ColorPortControl}" Width="50"/>
-                            <Slider Minimum="0" Maximum="255" Width="150" 
-                                    Value="{Binding Blue, Mode=TwoWay, ElementName=ColorPortControl}"/>
+                            <TextBlock Text="B:" Width="20" VerticalAlignment="Center" />
+                            <TextBox Text="{Binding Blue, Mode=TwoWay, ElementName=ColorPortControl}" Width="50" />
+                            <Slider Minimum="0" Maximum="255" Width="150"
+                                    Value="{Binding Blue, Mode=TwoWay, ElementName=ColorPortControl}" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,5">
-                            <TextBlock Text="A:" Width="20" VerticalAlignment="Center"/>
-                            <TextBox Text="{Binding Alpha, Mode=TwoWay, ElementName=ColorPortControl}" Width="50"/>
-                            <Slider Minimum="0" Maximum="255" Width="150" 
-                                    Value="{Binding Alpha, Mode=TwoWay, ElementName=ColorPortControl}"/>
+                            <TextBlock Text="A:" Width="20" VerticalAlignment="Center" />
+                            <TextBox Text="{Binding Alpha, Mode=TwoWay, ElementName=ColorPortControl}" Width="50" />
+                            <Slider Minimum="0" Maximum="255" Width="150"
+                                    Value="{Binding Alpha, Mode=TwoWay, ElementName=ColorPortControl}" />
                         </StackPanel>
                     </StackPanel>
                 </Grid>

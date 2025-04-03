@@ -1,27 +1,27 @@
 ﻿using System.Windows;
 using YukkuriMovieMaker.Commons;
 
-namespace NodeVideoEffects
+namespace NodeVideoEffects;
+
+internal class OpenNodeEditorAttribute : PropertyEditorAttribute2
 {
-    internal class OpenNodeEditorAttribute : PropertyEditorAttribute2
+    public override FrameworkElement Create()
     {
-        public override FrameworkElement Create()
-        {
-            return new OpenNodeEditorButton();
-        }
+        return new OpenNodeEditorButton();
+    }
 
-        public override void SetBindings(FrameworkElement control, ItemProperty[] itemProperties)
-        {
-            if (control is not OpenNodeEditorButton editor)
-                return;
+    public override void SetBindings(FrameworkElement control, ItemProperty[] itemProperties)
+    {
+        if (control is not OpenNodeEditorButton editor)
+            return;
 
-            editor.ItemProperties = itemProperties;
-        }
-        public override void ClearBindings(FrameworkElement control)
-        {
-            if (control is not OpenNodeEditorButton editor)
-                return;
-            editor.ItemProperties = null;
-        }
+        editor.ItemProperties = itemProperties;
+    }
+
+    public override void ClearBindings(FrameworkElement control)
+    {
+        if (control is not OpenNodeEditorButton editor)
+            return;
+        editor.ItemProperties = null;
     }
 }

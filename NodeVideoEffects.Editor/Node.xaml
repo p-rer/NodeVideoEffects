@@ -18,18 +18,20 @@
             <RowDefinition Height="28" />
             <RowDefinition Height="1*" />
         </Grid.RowDefinitions>
-        <Border Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" BorderThickness="1" BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}">
+        <Border Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" BorderThickness="1"
+                BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}">
             <Rectangle Fill="{DynamicResource {x:Static SystemColors.WindowBrushKey}}" Opacity="0.85" />
         </Border>
-        <Border Grid.Row="0" Grid.Column="1" 
-             BorderThickness="0,0,0,1" BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}">
+        <Border Grid.Row="0" Grid.Column="1"
+                BorderThickness="0,0,0,1" BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}">
             <Grid>
-                <Label Name="NodeName" Grid.Row="0" >
+                <Label Name="NodeName" Grid.Row="0">
                     <Label.BorderBrush>
                         <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.ActiveBorderColorKey}}" />
                     </Label.BorderBrush>
                 </Label>
-                <Ellipse Name="CategorySign" Grid.Row="0" Height="15" Width="15" Margin="0,5,5,5" HorizontalAlignment="Right" />
+                <Ellipse Name="CategorySign" Grid.Row="0" Height="15" Width="15" Margin="0,5,5,5"
+                         HorizontalAlignment="Right" />
             </Grid>
         </Border>
         <StackPanel Grid.Row="1" Grid.ColumnSpan="3" Grid.Column="0" VerticalAlignment="Top">

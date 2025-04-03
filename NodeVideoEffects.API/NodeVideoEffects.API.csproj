@@ -4,16 +4,18 @@
         <TargetFramework>net9.0-windows</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <Configurations>Debug;Release;Preview Release</Configurations>
+        <Platforms>AnyCPU</Platforms>
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\NodeVideoEffects.Type\NodeVideoEffects.Type.csproj" />
+        <ProjectReference Include="..\NodeVideoEffects.Core\NodeVideoEffects.Core.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-      <Reference Include="Vortice.Direct2D1">
-        <HintPath>$(YMM4DirPath)Vortice.Direct2D1.dll</HintPath>
-      </Reference>
+        <Reference Include="Vortice.Direct2D1">
+            <HintPath>$(YMM4DirPath)Vortice.Direct2D1.dll</HintPath>
+        </Reference>
     </ItemGroup>
 
 </Project>

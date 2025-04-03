@@ -6,7 +6,7 @@
 public partial class App
 {
     private readonly string[] _args = Environment.GetCommandLineArgs();
-    
+
     public App()
     {
         if (_args.Length <= 1) return;

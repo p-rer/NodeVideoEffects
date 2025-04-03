@@ -1,31 +1,30 @@
 ﻿using System.Collections.Immutable;
 
-namespace NodeVideoEffects.Utility
+namespace NodeVideoEffects.Utility;
+
+public static class Logger
 {
-    public static class Logger
+    private static readonly LinkedList<(DateTime, LogLevel, string, object?)> Logs = [];
+
+    public static void Write(LogLevel level, string message, object? obj = null)
     {
-        private static readonly LinkedList<(DateTime, LogLevel, string, object?)> Logs = [];
-
-        public static void Write(LogLevel level, string message, object? obj = null)
-        {
-            Logs.AddLast((DateTime.Now, level, message, obj));
-            if (Logs.Count > 1500)
-            {
-                Logs.RemoveFirst();
-            }
-            LogUpdated.Invoke(null, EventArgs.Empty);
-        }
-
-        public static ImmutableList<(DateTime, LogLevel, string, object?)> Read() => Logs.ToImmutableList();
-
-        public static EventHandler LogUpdated = delegate { };
+        Logs.AddLast((DateTime.Now, level, message, obj));
+        if (Logs.Count > 1500) Logs.RemoveFirst();
+        LogUpdated.Invoke(null, EventArgs.Empty);
     }
 
-    public enum LogLevel
+    public static ImmutableList<(DateTime, LogLevel, string, object?)> Read()
     {
-        Debug,
-        Info,
-        Warn,
-        Error
+        return Logs.ToImmutableList();
     }
+
+    public static EventHandler LogUpdated = delegate { };
+}
+
+public enum LogLevel
+{
+    Debug,
+    Info,
+    Warn,
+    Error
 }

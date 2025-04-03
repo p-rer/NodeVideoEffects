@@ -1,20 +1,22 @@
-﻿using NodeVideoEffects.Type;
+﻿using NodeVideoEffects.Core;
 using NodeVideoEffects.Utility;
 using System.Windows.Media;
+using NodeVideoEffects.Control;
 using Vortice.Direct2D1;
 using Blend = Vortice.Direct2D1.Effects.Blend;
+using Enum = NodeVideoEffects.Core.Enum;
 
-namespace NodeVideoEffects.Nodes.Composite
+namespace NodeVideoEffects.Nodes.Composite;
+
+public class BlendNode : NodeLogic
 {
-    public class BlendNode : NodeLogic
-    {
-        private Blend _blend = null!;
-        private readonly string _id;
+    private Blend _blend = null!;
+    private readonly string _id;
 
-        public BlendNode(string id) : base(
-            [
-            new Input(new Type.Enum(
-            [
+    public BlendNode(string id) : base(
+        [
+            new Input(new Enum(
+                [
                     "Multiply",
                     "Screen",
                     "Darken",
@@ -45,56 +47,52 @@ namespace NodeVideoEffects.Nodes.Composite
                 "Mode"),
             new Input(new Image(null), "Input1"),
             new Input(new Image(null), "Input2")
-            ],
-            [
-                new Output(new Image(null), "Output")
-                ],
-            "Blend",
-            Colors.DarkViolet,
-            "Composite"
-            )
-        {
-            _id = id;
-            if (id == "")
-                return;
-            _blend = new Blend(NodesManager.GetContext(_id).DeviceContext);
-        }
+        ],
+        [
+            new Output(new Image(null), "Output")
+        ],
+        "Blend",
+        Colors.DarkViolet,
+        "Composite"
+    )
+    {
+        _id = id;
+        if (id == "")
+            return;
+        _blend = new Blend(NodesManager.GetContext(_id).DeviceContext);
+    }
 
-        public override async Task Calculate()
+    public override async Task Calculate()
+    {
+        await Task.Run(() =>
         {
-            await Task.Run(() =>
+            lock (_blend)
             {
-                lock (_blend)
+                if (_blend.NativePointer == 0) _blend = new Blend(NodesManager.GetContext(_id).DeviceContext);
+
+                if (Inputs[0].Value == null || Inputs[1].Value == null)
                 {
-                    if (_blend.NativePointer == 0)
-                    {
-                        _blend = new Blend(NodesManager.GetContext(_id).DeviceContext);
-                    }
-
-                    if (Inputs[0].Value == null || Inputs[1].Value == null)
-                    {
-                        Logger.Write(LogLevel.Warn, $"Inputs are null. Calculation skipped.\nID: {_id}\nName: {Name}");
-                        return;
-                    }
-
-                    _blend.SetInput(0, ((ImageWrapper?)Inputs[1].Value)?.Image, true);
-                    _blend.SetInput(1, ((ImageWrapper?)Inputs[2].Value)?.Image, true);
-                    _blend.Mode = (BlendMode)((int?)Inputs[0].Value ?? 0);
-                    Outputs[0].Value = new ImageWrapper(_blend.Output);
+                    Logger.Write(LogLevel.Warn, $"Inputs are null. Calculation skipped.\nID: {_id}\nName: {Name}");
+                    return;
                 }
-            });
-        }
 
-        public override void Dispose()
-        {
-            base.Dispose();
+                _blend.SetInput(0, ((ImageWrapper?)Inputs[1].Value)?.Image, true);
+                _blend.SetInput(1, ((ImageWrapper?)Inputs[2].Value)?.Image, true);
+                _blend.Mode = (BlendMode)((int?)Inputs[0].Value ?? 0);
+                Outputs[0].Value = new ImageWrapper(_blend.Output);
+            }
+        });
+    }
 
-            if (_blend == null!)
-                return;
-            _blend.SetInput(0, null, true);
-            _blend.SetInput(1, null, true);
-            _blend.Dispose();
-            _blend = null!;
-        }
+    public override void Dispose()
+    {
+        base.Dispose();
+
+        if (_blend == null!)
+            return;
+        _blend.SetInput(0, null, true);
+        _blend.SetInput(1, null, true);
+        _blend.Dispose();
+        _blend = null!;
     }
 }

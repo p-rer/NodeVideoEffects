@@ -1,30 +1,32 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net9.0-windows</TargetFramework>
-    <UseWPF>true</UseWPF>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
-  
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DebugType>none</DebugType>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net9.0-windows</TargetFramework>
+        <UseWPF>true</UseWPF>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <Configurations>Debug;Release;Preview Release</Configurations>
+        <Platforms>AnyCPU</Platforms>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <Reference Include="Vortice.Direct2D1">
-      <HintPath>$(YMM4DirPath)Vortice.Direct2D1.dll</HintPath>
-    </Reference>
-    <Reference Include="YukkuriMovieMaker">
-      <HintPath>$(YMM4DirPath)YukkuriMovieMaker.dll</HintPath>
-    </Reference>
-    <Reference Include="YukkuriMovieMaker.Plugin">
-      <HintPath>$(YMM4DirPath)YukkuriMovieMaker.Plugin.dll</HintPath>
-    </Reference>
-  </ItemGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+        <DebugType>none</DebugType>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\YukkuriMovieMaker.Generator\YukkuriMovieMaker.Generator\YukkuriMovieMaker.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-    <AdditionalFiles Include="**/*.csv" />
-  </ItemGroup>
+    <ItemGroup>
+        <Reference Include="Vortice.Direct2D1">
+            <HintPath>$(YMM4DirPath)Vortice.Direct2D1.dll</HintPath>
+        </Reference>
+        <Reference Include="YukkuriMovieMaker">
+            <HintPath>$(YMM4DirPath)YukkuriMovieMaker.dll</HintPath>
+        </Reference>
+        <Reference Include="YukkuriMovieMaker.Plugin">
+            <HintPath>$(YMM4DirPath)YukkuriMovieMaker.Plugin.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\YukkuriMovieMaker.Generator\YukkuriMovieMaker.Generator\YukkuriMovieMaker.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
+        <AdditionalFiles Include="**/*.csv"/>
+    </ItemGroup>
 </Project>
