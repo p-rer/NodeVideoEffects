@@ -78,4 +78,39 @@ public partial class NodeEditor
         if (LogViewer.LogViewer.CreateWindow(out var viewer))
             viewer.Show();
     }
+
+    private async void CheckUpdate(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            if (await UpdaterService.CheckUpdate())
+            {
+                var result = MessageBox.Show(
+                    "A new version is available. Do you want to update?",
+                    "Update", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (result == MessageBoxResult.Yes)
+                {
+                    _ = new UpdaterService(true);
+                }
+            }
+            else
+            {
+                MessageBox.Show("No updates available.", "Update", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+        catch (Exception exception)
+        {
+            Logger.Write(LogLevel.Error, "Failed to check for updates.", exception);
+        }
+    }
+
+    private void ResetView(object sender, RoutedEventArgs e)
+    {
+        EditSpace.ResetView();
+    }
+
+    private void Close(object sender, RoutedEventArgs e)
+    {
+        Close();
+    }
 }

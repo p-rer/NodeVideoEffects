@@ -12,8 +12,8 @@ public partial class MainWindow
 {
     public MainWindow()
     {
-        Hide();
-
+        InitializeComponent();
+        Show();
         var id = Guid.NewGuid().ToString("N");
 
         var editor = new NodeEditor()

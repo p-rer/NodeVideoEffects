@@ -4,12 +4,12 @@ using System.ComponentModel.DataAnnotations;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Exo;
 using YukkuriMovieMaker.Player.Video;
-using YukkuriMovieMaker.Plugin;
 using YukkuriMovieMaker.Plugin.Effects;
+using YukkuriMovieMaker.Resources.Localization;
 
 namespace NodeVideoEffects;
 
-[VideoEffect("NodeVideoEffects", [VideoEffectCategories.Filtering], ["NVE", "ノード"])]
+[VideoEffect("NodeVideoEffects", [VideoEffectCategories.Filtering], ["NVE", "ノード"], ResourceType = typeof(Texts), IsAviUtlSupported = false)]
 public class NodeVideoEffectsPlugin : VideoEffectBase
 {
     private bool _isCreated;

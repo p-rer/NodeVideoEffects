@@ -11,7 +11,11 @@ namespace NodeVideoEffects;
 
 public partial class UpdaterService : IPlugin
 {
-    public UpdaterService()
+    public UpdaterService() : this(false)
+    {
+    }
+    
+    public UpdaterService(bool force)
     {
         Task.Run(async () =>
         {
@@ -35,10 +39,27 @@ public partial class UpdaterService : IPlugin
                 if (newVersion <= currentVersion) return;
                 Logger.Write(LogLevel.Info,
                     $"A new version is available.\nCurrent version: {currentVersion}, Latest version: {newVersion}");
-                var result = MessageBox.Show(
-                    $"A new version is available. Do you want to update?\n{currentVersion} -> {newVersion}",
-                    "Update", MessageBoxButton.YesNo, MessageBoxImage.Question);
-                if (result == MessageBoxResult.Yes)
+                if (!force)
+                {
+                    var result = MessageBox.Show(
+                        $"A new version is available. Do you want to update?\n{currentVersion} -> {newVersion}",
+                        "Update", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        var downloadUrl = json["assets"]?.First?["browser_download_url"]?.ToString();
+                        if (downloadUrl != null)
+                        {
+                            var app = new ProcessStartInfo
+                            {
+                                FileName = "NodeVideoEffects.Updater.exe",
+                                Arguments = downloadUrl
+                            };
+
+                            Process.Start(app);
+                        }
+                    }
+                }
+                else
                 {
                     var downloadUrl = json["assets"]?.First?["browser_download_url"]?.ToString();
                     if (downloadUrl != null)
@@ -79,6 +100,39 @@ public partial class UpdaterService : IPlugin
         return (from release in releases
             where release.Value<bool>("prerelease") == isPreRelease
             select release.ToString()).FirstOrDefault();
+    }
+
+    public static async Task<bool> CheckUpdate()
+    {
+
+        using var client = new HttpClient();
+
+        client.DefaultRequestHeaders.Add("User-Agent", ".Net Application");
+
+        try
+        {
+#if PREVIEW_RELEASE
+            const bool isRelease = true;
+#else
+            const bool isRelease = false;
+#endif // PREVIEW_RELEASE
+            var responseBody = await GetLatestRelease(client, "p-rer", "NodeVideoEffects", isRelease);
+            var json = JObject.Parse(responseBody ??
+                                     throw new InvalidOperationException("Failed to get the latest release."));
+            var newVersion = ParseVersion(json["tag_name"]?.ToString());
+
+            var currentVersion = ParseVersion(ResourceLoader.FileLoad("git_tag.txt"));
+            return newVersion > currentVersion;
+        }
+        catch (HttpRequestException ex)
+        {
+            Logger.Write(LogLevel.Error, ex.Message, ex);
+        }
+        catch (InvalidOperationException)
+        {
+            // ignore
+        }
+        return false;
     }
 
     private static Version ParseVersion(string? input)

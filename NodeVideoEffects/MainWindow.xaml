@@ -20,17 +20,17 @@
         </Grid.RowDefinitions>
         <Menu Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3">
             <MenuItem Header="{x:Static utility:Text.File}">
-                <MenuItem Header="{x:Static utility:Text.Close}" />
+                <MenuItem Header="{x:Static utility:Text.Close}" Click="Close" />
             </MenuItem>
-            <MenuItem Header="{x:Static utility:Text.Edit}">
+            <MenuItem Header="{x:Static utility:Text.Edit}" IsEnabled="False">
                 <MenuItem Header="{x:Static utility:Text.Copy}" />
             </MenuItem>
             <MenuItem Header="{x:Static utility:Text.View}">
-                <MenuItem Header="{x:Static utility:Text.ResetView}" />
+                <MenuItem Header="{x:Static utility:Text.ResetView}" Click="ResetView" />
                 <MenuItem Header="Open Log..." Click="OpenLogViewer" />
             </MenuItem>
             <MenuItem Header="{x:Static utility:Text.Help}">
-                <MenuItem Header="{x:Static utility:Text.CheckUpdate}" />
+                <MenuItem Header="{x:Static utility:Text.CheckUpdate}" Click="CheckUpdate" />
                 <MenuItem Header="{x:Static utility:Text.ShowAbout}" Click="ShowAbout" />
             </MenuItem>
         </Menu>

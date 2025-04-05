@@ -489,6 +489,60 @@ public partial class Editor : INotifyPropertyChanged
         }
     }
 
+    public void ResetView()
+    {
+        var minX = double.MaxValue;
+        var minY = double.MaxValue;
+        var maxX = double.MinValue;
+        var maxY = double.MinValue;
+
+        foreach (UIElement element in Canvas.Children)
+        {
+            if (element is not FrameworkElement fe) continue;
+
+            var left = Canvas.GetLeft(fe);
+            var top = Canvas.GetTop(fe);
+            var right = left + fe.ActualWidth;
+            var bottom = top + fe.ActualHeight;
+
+            if (left < minX) minX = left;
+            if (top < minY) minY = top;
+            if (right > maxX) maxX = right;
+            if (bottom > maxY) maxY = bottom;
+        }
+
+        if (Math.Abs(minX - double.MaxValue) < Tolerance || Math.Abs(minY - double.MaxValue) < Tolerance ||
+            Math.Abs(maxX - double.MinValue) < Tolerance || Math.Abs(maxY - double.MinValue) < Tolerance)
+            return;
+
+        var canvasWidth = WrapperCanvas.ActualWidth;
+        var canvasHeight = WrapperCanvas.ActualHeight;
+        var width = maxX - minX + 50;
+        var height = maxY - minY + 50;
+
+        if (width == 0 || height == 0)
+            return;
+
+        var scale = _scale = Math.Max(Math.Min(Math.Min(canvasWidth / width, canvasHeight / height), 4) , 0.1);
+
+        _scaleTransform.ScaleX = scale;
+        _scaleTransform.ScaleY = scale;
+
+        var scaledWidth = width * scale;
+        var scaledHeight = height * scale;
+
+        var offsetX = (canvasWidth - scaledWidth) / 2 - minX * scale;
+        var offsetY = (canvasHeight - scaledHeight) / 2 - minY * scale;
+
+        _translateTransform.X = offsetX;
+        _translateTransform.Y = offsetY;
+
+        UpdateScrollBar();
+        DrawDotPattern(WrapperCanvas, 50, 50, 1, _scale,
+            new Point(_translateTransform.X, _translateTransform.Y));
+        ZoomValue.Text = (int)(_scale * 100) + "%";
+    }
+
     internal Point ConvertToTransform(Point p)
     {
         return new Point((p.X - _translateTransform.X) / _scale,
