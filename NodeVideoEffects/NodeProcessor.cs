@@ -17,6 +17,7 @@ internal class NodeProcessor : IVideoEffectProcessor
 {
     internal ID2D1DeviceContext6 Context;
     private readonly NodeVideoEffectsPlugin _item;
+
     public ID2D1Image Output { private set; get; } = null!;
 
     private readonly OutputNode _outputNode = null!;
@@ -25,6 +26,7 @@ internal class NodeProcessor : IVideoEffectProcessor
     private AffineTransform2D? _affineTransform2D;
 
     private readonly Lock _locker = new();
+    private bool _isCalculating;
     private bool _hasError;
 
     public NodeProcessor(IGraphicsDevicesAndContext context, NodeVideoEffectsPlugin item)
@@ -246,9 +248,15 @@ internal class NodeProcessor : IVideoEffectProcessor
                         BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static |
                         BindingFlags.FlattenHierarchy)
                     ?.Invoke(null, [_item.Id, effectDescription]);
+                if (effectDescription.Usage != TimelineSourceUsage.Exporting && _isCalculating)
+                {
+                    return effectDescription.DrawDescription;
+                }
+                _isCalculating = true;
                 output = ((ImageWrapper?)_outputNode.Inputs[0].Value)?.Image;
                 if (output == null || output.NativePointer == 0)
                     throw new InvalidOperationException("Output image is null.");
+                _isCalculating = false;
                 _hasError = false;
                 return effectDescription.DrawDescription;
             }
@@ -256,6 +264,7 @@ internal class NodeProcessor : IVideoEffectProcessor
             {
                 if (_hasError == false)
                     Logger.Write(LogLevel.Error, $"{e.Message}\nItem ID: \"{_item.Id}\"", e);
+                _isCalculating = false;
                 _hasError = true;
 
                 SetBlankImage(out output);

@@ -28,7 +28,10 @@ public static class NodesManager
 
             if (node.Outputs[index].IsSuccess)
                 return node.GetOutput(index);
-            await TaskTracker.RunTrackedTask(node.Calculate);
+            if (EffectDescription[id[..id.IndexOf('-')]].Usage == TimelineSourceUsage.Exporting)
+                await node.Calculate();
+            else
+                await TaskTracker.RunTrackedTask(node.Calculate);
 
             return node.GetOutput(index);
         }
