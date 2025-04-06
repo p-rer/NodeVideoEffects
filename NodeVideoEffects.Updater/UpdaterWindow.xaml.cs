@@ -140,6 +140,10 @@ public class UpdateViewModel : INotifyPropertyChanged
             Status = "Update initiated. The updater will now exit.";
             // Exit current process to allow batch file to replace locked files (self-update)
         }
+        catch
+        {
+            Environment.Exit(1);
+        }
         finally
         {
             _stream?.Close();
@@ -305,7 +309,12 @@ public static class ZipExtractor
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var fullPath = Path.Combine(destinationPath, entry.FullName);
+            var fullPath = Path.GetFullPath(Path.Combine(destinationPath, entry.FullName));
+            var fullDestDirPath = Path.GetFullPath(destinationPath + Path.DirectorySeparatorChar);
+            if (!fullPath.StartsWith(fullDestDirPath))
+            {
+                throw new InvalidOperationException("Entry is outside the target dir: " + fullPath);
+            }
             var directory = Path.GetDirectoryName(fullPath);
 
             if (!string.IsNullOrEmpty(directory)) Directory.CreateDirectory(directory);
