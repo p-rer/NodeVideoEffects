@@ -1,14 +1,42 @@
 ﻿<Window x:Class="NodeVideoEffects.LogViewer.LogViewer"
+        x:Name="LogViewerWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:logViewer="clr-namespace:NodeVideoEffects.LogViewer"
         mc:Ignorable="d"
         Title="LogViewer" Height="450" Width="800">
     <Grid>
-        <ScrollViewer x:Name="ScrollViewer" SnapsToDevicePixels="False" ScrollChanged="ScrollViewer_OnScrollChanged"
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <ToolBar Grid.Row="0">
+            <Button Click="ClearButton_Click" Content="Clear" ToolTip="Clear the log viewer"/>
+            <Separator/>
+            <ToggleButton Content="Debug" IsChecked="{Binding IsDebugFiltered, Mode=TwoWay, ElementName=LogViewerWindow}"
+                          Checked="ToggleButton_IsCheckChanged" Unchecked="ToggleButton_IsCheckChanged"/>
+            <ToggleButton Content="Info" IsChecked="{Binding IsInfoFiltered, Mode=TwoWay, ElementName=LogViewerWindow}"
+                          Checked="ToggleButton_IsCheckChanged" Unchecked="ToggleButton_IsCheckChanged"/>
+            <ToggleButton Content="Warn" IsChecked="{Binding IsWarnFiltered, Mode=TwoWay, ElementName=LogViewerWindow}"
+                          Checked="ToggleButton_IsCheckChanged" Unchecked="ToggleButton_IsCheckChanged"/>
+            <ToggleButton Content="Error" IsChecked="{Binding IsErrorFiltered, Mode=TwoWay, ElementName=LogViewerWindow}"
+                          Checked="ToggleButton_IsCheckChanged" Unchecked="ToggleButton_IsCheckChanged"/>
+        </ToolBar>
+        <ScrollViewer Grid.Row="1" x:Name="ScrollViewer" SnapsToDevicePixels="False" ScrollChanged="ScrollViewer_OnScrollChanged"
                       PreviewMouseWheel="OnPreviewMouseWheel" PreviewKeyDown="OnPreviewKeyDown">
-            <StackPanel x:Name="Viewer" VerticalAlignment="Top" />
+            <ItemsControl ItemsSource="{Binding Logs, Mode=OneWay, ElementName=LogViewerWindow}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <logViewer:LogItem Width="Auto" Height="Auto"
+                                           LogTime="{Binding Item1}"
+                                           Level ="{Binding Item2}"
+                                           MessageText="{Binding Item3}"
+                                           RootObject ="{Binding Item4}" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
         </ScrollViewer>
     </Grid>
 </Window>
