@@ -49,6 +49,6 @@ public struct ImageWrapper(ID2D1Image? image)
 
     public override string? ToString()
     {
-        return Image?.NativePointer.ToString();
+        return Image?.NativePointer.ToString("x8");
     }
 }

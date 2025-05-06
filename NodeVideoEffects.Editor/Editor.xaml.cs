@@ -19,6 +19,8 @@ public partial class Editor : INotifyPropertyChanged
     private readonly ScaleTransform _scaleTransform;
     private readonly TranslateTransform _translateTransform;
 
+    private readonly VisualBrush _dotBrush;
+
     private Point _lastPos;
     private Point _nowPos;
     private bool _isDragging;
@@ -39,6 +41,8 @@ public partial class Editor : INotifyPropertyChanged
 
     private static readonly Lock Locker = new();
 
+    private const double DotSpacing = 50;
+    private const double DotSize = 1;
     private const double Tolerance = 0.001;
 
     public List<NodeInfo> Nodes
@@ -65,6 +69,21 @@ public partial class Editor : INotifyPropertyChanged
 
         Canvas.LayoutTransform = _scaleTransform;
         Canvas.RenderTransform = _translateTransform;
+        
+        var drawingVisual = new DrawingVisual();
+        using var dc = drawingVisual.RenderOpen();
+        for (double x = 0; x < DotSpacing * 10; x += DotSpacing)
+        for (double y = 0; y < DotSpacing * 10; y += DotSpacing)
+            dc.DrawEllipse(SystemColors.GrayTextBrush, null, new Point(x, y), DotSize, DotSize);
+
+        _dotBrush = new VisualBrush(drawingVisual)
+        {
+            TileMode = TileMode.Tile,
+            Viewport = new Rect(0, 0, DotSpacing, DotSpacing),
+            ViewportUnits = BrushMappingMode.Absolute,
+            Stretch = Stretch.None
+        };
+
 
         MouseWheel += Canvas_MouseWheel;
         MouseDown += Canvas_Down;
@@ -136,29 +155,13 @@ public partial class Editor : INotifyPropertyChanged
 
     #region Draw Editor
 
-    private static void DrawDotPattern(Canvas canvas, double dotSpacingX, double dotSpacingY, double dotSize,
-        double scale, Point offset)
+    private void DrawDotPattern(Canvas canvas, double scale, Point offset)
     {
-        var drawingVisual = new DrawingVisual();
-        using var dc = drawingVisual.RenderOpen();
-        for (double x = 0; x < dotSpacingX * 10; x += dotSpacingX)
-        for (double y = 0; y < dotSpacingY * 10; y += dotSpacingY)
-            dc.DrawEllipse(SystemColors.GrayTextBrush, null, new Point(x, y), dotSize, dotSize);
-
-        var dotBrush = new VisualBrush(drawingVisual)
-        {
-            TileMode = TileMode.Tile,
-            Viewport = new Rect(0, 0, dotSpacingX, dotSpacingY),
-            ViewportUnits = BrushMappingMode.Absolute,
-            Stretch = Stretch.None
-        };
-
         var transformGroup = new TransformGroup();
         transformGroup.Children.Add(new ScaleTransform(scale, scale));
         transformGroup.Children.Add(new TranslateTransform(offset.X, offset.Y));
-        dotBrush.Transform = transformGroup;
-
-        canvas.Background = dotBrush;
+        _dotBrush.Transform = transformGroup;
+        canvas.Background = _dotBrush;
     }
 
     private async void EditorLoaded(object sender, RoutedEventArgs e)
@@ -168,20 +171,17 @@ public partial class Editor : INotifyPropertyChanged
             await Dispatcher.InvokeAsync(() =>
             {
                 UpdateScrollBar();
-                DrawDotPattern(WrapperCanvas, 50, 50, 1, _scale,
-                    new Point(_translateTransform.X, _translateTransform.Y));
+                DrawDotPattern(WrapperCanvas, _scale, new Point(_translateTransform.X, _translateTransform.Y));
 
                 Canvas.LayoutUpdated += (_, _) =>
                 {
                     UpdateScrollBar();
-                    DrawDotPattern(WrapperCanvas, 50, 50, 1, _scale,
-                        new Point(_translateTransform.X, _translateTransform.Y));
+                    DrawDotPattern(WrapperCanvas, _scale, new Point(_translateTransform.X, _translateTransform.Y));
                 };
                 WrapperCanvas.SizeChanged += (_, _) =>
                 {
                     UpdateScrollBar();
-                    DrawDotPattern(WrapperCanvas, 50, 50, 1, _scale,
-                        new Point(_translateTransform.X, _translateTransform.Y));
+                    DrawDotPattern(WrapperCanvas, _scale, new Point(_translateTransform.X, _translateTransform.Y));
                 };
 
                 BuildNodes();
@@ -265,9 +265,9 @@ public partial class Editor : INotifyPropertyChanged
 
     public async void RebuildNodes(List<NodeInfo> infos)
     {
-        Logger.Write(LogLevel.Debug, "RebuildNodes started.", new { NodesToRebuildCount = infos.Count });
         try
         {
+            Logger.Write(LogLevel.Debug, "RebuildNodes started.", new { NodesToRebuildCount = infos.Count });
             InfoText = "Rebuilding nodes...";
             Logger.Write(LogLevel.Debug, "Rebuilding nodes: removing deleted nodes.", infos);
 
@@ -452,8 +452,7 @@ public partial class Editor : INotifyPropertyChanged
         _translateTransform.Y = offsetY;
 
         UpdateScrollBar();
-        DrawDotPattern(WrapperCanvas, 50, 50, 1, _scale,
-            new Point(_translateTransform.X, _translateTransform.Y));
+        DrawDotPattern(WrapperCanvas, _scale, new Point(_translateTransform.X, _translateTransform.Y));
         ZoomValue.Text = (int)(_scale * 100) + "%";
     }
 
@@ -862,6 +861,7 @@ public partial class Editor : INotifyPropertyChanged
             _lastPos = _nowPos;
 
             UpdateScrollBar();
+            DrawDotPattern(WrapperCanvas, _scale, new Point(_translateTransform.X, _translateTransform.Y));
         }
         else if (_isSelecting)
         {
