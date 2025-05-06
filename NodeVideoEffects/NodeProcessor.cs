@@ -31,198 +31,140 @@ internal class NodeProcessor : IVideoEffectProcessor
 
     public NodeProcessor(IGraphicsDevicesAndContext context, NodeVideoEffectsPlugin item)
     {
-#if DEBUG
         Logger.Write(LogLevel.Debug, "NodeProcessor constructor started.");
         Logger.Write(LogLevel.Debug,
             $"Received context: {context.ToString() ?? "null"} and plugin item with ID: \"{item.Id}\".");
-#endif
 
         if ((item.Id == "") ^ !NodesManager.AddItem(item.Id))
         {
-#if DEBUG
             Logger.Write(LogLevel.Debug,
                 "Condition met: item.Id is empty or NodesManager.AddItem(item.Id) failed.");
-#endif
             item.Id = Guid.NewGuid().ToString("N");
-#if DEBUG
             Logger.Write(LogLevel.Debug, $"Generated new ID: \"{item.Id}\". Adding to NodesManager.");
-#endif
             NodesManager.AddItem(item.Id);
-#if DEBUG
             Logger.Write(LogLevel.Debug, $"Created the effect processor, ID: \"{item.Id}\".");
-#endif
         }
 
-#if DEBUG
         Logger.Write(LogLevel.Debug, "Setting the DeviceContext.");
-#endif
         Context = context.DeviceContext;
         NodesManager.SetContext(item.Id, context);
-#if DEBUG
         Logger.Write(LogLevel.Debug, "Context has been set in NodesManager.");
-#endif
 
         if (item.Nodes.Count == 0)
         {
-#if DEBUG
             Logger.Write(LogLevel.Debug,
                 "No nodes exist in item.Nodes. Generating initial nodes (InputNode and OutputNode).");
-#endif
             var inputNode = new InputNode();
             _outputNode = new OutputNode();
             inputNode.Id = item.Id + "-" + Guid.NewGuid().ToString("N");
             _outputNode.Id = item.Id + "-" + Guid.NewGuid().ToString("N");
-#if DEBUG
             Logger.Write(LogLevel.Debug,
                 $"Generated InputNode ID: \"{inputNode.Id}\", OutputNode ID: \"{_outputNode.Id}\".");
-#endif
             NodesManager.AddNode(inputNode.Id, inputNode);
             NodesManager.AddNode(_outputNode.Id, _outputNode);
-#if DEBUG
             Logger.Write(LogLevel.Debug, "Nodes added to NodesManager.");
-#endif
             _outputNode.SetInputConnection(0, new PortInfo(inputNode.Id, 0));
-#if DEBUG
             Logger.Write(LogLevel.Debug, "OutputNode input connection set with InputNode.");
-#endif
             item.EditorNodes =
             [
                 new NodeInfo(inputNode.Id, inputNode.GetType(), [], 100, 100, new List<PortInfo>()),
                 new NodeInfo(_outputNode.Id, _outputNode.GetType(), [], 500, 100,
                     [new PortInfo(inputNode.Id, 0)])
             ];
-#if DEBUG
             Logger.Write(LogLevel.Info, "Initializing completed.");
             Logger.Write(LogLevel.Debug, "EditorNodes set successfully.");
-#endif
         }
         else
         {
-#if DEBUG
             Logger.Write(LogLevel.Debug,
                 "Existing nodes detected in item.Nodes. Starting node regeneration process.");
-#endif
             for (var i = 0; i < item.Nodes.Count; i++)
             {
                 var info = item.Nodes[i];
                 info = item.Nodes[i] = info with { Id = item.Id + "-" + info.Id[(info.Id.IndexOf('-') + 1)..] };
-#if DEBUG
                 Logger.Write(LogLevel.Debug, $"Updated node ID to \"{info.Id}\".");
-#endif
                 var type = info.Type;
                 object? obj;
                 try
                 {
-#if DEBUG
                     Logger.Write(LogLevel.Debug,
                         $"Attempting to create instance of type {type} using Activator with item.Id.");
-#endif
                     obj = Activator.CreateInstance(type, item.Id);
-#if DEBUG
                     Logger.Write(LogLevel.Debug, "Instance creation succeeded using first method.");
-#endif
                 }
 #pragma warning disable CS0168
                 catch (Exception ex)
 #pragma warning restore CS0168
                 {
-#if DEBUG
                     Logger.Write(LogLevel.Debug,
                         $"Exception during Activator.CreateInstance: {ex.Message}. Trying alternative constructor.");
-#endif
                     obj = Activator.CreateInstance(type, []);
-#if DEBUG
                     Logger.Write(LogLevel.Debug, "Instance creation succeeded using alternative method.");
-#endif
                 }
 
                 var node = obj as NodeLogic ?? throw new Exception("Unable to create node instance.");
                 node.Id = info.Id;
                 NodesManager.AddNode(info.Id, node);
-#if DEBUG
                 Logger.Write(LogLevel.Debug, $"Node {node.Id} added to NodesManager.");
-#endif
                 if (node.GetType() == typeof(OutputNode))
                 {
-#if DEBUG
                     Logger.Write(LogLevel.Debug, "OutputNode found and assigned to _outputNode.");
-#endif
                     _outputNode = (OutputNode)node;
                 }
 
                 for (var j = 0; j < info.Values.Count; j++)
                 {
                     node.SetInput(j, info.Values[j]);
-#if DEBUG
                     Logger.Write(LogLevel.Debug, $"Set input {j} for node {node.Id}.");
-#endif
                 }
             }
 
             foreach (var info in item.Nodes)
             {
                 var node = NodesManager.GetNode(info.Id);
-#if DEBUG
                 Logger.Write(LogLevel.Debug, $"Retrieved node {info.Id} from NodesManager.");
-#endif
                 for (var i = 0; i < info.Connections.Count; i++)
                 {
                     if (info.Connections[i].Id == "") continue;
                     var index = info.Id.IndexOf('-');
                     if (info.Connections[i].Id[..index] != item.Id)
                     {
-#if DEBUG
                         Logger.Write(LogLevel.Debug,
                             $"Updating connection ID from \"{info.Connections[i].Id}\" to match item.Id.");
-#endif
                         info.Connections[i] = new PortInfo(item.Id
                                                            + "-"
                                                            + info.Connections[i].Id[(index + 1)..],
                             info.Connections[i].Index);
-#if DEBUG
                         Logger.Write(LogLevel.Debug, $"Connection ID updated to \"{info.Connections[i].Id}\".");
-#endif
                     }
 
                     node?.SetInputConnection(i, info.Connections[i]);
-#if DEBUG
                     Logger.Write(LogLevel.Debug, $"Set connection {i} for node {info.Id}.");
-#endif
                 }
             }
-#if DEBUG
             Logger.Write(LogLevel.Info, "Connection restoration completed.");
             Logger.Write(LogLevel.Debug, "All node connections have been successfully restored.");
-#endif
         }
 
-#if DEBUG
         Logger.Write(LogLevel.Debug, "Starting Bitmap properties configuration.");
-#endif
         var bitmapProperties = new BitmapProperties1(
             new PixelFormat(Format.B8G8R8A8_UNorm, AlphaMode.Premultiplied),
             96,
             96,
             BitmapOptions.Target
         );
-#if DEBUG
         Logger.Write(LogLevel.Debug, "Bitmap properties configured successfully.");
         Logger.Write(LogLevel.Debug, "Creating Bitmap.");
-#endif
         _bitmap = Context.CreateBitmap(
             new SizeI(1, 1),
             IntPtr.Zero,
             0,
             bitmapProperties
         );
-#if DEBUG
         Logger.Write(LogLevel.Debug, "Bitmap created successfully.");
-#endif
 
         _item = item;
-#if DEBUG
         Logger.Write(LogLevel.Debug, "NodeProcessor constructor processing completed.");
-#endif
     }
 
     public void SetInput(ID2D1Image? input)

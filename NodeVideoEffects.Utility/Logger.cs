@@ -11,17 +11,13 @@ public static class Logger
     
     static Logger()
     {
-        LogUpdated += (_, _) =>
-        {
-            if (_isConsoleWriting || ConsoleLogs.Count <= 0) return;
-            _isConsoleWriting = true;
-            WriteLogToConsole();
-            _isConsoleWriting = false;
-        };
+        LogUpdated += (_, _) => _ = Task.Run(WriteLogToConsole);
     }
 
     private static void WriteLogToConsole()
     {
+        if (_isConsoleWriting || ConsoleLogs.Count <= 0) return;
+        _isConsoleWriting = true;
         while (true)
         {
             var log = ConsoleLogs.Dequeue();
@@ -45,11 +41,16 @@ public static class Logger
             if (ConsoleLogs.Count > 0) continue;
             break;
         }
+        _isConsoleWriting = false;
     }
 
     public static void Write(LogLevel level, string message, object? obj = null)
     {
         var log = new Tuple<DateTime, LogLevel, string, object?>(DateTime.Now, level, message, obj);
+#if DEBUG
+#else
+        if (level != LogLevel.Debug)
+#endif
         Logs.AddLast(log);
         ConsoleLogs.Enqueue(log);
         if (Logs.Count > 1500) Logs.RemoveFirst();

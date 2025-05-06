@@ -58,10 +58,8 @@ public class NodeVideoEffectsPlugin : VideoEffectBase
         {
             NodesManager.SetContext(Id, devices);
             _processor!.Context = devices.DeviceContext;
-#if DEBUG
             Logger.Write(LogLevel.Debug, $"Reloaded the effect processor, ID: \"{Id}\".");
             Logger.Write(LogLevel.Debug, "Nodes", Nodes);
-#endif // Debug
             return _processor;
         }
 
