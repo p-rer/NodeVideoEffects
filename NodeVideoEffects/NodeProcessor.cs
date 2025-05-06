@@ -171,6 +171,7 @@ internal class NodeProcessor : IVideoEffectProcessor
     {
         lock (_locker)
         {
+            Logger.Write(LogLevel.Debug, $"Setting input for node processor.\nID: {_item.Id}\nInput: 0x{input?.NativePointer??0:x8}");
             NodesManager.SetInput(_item.Id, input);
         }
     }
@@ -195,7 +196,12 @@ internal class NodeProcessor : IVideoEffectProcessor
                     return effectDescription.DrawDescription;
                 }
                 _isCalculating = true;
-                output = ((ImageWrapper?)_outputNode.Inputs[0].Value)?.Image;
+                output = (
+                    (ImageWrapper?)NodesManager.GetOutputValue(_outputNode.Inputs[0].PortInfo.Id, _outputNode.Inputs[0].PortInfo.Index)
+                        .GetAwaiter()
+                        .GetResult())?.Image;
+                Logger.Write(LogLevel.Debug,
+                    $"Output image retrieved: 0x{output?.NativePointer.ToString("x8") ?? "null"}");
                 if (output == null || output.NativePointer == 0)
                     throw new InvalidOperationException("Output image is null.");
                 _isCalculating = false;
