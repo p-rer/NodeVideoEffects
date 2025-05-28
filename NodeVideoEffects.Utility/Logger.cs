@@ -1,18 +1,15 @@
 ﻿using System.Collections.Immutable;
+using System.Reflection;
+using System.Windows;
 
 namespace NodeVideoEffects.Utility;
 
 public static class Logger
 {
     private static readonly LinkedList<Tuple<DateTime, LogLevel, string, object?>> Logs = [];
-    private static readonly Queue<Tuple<DateTime, LogLevel, string, object?>> ConsoleLogs = [];
+    private static readonly Queue<Tuple<DateTime, LogLevel, string, object?, Assembly>> ConsoleLogs = [];
     private static byte _levels = 0x0F;
     private static bool _isConsoleWriting;
-    
-    static Logger()
-    {
-        LogUpdated += (_, _) => _ = Task.Run(WriteLogToConsole);
-    }
 
     private static void WriteLogToConsole()
     {
@@ -21,6 +18,7 @@ public static class Logger
         while (true)
         {
             var log = ConsoleLogs.Dequeue();
+            Console.Write(@"");
             Console.Write($@"{log.Item1:HH:mm:ss.fff}");
             Console.ForegroundColor = log.Item2 switch
             {
@@ -37,6 +35,11 @@ public static class Logger
             {
                 Console.WriteLine(log.Item4);
             }
+            var asm = log.Item5.FullName ?? "";
+            Console.CursorLeft = Console.BufferWidth- asm.Length - 3;
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine(@"in " + asm);
+            Console.ResetColor();
             Console.WriteLine();
             if (ConsoleLogs.Count > 0) continue;
             break;
@@ -46,15 +49,20 @@ public static class Logger
 
     public static void Write(LogLevel level, string message, object? obj = null)
     {
-        var log = new Tuple<DateTime, LogLevel, string, object?>(DateTime.Now, level, message, obj);
+        _ = Task.Run(() =>
+        {
+            var log = new Tuple<DateTime, LogLevel, string, object?>(DateTime.Now, level, message, obj);
 #if DEBUG
 #else
-        if (level != LogLevel.Debug)
+            if (level != LogLevel.Debug)
 #endif
-        Logs.AddLast(log);
-        ConsoleLogs.Enqueue(log);
-        if (Logs.Count > 1500) Logs.RemoveFirst();
-        LogUpdated?.Invoke(null, EventArgs.Empty);
+            Logs.AddLast(log);
+            ConsoleLogs.Enqueue(new Tuple<DateTime, LogLevel, string, object?, Assembly>(log.Item1, log.Item2,
+                log.Item3, log.Item4, Assembly.GetCallingAssembly()));
+            if (Logs.Count > 1500) Logs.RemoveFirst();
+            LogUpdated?.Invoke(null, EventArgs.Empty);
+            Application.Current.Dispatcher.Invoke(WriteLogToConsole);
+        });
     }
     
     public static void Clear()
