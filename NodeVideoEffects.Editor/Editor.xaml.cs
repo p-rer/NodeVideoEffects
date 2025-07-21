@@ -477,8 +477,9 @@ public partial class Editor : INotifyPropertyChanged
         {
             _infos[node.Id] = _infos[node.Id] with { X = Canvas.GetLeft(node), Y = Canvas.GetTop(node) };
         };
-        node.ValueChanged += (_, _) =>
+        node.ValueChanged += (isChangedByControl, _) =>
         {
+            if (!(bool)isChangedByControl!) return;
             try
             {
                 List<object?> value = [];

@@ -7,7 +7,9 @@ namespace NodeVideoEffects.Nodes.Effect;
 
 public class GaussianBlurNode : NodeLogic
 {
-    private GaussianBlur _blur = null!;
+    private readonly string _id;
+    private GaussianBlur? _blur;
+    private readonly Lock _lock = new();
 
     public GaussianBlurNode(string id) : base(
         [
@@ -21,7 +23,7 @@ public class GaussianBlurNode : NodeLogic
         Colors.LawnGreen,
         "Effect")
     {
-        if (id == "") return;
+        if ((_id = id) == "") return;
         _blur = new GaussianBlur(NodesManager.GetContext(id).DeviceContext);
     }
 
@@ -29,8 +31,9 @@ public class GaussianBlurNode : NodeLogic
     {
         await Task.Run(() =>
         {
-            lock (_blur)
+            lock (_lock)
             {
+                _blur ??= new GaussianBlur(NodesManager.GetContext(_id).DeviceContext);
                 _blur.SetInput(0, ((ImageWrapper?)Inputs[0].Value)?.Image, true);
                 _blur.StandardDeviation = Convert.ToSingle(Inputs[1].Value);
                 Outputs[0].Value = new ImageWrapper(_blur.Output);
@@ -42,10 +45,10 @@ public class GaussianBlurNode : NodeLogic
     {
         base.Dispose();
 
-        if (_blur == null!) return;
+        if (_blur == null) return;
         _blur.SetInput(0, null, true);
         _blur.Dispose();
-        _blur = null!;
+        _blur = null;
 
         GC.SuppressFinalize(this);
     }

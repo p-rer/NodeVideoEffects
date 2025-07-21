@@ -50,7 +50,7 @@ public partial class Node
                 Values.Add(input.Value);
                 if (input.PortInfo.Id != "")
                     inputPort.Loaded += (_, _) => inputPort.PortControl.Visibility = Visibility.Hidden;
-                input.PropertyChanged += (_, _) => ValueChanged(this, new PropertyChangedEventArgs(_name));
+                input.PropertyChanged += (isChangedByControl, _) => ValueChanged(isChangedByControl, new PropertyChangedEventArgs(_name));
                 index++;
             }
         }

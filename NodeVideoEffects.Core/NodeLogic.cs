@@ -86,7 +86,7 @@ public abstract class NodeLogic : IDisposable
 
     protected void Input_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        foreach (var output in Outputs) output.IsSuccess = false;
+        foreach (var output in Outputs) output.SetIsSuccess(false, (bool)sender!);
     }
 
     public void SetInput(int index, object? value)

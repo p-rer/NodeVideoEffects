@@ -1,5 +1,4 @@
 ﻿using NodeVideoEffects.Core;
-using System.ComponentModel;
 using System.Windows.Media;
 using NodeVideoEffects.Utility;
 
@@ -14,11 +13,6 @@ public class OutputNode : NodeLogic
         Colors.PaleVioletRed,
         "Basic")
     {
-        Inputs[0].PropertyChanged += (_, _) =>
-        {
-            if (Inputs[0].Value != null)
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(Name));
-        };
     }
 
     public override object? GetOutput(int index)
@@ -30,6 +24,4 @@ public class OutputNode : NodeLogic
     {
         return Task.CompletedTask;
     }
-
-    public event PropertyChangedEventHandler? PropertyChanged;
 }

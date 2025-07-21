@@ -30,7 +30,7 @@ public class Image : IPortValue
     {
         _value = (ImageWrapper?)value ?? new ImageWrapper();
     }
-
+    
     public void Dispose()
     {
         _value.Image?.Dispose();
@@ -47,7 +47,7 @@ public struct ImageWrapper(ID2D1Image? image)
     [Newtonsoft.Json.JsonIgnore]
     public ID2D1Image? Image { get; set; } = image;
 
-    public override string? ToString()
+    public override string ToString()
     {
         return "0x" + Image?.NativePointer.ToString("x8");
     }

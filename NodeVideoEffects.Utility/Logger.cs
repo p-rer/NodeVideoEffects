@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections.Concurrent;
+using System.Collections.Immutable;
 using System.Reflection;
 using System.Windows;
 
@@ -7,17 +8,16 @@ namespace NodeVideoEffects.Utility;
 public static class Logger
 {
     private static readonly LinkedList<Tuple<DateTime, LogLevel, string, object?>> Logs = [];
-    private static readonly Queue<Tuple<DateTime, LogLevel, string, object?, Assembly>> ConsoleLogs = [];
+    private static readonly ConcurrentQueue<Tuple<DateTime, LogLevel, string, object?, Assembly>> ConsoleLogs = [];
     private static byte _levels = 0x0F;
-    private static bool _isConsoleWriting;
+    private static readonly Lock LogsLock = new();
 
     private static void WriteLogToConsole()
     {
-        if (_isConsoleWriting || ConsoleLogs.Count <= 0) return;
-        _isConsoleWriting = true;
-        while (true)
+        try
         {
-            var log = ConsoleLogs.Dequeue();
+            var result = ConsoleLogs.TryDequeue(out var log);
+            if (!result || log == null) return;
             Console.Write(@"");
             Console.Write($@"{log.Item1:HH:mm:ss.fff}");
             Console.ForegroundColor = log.Item2 switch
@@ -35,55 +35,80 @@ public static class Logger
             {
                 Console.WriteLine(log.Item4);
             }
+
             var asm = log.Item5.FullName ?? "";
-            Console.CursorLeft = Console.BufferWidth- asm.Length - 3;
+            Console.CursorLeft = Console.BufferWidth - asm.Length - 3;
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine(@"in " + asm);
             Console.ResetColor();
             Console.WriteLine();
-            if (ConsoleLogs.Count > 0) continue;
-            break;
         }
-        _isConsoleWriting = false;
+        catch
+        {
+            // ignored
+        }
     }
 
     public static void Write(LogLevel level, string message, object? obj = null)
     {
-        _ = Task.Run(() =>
+        var last = Logs.Last?.Value;
+        if (last != null && last.Item2 == level && last.Item3 == message && last.Item4 == obj) return;
+        try
         {
-            var log = new Tuple<DateTime, LogLevel, string, object?>(DateTime.Now, level, message, obj);
+            Task.Run(() =>
+            {
+                var log = new Tuple<DateTime, LogLevel, string, object?>(DateTime.Now, level, message, obj);
 #if DEBUG
 #else
             if (level != LogLevel.Debug)
 #endif
-            Logs.AddLast(log);
-            ConsoleLogs.Enqueue(new Tuple<DateTime, LogLevel, string, object?, Assembly>(log.Item1, log.Item2,
-                log.Item3, log.Item4, Assembly.GetCallingAssembly()));
-            if (Logs.Count > 1500) Logs.RemoveFirst();
-            LogUpdated?.Invoke(null, EventArgs.Empty);
-            Application.Current.Dispatcher.Invoke(WriteLogToConsole);
-        });
+                lock (LogsLock)
+                {
+                    Logs.AddLast(log);
+                    ConsoleLogs.Enqueue(new Tuple<DateTime, LogLevel, string, object?, Assembly>(log.Item1, log.Item2,
+                        log.Item3, log.Item4, Assembly.GetCallingAssembly()));
+                    if (Logs.Count > 1500) Logs.RemoveFirst();
+                    LogUpdated?.Invoke(null, EventArgs.Empty);
+                    Application.Current.Dispatcher.Invoke(WriteLogToConsole);
+                }
+            });
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(@"Logger error: " + e.Message);
+            Console.WriteLine(e.StackTrace);
+        }
     }
     
     public static void Clear()
     {
-        Logs.Clear();
-        LogUpdated?.Invoke(null, EventArgs.Empty);
+        lock (LogsLock)
+        {
+            Logs.Clear();
+            Console.Clear();
+            LogUpdated?.Invoke(null, EventArgs.Empty);
+        }
     }
 
     // levels: 0x01 = Debug, 0x02 = Info, 0x04 = Warn, 0x08 = Error
     // levels can be combined, e.g. 0x03 = Debug + Info
     public static void Filter(byte levels)
     {
-        _levels = levels;
-        LogUpdated?.Invoke(null, EventArgs.Empty);
+        lock (LogsLock)
+        {
+            _levels = levels;
+            LogUpdated?.Invoke(null, EventArgs.Empty);
+        }
     }
 
     public static ImmutableList<Tuple<DateTime, LogLevel, string, object?>> Read()
     {
-        return Logs
-            .Where(log => ((byte)log.Item2 & _levels) != 0)
-            .ToImmutableList();
+        lock (LogsLock)
+        {
+            return Logs
+                .Where(log => ((byte)log.Item2 & _levels) != 0)
+                .ToImmutableList();
+        }
     }
 
     public static EventHandler? LogUpdated;

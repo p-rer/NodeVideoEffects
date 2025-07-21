@@ -8,11 +8,11 @@ public class SubNode : NodeLogic
 {
     public SubNode() : base(
         [
-            new Input(new Number(0, null, null, null), "Value1"),
-            new Input(new Number(0, null, null, null), "Value2")
+            new Input(new Number(0f, null, null, null), "Value1"),
+            new Input(new Number(0f, null, null, null), "Value2")
         ],
         [
-            new Output(new Number(0, null, null, null), "Result")
+            new Output(new Number(0f, null, null, null), "Result")
         ],
         Text.SubNode,
         Colors.LightCoral,
@@ -22,7 +22,7 @@ public class SubNode : NodeLogic
 
     public override Task Calculate()
     {
-        Outputs[0].Value = (float)(Inputs[0].Value ?? 0) - (float)(Inputs[1].Value ?? 0);
+        Outputs[0].Value = (float)(Inputs[0].Value ?? 0f) - (float)(Inputs[1].Value ?? 0f);
         return Task.CompletedTask;
     }
 }
