@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Windows.Media;
+using NodeVideoEffects.Utility;
+using Vortice.Direct2D1;
 
 namespace NodeVideoEffects.Core;
 
@@ -8,6 +10,43 @@ namespace NodeVideoEffects.Core;
 /// </summary>
 public abstract class NodeLogic : IDisposable
 {
+    /// <summary>
+    ///     Create new node object
+    /// </summary>
+    /// <param name="inputs">Input ports</param>
+    /// <param name="outputs">Output ports</param>
+    /// <param name="name">Name of this node</param>
+    /// <param name="category">Category of this node</param>
+    protected NodeLogic(Input[] inputs, Output[] outputs, string name, string? category = null)
+    {
+        Inputs = inputs;
+        Outputs = outputs;
+        Name = name;
+        Color = Colors.Transparent;
+        Category = category;
+
+        SubscribeToInputChanges();
+    }
+
+    /// <summary>
+    ///     Create new node object
+    /// </summary>
+    /// <param name="inputs">Input ports</param>
+    /// <param name="outputs">Output ports</param>
+    /// <param name="name">Name of this node</param>
+    /// <param name="color">Color of this node</param>
+    /// <param name="category">Category of this node</param>
+    protected NodeLogic(Input[] inputs, Output[] outputs, string name, Color color, string? category = null)
+    {
+        Inputs = inputs;
+        Outputs = outputs;
+        Name = name;
+        Color = color;
+        Category = category;
+
+        SubscribeToInputChanges();
+    }
+
     /// <summary>
     /// Get input ports
     /// </summary>
@@ -35,41 +74,20 @@ public abstract class NodeLogic : IDisposable
 
     public string Id { get; set; } = "";
 
-    /// <summary>
-    /// Create new node object
-    /// </summary>
-    /// <param name="inputs">Input ports</param>
-    /// <param name="outputs">Output ports</param>
-    /// <param name="name">Name of this node</param>
-    /// <param name="category">Category of this node</param>
-    protected NodeLogic(Input[] inputs, Output[] outputs, string name, string? category = null)
+    public virtual void Dispose()
     {
-        Inputs = inputs;
-        Outputs = outputs;
-        Name = name;
-        Color = Colors.Transparent;
-        Category = category;
-
-        SubscribeToInputChanges();
-    }
-
-    /// <summary>
-    /// Create new node object
-    /// </summary>
-    /// <param name="inputs">Input ports</param>
-    /// <param name="outputs">Output ports</param>
-    /// <param name="name">Name of this node</param>
-    /// <param name="color">Color of this node</param>
-    /// <param name="category">Category of this node</param>
-    protected NodeLogic(Input[] inputs, Output[] outputs, string name, Color color, string? category = null)
-    {
-        Inputs = inputs;
-        Outputs = outputs;
-        Name = name;
-        Color = color;
-        Category = category;
-
-        SubscribeToInputChanges();
+        Logger.Write(LogLevel.Info, $"Disposing NodeLogic: {Name}(id: {Id})");
+        try
+        {
+            foreach (var input in Inputs)
+                input.Dispose();
+            foreach (var output in Outputs)
+                output.Dispose();
+        }
+        catch
+        {
+            // ignored
+        }
     }
 
     ~NodeLogic()
@@ -115,25 +133,13 @@ public abstract class NodeLogic : IDisposable
         Inputs[index].RemoveConnection(Id, index);
     }
 
+    public virtual void UpdateContext(ID2D1DeviceContext6 context)
+    {
+    }
+
     /// <summary>
     /// Calculation on this node (async)
     /// </summary>
     /// <returns>The calculation task</returns>
     public abstract Task Calculate();
-
-    public virtual void Dispose()
-    {
-        try
-        {
-            foreach (var input in Inputs)
-                input.Dispose();
-            foreach (var output in Outputs)
-                output.Dispose();
-            NodesManager.RemoveNode(Id);
-        }
-        catch
-        {
-            // ignored
-        }
-    }
 }

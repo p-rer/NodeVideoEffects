@@ -1,15 +1,15 @@
-﻿using NodeVideoEffects.Core;
-using System.Windows.Media;
+﻿using System.Windows.Media;
+using NodeVideoEffects.Core;
 using NodeVideoEffects.Utility;
+using Vortice.Direct2D1;
 using Vortice.Direct2D1.Effects;
 
 namespace NodeVideoEffects.Nodes.Effect;
 
 public class GaussianBlurNode : NodeLogic
 {
-    private readonly string _id;
-    private GaussianBlur? _blur;
     private readonly Lock _lock = new();
+    private GaussianBlur? _blur;
 
     public GaussianBlurNode(string id) : base(
         [
@@ -23,8 +23,18 @@ public class GaussianBlurNode : NodeLogic
         Colors.LawnGreen,
         "Effect")
     {
-        if ((_id = id) == "") return;
+        if (id == "") return;
         _blur = new GaussianBlur(NodesManager.GetContext(id).DeviceContext);
+    }
+
+    public override void UpdateContext(ID2D1DeviceContext6 context)
+    {
+        lock (_lock)
+        {
+            _blur?.SetInput(0, null, true);
+            _blur?.Dispose();
+            _blur = new GaussianBlur(context);
+        }
     }
 
     public override async Task Calculate()
@@ -33,7 +43,7 @@ public class GaussianBlurNode : NodeLogic
         {
             lock (_lock)
             {
-                _blur ??= new GaussianBlur(NodesManager.GetContext(_id).DeviceContext);
+                if (_blur == null) return;
                 _blur.SetInput(0, ((ImageWrapper?)Inputs[0].Value)?.Image, true);
                 _blur.StandardDeviation = Convert.ToSingle(Inputs[1].Value);
                 Outputs[0].Value = new ImageWrapper(_blur.Output);

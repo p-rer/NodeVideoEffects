@@ -1,6 +1,5 @@
-﻿using NodeVideoEffects.Core;
-using System.Windows.Media;
-using NodeVideoEffects.Control;
+﻿using System.Windows.Media;
+using NodeVideoEffects.Core;
 using YukkuriMovieMaker.Project.Effects;
 using Enum = NodeVideoEffects.Core.Enum;
 
@@ -8,8 +7,8 @@ namespace NodeVideoEffects.Nodes.Effect;
 
 public class MosaicNode : NodeLogic
 {
-    private VideoEffectsLoader? _videoEffect;
     private readonly string _effectId = "";
+    private VideoEffectsLoader? _videoEffect;
 
     public MosaicNode(string id) : base(
         [

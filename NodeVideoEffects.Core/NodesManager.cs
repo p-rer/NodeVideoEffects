@@ -1,6 +1,6 @@
-﻿using NodeVideoEffects.Utility;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Reflection;
+using NodeVideoEffects.Utility;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
 
@@ -10,6 +10,25 @@ public static class NodesManager
 {
     private static readonly Dictionary<string, NodeLogic> Dictionary = [];
     private static readonly List<string> Items = [];
+
+    private static readonly Dictionary<string, IGraphicsDevicesAndContext> Contexts = [];
+
+    private static readonly Dictionary<string, EffectDescription> EffectDescription = [];
+
+    /// <summary>
+    ///     Now frame
+    /// </summary>
+    public static Dictionary<string, int> Frame { get; } = [];
+
+    /// <summary>
+    ///     Length of the item
+    /// </summary>
+    public static Dictionary<string, int> Length { get; } = [];
+
+    /// <summary>
+    ///     FPS of the YMM4 project
+    /// </summary>
+    public static Dictionary<string, int> Fps { get; } = [];
 
     /// <summary>
     /// Get output port value from node id and port index
@@ -34,12 +53,16 @@ public static class NodesManager
                     node.Outputs[index].IsSuccess)
                     return node.GetOutput(index);
             }
-            catch { /*ignored*/ }
+            catch
+            {
+                /*ignored*/
+            }
 
             await TaskTracker.RunTrackedTask(node.Calculate);
 
             var result = node.GetOutput(index);
-            Logger.Write(LogLevel.Debug, $"Get output value from node {id} ({node.Name}), index {index} - {result?.ToString() ?? "null"}");
+            Logger.Write(LogLevel.Debug,
+                $"Get output value from node {id} ({node.Name}), index {index} - {result?.ToString() ?? "null"}");
             return result;
         }
         catch (Exception e)
@@ -80,7 +103,7 @@ public static class NodesManager
         return result;
     }
 
-    public static void NotifyOutputChanged(string id, int index, bool isControlChanged=false)
+    public static void NotifyOutputChanged(string id, int index, bool isControlChanged = false)
     {
         Task.Run(() => Dictionary[id].Inputs[index].UpdatedConnectionValue(isControlChanged));
     }
@@ -122,52 +145,60 @@ public static class NodesManager
 
     public static void RemoveNode(string id)
     {
-        if (!string.IsNullOrEmpty(id)) Dictionary.Remove(id);
+        if (string.IsNullOrEmpty(id)) return;
+        Dictionary.TryGetValue(id, out var node);
+        if (node == null) return;
+        node.Outputs.Select(output => output.Connection).ToList()
+            .ForEach(connections => connections
+                .ForEach(connection =>
+                {
+                    if (connection.Id == "") return;
+                    Dictionary[connection.Id].Inputs[connection.Index].RemoveConnection("", 0);
+                }));
+        node.Inputs.Select((input, i) =>
+                (input.PortInfo, i)).ToList()
+            .ForEach(port =>
+            {
+                if (port.PortInfo.Id == "") return;
+                Dictionary[port.PortInfo.Id].Outputs[port.PortInfo.Index].RemoveConnection(node.Id, port.i);
+            });
+        node.Dispose();
+        Dictionary.Remove(id);
     }
 
     public static bool AddItem(string id)
     {
-        if (Items.Contains(id)) return false;
+        if (string.IsNullOrEmpty(id) || Items.Contains(id)) return false;
         Items.Add(id);
         return true;
     }
 
     public static void RemoveItem(string id)
     {
+        Dictionary.Select(kvp => kvp.Key)
+            .ToList()
+            .ForEach(key =>
+            {
+                if (!key.StartsWith(id)) return;
+                Dictionary.TryGetValue(key, out var node);
+                node?.Dispose();
+                Dictionary.Remove(key);
+            });
         Items.Remove(id);
-        _ = Dictionary.Where(kvp => kvp.Key.StartsWith(id))
-            .Select(kvp => Dictionary.Remove(kvp.Key));
     }
-
-    private static readonly Dictionary<string, IGraphicsDevicesAndContext> Contexts = [];
 
     public static void SetContext(string id, IGraphicsDevicesAndContext context)
     {
         if (!Contexts.TryAdd(id, context))
             Contexts[id] = context;
+        Dictionary.Where(kvp => kvp.Key.StartsWith(id)).ToList()
+            .ForEach(kvp => kvp.Value.UpdateContext(context.DeviceContext));
     }
 
     public static IGraphicsDevicesAndContext GetContext(string id)
     {
         return Contexts[id];
     }
-
-    /// <summary>
-    /// Now frame
-    /// </summary>
-    public static Dictionary<string, int> Frame { get; private set; } = [];
-
-    /// <summary>
-    /// Length of the item
-    /// </summary>
-    public static Dictionary<string, int> Length { get; private set; } = [];
-
-    /// <summary>
-    /// FPS of the YMM4 project
-    /// </summary>
-    public static Dictionary<string, int> Fps { get; private set; } = [];
-
-    private static readonly Dictionary<string, EffectDescription> EffectDescription = [];
 
     public static void SetInfo(string id, EffectDescription info)
     {

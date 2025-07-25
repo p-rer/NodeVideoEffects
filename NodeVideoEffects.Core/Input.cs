@@ -1,6 +1,6 @@
-﻿using NodeVideoEffects.Control;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Windows.Media;
+using NodeVideoEffects.Control;
 using NodeVideoEffects.Utility;
 
 namespace NodeVideoEffects.Core;
@@ -10,11 +10,10 @@ namespace NodeVideoEffects.Core;
 /// </summary>
 public sealed class Input : INotifyPropertyChanged, IDisposable
 {
-    private readonly IPortValue _value;
-    private PortInfo _portInfo = new();
-
     private readonly Lock _locker = new();
+    private readonly IPortValue _value;
     private bool _disposed;
+    private PortInfo _portInfo = new();
 
     /// <summary>
     /// Create new input port object
@@ -40,7 +39,8 @@ public sealed class Input : INotifyPropertyChanged, IDisposable
             {
                 var task = NodesManager.GetOutputValue(_portInfo.Id, _portInfo.Index);
                 var result = task.GetAwaiter().GetResult();
-                Logger.Write(LogLevel.Debug, $"Get input value from connected node {_portInfo.Id} ({Name}), index {_portInfo.Index} - {result?.ToString() ?? "null"}");
+                Logger.Write(LogLevel.Debug,
+                    $"Get input value from connected node {_portInfo.Id} ({Name}), index {_portInfo.Index} - {result?.ToString() ?? "null"}");
                 return result;
             }
         }
@@ -74,9 +74,17 @@ public sealed class Input : INotifyPropertyChanged, IDisposable
     /// </summary>
     public PortInfo PortInfo => _portInfo;
 
+    public void Dispose()
+    {
+        _value.Dispose();
+        _disposed = true;
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
     public void UpdatedConnectionValue(bool isControlChanged)
     {
-        if(!isControlChanged)
+        if (!isControlChanged)
             return;
         OnPropertyChanged(nameof(Value), false);
     }
@@ -102,21 +110,15 @@ public sealed class Input : INotifyPropertyChanged, IDisposable
     /// <param name="index">Index of this port</param>
     public void RemoveConnection(string id, int index)
     {
+        if (id == "")
+            _portInfo.Id = "";
         if (_portInfo.Id == "") return;
         NodesManager.NotifyInputConnectionRemove(id, index, _portInfo.Id, _portInfo.Index);
         _portInfo.Id = "";
     }
 
-    public event PropertyChangedEventHandler? PropertyChanged;
-
     private void OnPropertyChanged(string propertyName, bool isChangedByControl)
     {
         PropertyChanged?.Invoke(isChangedByControl, new PropertyChangedEventArgs(propertyName));
-    }
-
-    public void Dispose()
-    {
-        _value.Dispose();
-        _disposed = true;
     }
 }

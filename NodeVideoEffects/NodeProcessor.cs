@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
-using NodeVideoEffects.Nodes.Basic;
 using NodeVideoEffects.Core;
+using NodeVideoEffects.Nodes.Basic;
 using NodeVideoEffects.Utility;
 using Vortice.DCommon;
 using Vortice.Direct2D1;
@@ -14,26 +14,24 @@ namespace NodeVideoEffects;
 
 internal class NodeProcessor : IVideoEffectProcessor
 {
-    internal ID2D1DeviceContext6 Context;
+    private readonly InputNode _inputNode = null!;
     private readonly NodeVideoEffectsPlugin _item;
 
-    public ID2D1Image Output { private set; get; } = null!;
+    private readonly Lock _locker = new();
 
     private readonly OutputNode _outputNode = null!;
-    private readonly InputNode _inputNode = null!;
-
-    private ID2D1Bitmap1? _bitmap;
     private AffineTransform2D? _affineTransform2D;
 
-    private readonly Lock _locker = new();
-    private bool _isCalculating;
+    private ID2D1Bitmap1? _bitmap;
     private bool _hasError;
+    private bool _isCalculating;
+    internal ID2D1DeviceContext6 Context;
 
     public NodeProcessor(IGraphicsDevicesAndContext context, NodeVideoEffectsPlugin item)
     {
         _item = item;
-        
-        if ((item.Id == "") ^ !NodesManager.AddItem(item.Id))
+
+        if (!NodesManager.AddItem(item.Id))
         {
             item.Id = Guid.NewGuid().ToString("N");
             NodesManager.AddItem(item.Id);
@@ -82,6 +80,7 @@ internal class NodeProcessor : IVideoEffectProcessor
                 {
                     _outputNode = (OutputNode)node;
                 }
+
                 if (node.GetType() == typeof(InputNode))
                 {
                     _inputNode = (InputNode)node;
@@ -111,6 +110,7 @@ internal class NodeProcessor : IVideoEffectProcessor
                     node?.SetInputConnection(i, info.Connections[i]);
                 }
             }
+
             Logger.Write(LogLevel.Info, "Connection restoration completed.");
         }
 
@@ -130,11 +130,7 @@ internal class NodeProcessor : IVideoEffectProcessor
         Logger.Write(LogLevel.Info, "NodeProcessor initialized successfully.");
     }
 
-    internal void UpdateContext(IGraphicsDevicesAndContext context)
-    {
-        Context = context.DeviceContext;
-        NodesManager.SetContext(_item.Id, context);
-    }
+    public ID2D1Image Output { private set; get; } = null!;
 
     public void SetInput(ID2D1Image? input)
     {
@@ -166,6 +162,7 @@ internal class NodeProcessor : IVideoEffectProcessor
                 {
                     return effectDescription.DrawDescription;
                 }
+
                 _isCalculating = true;
                 output = ((ImageWrapper?)_outputNode.GetOutput(0))?.Image;
                 Logger.Write(LogLevel.Debug,
@@ -196,6 +193,24 @@ internal class NodeProcessor : IVideoEffectProcessor
         }
     }
 
+    public void Dispose()
+    {
+        Logger.Write(LogLevel.Debug, "Disposing NodeProcessor resources.");
+        ClearInput();
+        _bitmap?.Dispose();
+        _bitmap = null;
+        _affineTransform2D?.SetInput(0, null, true);
+        _affineTransform2D?.Dispose();
+        _affineTransform2D = null;
+        Output.Dispose();
+    }
+
+    internal void UpdateContext(IGraphicsDevicesAndContext context)
+    {
+        Context = context.DeviceContext;
+        NodesManager.SetContext(_item.Id, context);
+    }
+
     private void SetBlankImage(out ID2D1Image output)
     {
         if (_bitmap == null)
@@ -221,18 +236,5 @@ internal class NodeProcessor : IVideoEffectProcessor
         Context.EndDraw();
 
         output = _bitmap;
-    }
-
-    public void Dispose()
-    {
-        Logger.Write(LogLevel.Debug, "Disposing NodeProcessor resources.");
-        ClearInput();
-        _bitmap?.Dispose();
-        _bitmap = null;
-        _affineTransform2D?.SetInput(0, null, true);
-        _affineTransform2D?.Dispose();
-        _affineTransform2D = null;
-        Output.Dispose();
-        NodesManager.RemoveItem(_item.Id);
     }
 }

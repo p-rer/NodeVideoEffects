@@ -1,5 +1,3 @@
-using NodeVideoEffects.Nodes.Basic;
-using NodeVideoEffects.Core;
 using System.ComponentModel;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -7,6 +5,8 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using NodeVideoEffects.Core;
+using NodeVideoEffects.Nodes.Basic;
 using NodeVideoEffects.Utility;
 
 namespace NodeVideoEffects.Editor;
@@ -16,46 +16,33 @@ namespace NodeVideoEffects.Editor;
 /// </summary>
 public partial class Editor : INotifyPropertyChanged
 {
-    private readonly ScaleTransform _scaleTransform;
-    private readonly TranslateTransform _translateTransform;
-
-    private readonly VisualBrush _dotBrush;
-
-    private Point _lastPos;
-    private Point _nowPos;
-    private bool _isDragging;
-    private bool _isSelecting;
-    private double _scale;
-    private Rect _wrapRect;
-    private Rectangle _selectingRect = new();
-
-    private Path? _previewPath;
-
-    private readonly Dictionary<(string, string), Connector> _connectors = [];
-    private readonly Dictionary<string, NodeInfo> _infos = [];
-    private readonly Dictionary<string, Node> _nodes = [];
-
-    private List<Node> _selectingNodes = [];
-    private int _runningTaskCount;
-    private string _infoText = "";
-
-    private static readonly Lock Locker = new();
-
     private const double DotSpacing = 50;
     private const double DotSize = 1;
     private const double Tolerance = 0.001;
 
-    public List<NodeInfo> Nodes
-    {
-        get => _infos.Values.ToList();
-        set
-        {
-            _infos.Clear();
-            value.ForEach(value => { _infos.Add(value.Id, value); });
-        }
-    }
+    private static readonly Lock Locker = new();
 
-    public string ItemId { get; set; } = "";
+    private readonly Dictionary<(string, string), Connector> _connectors = [];
+
+    private readonly VisualBrush _dotBrush;
+    private readonly Dictionary<string, NodeInfo> _infos = [];
+    private readonly Dictionary<string, Node> _nodes = [];
+    private readonly ScaleTransform _scaleTransform;
+    private readonly TranslateTransform _translateTransform;
+    private string _infoText = "";
+    private bool _isDragging;
+    private bool _isSelecting;
+
+    private Point _lastPos;
+    private Point _nowPos;
+
+    private Path? _previewPath;
+    private int _runningTaskCount;
+    private double _scale;
+
+    private List<Node> _selectingNodes = [];
+    private Rectangle _selectingRect = new();
+    private Rect _wrapRect;
 
     public Editor()
     {
@@ -69,7 +56,7 @@ public partial class Editor : INotifyPropertyChanged
 
         Canvas.LayoutTransform = _scaleTransform;
         Canvas.RenderTransform = _translateTransform;
-        
+
         var drawingVisual = new DrawingVisual();
         using var dc = drawingVisual.RenderOpen();
         for (double x = 0; x < DotSpacing * 10; x += DotSpacing)
@@ -95,6 +82,31 @@ public partial class Editor : INotifyPropertyChanged
 
         Loaded += EditorLoaded;
         TaskTracker.TaskCountChanged += OnTaskCountChanged;
+    }
+
+    public List<NodeInfo> Nodes
+    {
+        get => _infos.Values.ToList();
+        set
+        {
+            _infos.Clear();
+            value.ForEach(value => { _infos.Add(value.Id, value); });
+        }
+    }
+
+    public string ItemId { get; set; } = "";
+
+    public event PropertyChangedEventHandler? NodesUpdated;
+
+    public void OnNodesUpdated()
+    {
+        NodesUpdated?.Invoke(this, new PropertyChangedEventArgs(nameof(Editor)));
+    }
+
+    private void Editor_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is Editor) return;
+        e.Handled = true;
     }
 
     #region StatusBar
@@ -139,19 +151,6 @@ public partial class Editor : INotifyPropertyChanged
     }
 
     #endregion
-
-    public event PropertyChangedEventHandler? NodesUpdated;
-
-    public void OnNodesUpdated()
-    {
-        NodesUpdated?.Invoke(this, new PropertyChangedEventArgs(nameof(Editor)));
-    }
-
-    private void Editor_PreviewMouseDown(object sender, MouseButtonEventArgs e)
-    {
-        if (sender is Editor) return;
-        e.Handled = true;
-    }
 
     #region Draw Editor
 
@@ -248,6 +247,7 @@ public partial class Editor : INotifyPropertyChanged
                         Logger.Write(LogLevel.Debug,
                             $"Set visibility hidden for InputPort at node ID: {info.Id}, port index: {i}.");
                     }
+
                     Logger.Write(LogLevel.Debug, $"Connection setup completed for node ID: {info.Id}.", info);
                 };
             }
@@ -367,6 +367,7 @@ public partial class Editor : INotifyPropertyChanged
 
                         i++;
                     }
+
                     Logger.Write(LogLevel.Debug, $"Background connection update completed for node ID: {info.Id}.",
                         info);
                 });
@@ -437,7 +438,7 @@ public partial class Editor : INotifyPropertyChanged
         if (width == 0 || height == 0)
             return;
 
-        var scale = _scale = Math.Max(Math.Min(Math.Min(canvasWidth / width, canvasHeight / height), 4) , 0.1);
+        var scale = _scale = Math.Max(Math.Min(Math.Min(canvasWidth / width, canvasHeight / height), 4), 0.1);
 
         _scaleTransform.ScaleX = scale;
         _scaleTransform.ScaleY = scale;
@@ -620,16 +621,17 @@ public partial class Editor : INotifyPropertyChanged
     {
         try
         {
+            _infos[id].Connections[index] = new PortInfo();
             var connector = _connectors
                 .Where(kvp => kvp.Key.Item1 == id + ";" + index)
                 .Select(kvp => kvp.Value)
-                .ToList()[0];
-            Canvas.Children.Remove(connector);
+                .ToList().FirstOrDefault();
+            if (connector != null)
+                Canvas.Children.Remove(connector);
             _connectors.Remove(_connectors
                 .Where(kvp => kvp.Value == connector)
                 .Select(kvp => kvp.Key)
-                .ToList()[0]);
-            _infos[id].Connections[index] = new PortInfo();
+                .ToList().FirstOrDefault());
         }
         catch (Exception e)
         {

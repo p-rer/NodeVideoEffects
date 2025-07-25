@@ -1,13 +1,15 @@
 using System.Numerics;
-using NodeVideoEffects.Core;
 using System.Windows.Media;
+using NodeVideoEffects.Core;
+using Vortice.Direct2D1;
 using Vortice.Direct2D1.Effects;
 
 namespace NodeVideoEffects.Nodes.Effect;
 
 public class BrightnessNode : NodeLogic
 {
-    private Brightness _brightness = null!;
+    private readonly Lock _lock = new();
+    private Brightness? _brightness;
 
     public BrightnessNode(string id) : base(
         [
@@ -26,12 +28,23 @@ public class BrightnessNode : NodeLogic
         _brightness = new Brightness(NodesManager.GetContext(id).DeviceContext);
     }
 
+    public override void UpdateContext(ID2D1DeviceContext6 context)
+    {
+        lock (_lock)
+        {
+            _brightness?.SetInput(0, null, true);
+            _brightness?.Dispose();
+            _brightness = new Brightness(context);
+        }
+    }
+
     public override async Task Calculate()
     {
         await Task.Run(() =>
         {
-            lock (_brightness)
+            lock (_lock)
             {
+                if (_brightness == null) return;
                 _brightness.SetInput(0, ((ImageWrapper?)Inputs[0].Value)?.Image, true);
                 _brightness.WhitePoint = Inputs[1].Value as Vector2? ?? new Vector2(1, 1);
                 _brightness.BlackPoint = Inputs[2].Value as Vector2? ?? new Vector2(0, 0);
@@ -44,10 +57,10 @@ public class BrightnessNode : NodeLogic
     {
         base.Dispose();
 
-        if (_brightness == null!) return;
-        _brightness.SetInput(0, null, true);
-        _brightness.Dispose();
-        _brightness = null!;
+        if (_brightness == null) return;
+        _brightness?.SetInput(0, null, true);
+        _brightness?.Dispose();
+        _brightness = null;
 
         GC.SuppressFinalize(this);
     }

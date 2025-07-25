@@ -1,33 +1,28 @@
 ﻿using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
+using System.Numerics;
 using System.Reflection;
 using System.Reflection.Emit;
+using NodeVideoEffects.Utility;
+using SharpGen.Runtime;
 using Vortice.Direct2D1;
+using Vortice.Mathematics;
+using YukkuriMovieMaker.Commons;
+using YukkuriMovieMaker.ItemEditor;
 using YukkuriMovieMaker.Player.Video;
 using YukkuriMovieMaker.Plugin;
 using YukkuriMovieMaker.Plugin.Effects;
-using SharpGen.Runtime;
-using System.Numerics;
-using Vortice.Mathematics;
-using NodeVideoEffects.Utility;
-using YukkuriMovieMaker.Commons;
-using Enum = NodeVideoEffects.Core.Enum;
 
 namespace NodeVideoEffects.Core;
 
 public class VideoEffectsLoader : IDisposable
 {
+    private static readonly Dictionary<string, byte[]> ShaderDictionaries = [];
+    private readonly string _id;
+    private readonly ShaderEffect? _shaderEffect;
+    private readonly EffectType _type;
     private readonly IVideoEffect? _videoEffect;
     private IVideoEffectProcessor? _processor;
-    private readonly ShaderEffect? _shaderEffect;
-    private readonly string _id;
-    private readonly EffectType _type;
-
-    private enum EffectType
-    {
-        VideoEffect,
-        ShaderEffect
-    }
 
     private VideoEffectsLoader(IVideoEffect? effect, string id)
     {
@@ -42,6 +37,14 @@ public class VideoEffectsLoader : IDisposable
         _shaderEffect = effect;
         _type = EffectType.ShaderEffect;
         _id = id;
+    }
+
+    public void Dispose()
+    {
+        _processor?.ClearInput();
+        _processor?.Dispose();
+        _processor = null;
+        GC.SuppressFinalize(this);
     }
 
     ~VideoEffectsLoader()
@@ -133,11 +136,9 @@ public class VideoEffectsLoader : IDisposable
                     propInfo.SetValue(targetObject, value);
                 }
 
-                if (_videoEffect is YukkuriMovieMaker.ItemEditor.IEditable editable) await editable.EndEditAsync();
+                if (_videoEffect is IEditable editable) await editable.EndEditAsync();
             }
                 break;
-            default:
-                return this;
         }
 
         return this;
@@ -228,14 +229,6 @@ public class VideoEffectsLoader : IDisposable
         }
     }
 
-    public void Dispose()
-    {
-        _processor?.ClearInput();
-        _processor?.Dispose();
-        _processor = null;
-        GC.SuppressFinalize(this);
-    }
-
     public static async Task<VideoEffectsLoader> LoadEffect(string name, string id)
     {
         return await Task.Run(() =>
@@ -257,6 +250,49 @@ public class VideoEffectsLoader : IDisposable
             effect = null;
             return new VideoEffectsLoader(effect, effectId);
         });
+    }
+
+    public static string RegisterShader(string shaderName)
+    {
+        byte[] shader;
+        var asm = Assembly.GetCallingAssembly();
+        var resName = asm.GetManifestResourceNames().FirstOrDefault(a => a.EndsWith(shaderName), "");
+
+        if (resName == "")
+        {
+            Logger.Write(LogLevel.Error, $"The shader resource \"*.{shaderName}\" not found.");
+            return "";
+        }
+
+        using (var resourceStream = asm.GetManifestResourceStream(resName))
+        {
+            if (resourceStream == null)
+            {
+                Logger.Write(LogLevel.Error, $"The shader resource \"{resName}\" not found.");
+                return "";
+            }
+
+            using (var memoryStream = new MemoryStream())
+            {
+                resourceStream.CopyTo(memoryStream);
+                shader = memoryStream.ToArray();
+            }
+        }
+
+        var id = Guid.NewGuid().ToString("N");
+        ShaderDictionaries.TryAdd(id, shader);
+        return id;
+    }
+
+    public static byte[] GetShader(string id)
+    {
+        return ShaderDictionaries[id];
+    }
+
+    private enum EffectType
+    {
+        VideoEffect,
+        ShaderEffect
     }
 
     public abstract class ShaderEffect : D2D1CustomShaderEffectBase
@@ -438,44 +474,5 @@ public class VideoEffectsLoader : IDisposable
                 };
             }
         }
-    }
-
-    private static readonly Dictionary<string, byte[]> ShaderDictionaries = [];
-
-    public static string RegisterShader(string shaderName)
-    {
-        byte[] shader;
-        var asm = Assembly.GetCallingAssembly();
-        var resName = asm.GetManifestResourceNames().FirstOrDefault(a => a.EndsWith(shaderName), "");
-
-        if (resName == "")
-        {
-            Logger.Write(LogLevel.Error, $"The shader resource \"*.{shaderName}\" not found.");
-            return "";
-        }
-
-        using (var resourceStream = asm.GetManifestResourceStream(resName))
-        {
-            if (resourceStream == null)
-            {
-                Logger.Write(LogLevel.Error, $"The shader resource \"{resName}\" not found.");
-                return "";
-            }
-
-            using (var memoryStream = new MemoryStream())
-            {
-                resourceStream.CopyTo(memoryStream);
-                shader = memoryStream.ToArray();
-            }
-        }
-
-        var id = Guid.NewGuid().ToString("N");
-        ShaderDictionaries.TryAdd(id, shader);
-        return id;
-    }
-
-    public static byte[] GetShader(string id)
-    {
-        return ShaderDictionaries[id];
     }
 }
