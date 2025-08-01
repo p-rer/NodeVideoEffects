@@ -12,6 +12,8 @@ public static class Logger
     private static byte _levels = 0x0F;
     private static readonly Lock LogsLock = new();
 
+    public static EventHandler? LogUpdated;
+
     private static void WriteLogToConsole()
     {
         try
@@ -79,14 +81,21 @@ public static class Logger
             Console.WriteLine(e.StackTrace);
         }
     }
-    
+
     public static void Clear()
     {
-        lock (LogsLock)
+        try
         {
-            Logs.Clear();
-            Console.Clear();
-            LogUpdated?.Invoke(null, EventArgs.Empty);
+            lock (LogsLock)
+            {
+                Logs.Clear();
+                Console.Clear();
+                LogUpdated?.Invoke(null, EventArgs.Empty);
+            }
+        }
+        catch
+        {
+            // ignore
         }
     }
 
@@ -110,8 +119,6 @@ public static class Logger
                 .ToImmutableList();
         }
     }
-
-    public static EventHandler? LogUpdated;
 }
 
 public enum LogLevel

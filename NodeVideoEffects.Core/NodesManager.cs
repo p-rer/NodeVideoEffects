@@ -155,13 +155,11 @@ public static class NodesManager
                     if (connection.Id == "") return;
                     Dictionary[connection.Id].Inputs[connection.Index].RemoveConnection("", 0);
                 }));
-        node.Inputs.Select((input, i) =>
-                (input.PortInfo, i)).ToList()
-            .ForEach(port =>
-            {
-                if (port.PortInfo.Id == "") return;
-                Dictionary[port.PortInfo.Id].Outputs[port.PortInfo.Index].RemoveConnection(node.Id, port.i);
-            });
+        node.Inputs.Select(input => input.PortInfo).ToList()
+            .Where(connection => connection.Id == id)
+            .ToList()
+            .ForEach(connection =>
+                node.Inputs.Select(input => input.PortInfo).ToList().Remove(connection));
         node.Dispose();
         Dictionary.Remove(id);
     }
