@@ -1,13 +1,14 @@
 using System.Windows.Media;
 using NodeVideoEffects.Core;
+using Vortice.Direct2D1;
 
 namespace NodeVideoEffects.Nodes.Effect;
 
 public class LensBlurNode : NodeLogic
 {
-    private VideoEffectsLoader? _videoEffect;
     private readonly string _effectId = "";
     private readonly string _shaderId = "";
+    private VideoEffectsLoader? _videoEffect;
 
     public LensBlurNode(string id) : base(
         [
@@ -29,14 +30,20 @@ public class LensBlurNode : NodeLogic
         _shaderId = VideoEffectsLoader.RegisterShader("LensBlur.cso");
     }
 
-    public override async Task Calculate()
+    public override void UpdateContext(ID2D1DeviceContext6 context)
     {
-        _videoEffect ??= await VideoEffectsLoader.LoadEffect([
+        _videoEffect?.Dispose();
+        _videoEffect = VideoEffectsLoader.LoadEffectSync([
             (typeof(float), "Radius"),
             (typeof(float), "Brightness"),
             (typeof(float), "EdgeStrength"),
             (typeof(float), "Quality")
         ], _shaderId, _effectId);
+    }
+
+    public override Task Calculate()
+    {
+        if (_videoEffect == null) return Task.CompletedTask;
         _videoEffect.SetValue(
             Convert.ToSingle(Inputs[1].Value),
             Convert.ToSingle(Inputs[2].Value),
@@ -44,15 +51,16 @@ public class LensBlurNode : NodeLogic
             Convert.ToSingle(Inputs[4].Value));
         if (_videoEffect.Update(((ImageWrapper?)Inputs[0].Value)?.Image, out var output))
             Outputs[0].Value = new ImageWrapper(output);
+        return Task.CompletedTask;
     }
 
     public override void Dispose()
     {
         base.Dispose();
 
-        if (_videoEffect == null!) return;
+        if (_videoEffect == null) return;
         _videoEffect.Dispose();
-        _videoEffect = null!;
+        _videoEffect = null;
 
         GC.SuppressFinalize(this);
     }

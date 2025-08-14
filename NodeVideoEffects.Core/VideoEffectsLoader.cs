@@ -231,25 +231,32 @@ public class VideoEffectsLoader : IDisposable
 
     public static async Task<VideoEffectsLoader> LoadEffect(string name, string id)
     {
-        return await Task.Run(() =>
-            new VideoEffectsLoader(
-                Activator.CreateInstance(PluginLoader.VideoEffects.ToList().First(type => type.Name == name)) as
-                    IVideoEffect, id));
+        return await Task.Run(() => LoadEffectSync(name, id));
+    }
+
+    public static VideoEffectsLoader LoadEffectSync(string name, string id)
+    {
+        return new VideoEffectsLoader(
+            Activator.CreateInstance(PluginLoader.VideoEffects.ToList().First(type => type.Name == name)) as
+                IVideoEffect, id);
     }
 
     public static async Task<VideoEffectsLoader> LoadEffect(List<(Type type, string name)> properties,
         string shaderResourceId, string effectId)
     {
-        return await Task.Run(() =>
-        {
-            if (shaderResourceId == "")
-                throw new ArgumentException("Shader resource id is empty.");
-            var effect = ShaderEffect.Create(effectId, properties, shaderResourceId);
-            if (effect.IsEnabled) return new VideoEffectsLoader(effect, effectId);
-            effect.Dispose();
-            effect = null;
-            return new VideoEffectsLoader(effect, effectId);
-        });
+        return await Task.Run(() => LoadEffectSync(properties, shaderResourceId, effectId));
+    }
+
+    public static VideoEffectsLoader LoadEffectSync(List<(Type type, string name)> properties,
+        string shaderResourceId, string effectId)
+    {
+        if (shaderResourceId == "")
+            throw new ArgumentException("Shader resource id is empty.");
+        var effect = ShaderEffect.Create(effectId, properties, shaderResourceId);
+        if (effect.IsEnabled) return new VideoEffectsLoader(effect, effectId);
+        effect.Dispose();
+        effect = null;
+        return new VideoEffectsLoader(effect, effectId);
     }
 
     public static string RegisterShader(string shaderName)

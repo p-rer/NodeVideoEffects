@@ -1,5 +1,6 @@
 ﻿using System.Windows.Media;
 using NodeVideoEffects.Core;
+using Vortice.Direct2D1;
 using YukkuriMovieMaker.Project.Effects;
 using Enum = NodeVideoEffects.Core.Enum;
 
@@ -26,12 +27,18 @@ public class MosaicNode : NodeLogic
     {
         if (id == "")
             return;
-        _effectId = id;
+        _videoEffect = VideoEffectsLoader.LoadEffectSync("MosaicEffect", _effectId = id);
+    }
+
+    public override void UpdateContext(ID2D1DeviceContext6 context)
+    {
+        _videoEffect?.Dispose();
+        _videoEffect = VideoEffectsLoader.LoadEffectSync("MosaicEffect", _effectId);
     }
 
     public override async Task Calculate()
     {
-        _videoEffect ??= await VideoEffectsLoader.LoadEffect("MosaicEffect", _effectId);
+        if (_videoEffect == null) return;
         await (await _videoEffect.SetValue("MosaicType", (MosaicType)((int?)Inputs[1].Value ?? 2)))
             .SetValue("Size", (float?)Inputs[2].Value ?? 10f);
         if (_videoEffect.Update(((ImageWrapper?)Inputs[0].Value)?.Image, out var output))

@@ -10,6 +10,7 @@ public class Enum : IPortValue
     public Enum(List<string> items, int value = 0)
     {
         Control = new EnumPort(items, value);
+        _value = value;
     }
 
     public Type Type => typeof(int);

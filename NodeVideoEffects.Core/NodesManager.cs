@@ -105,7 +105,21 @@ public static class NodesManager
 
     public static void NotifyOutputChanged(string id, int index, bool isControlChanged = false)
     {
-        Task.Run(() => Dictionary[id].Inputs[index].UpdatedConnectionValue(isControlChanged));
+        try
+        {
+            Dictionary[id].Inputs[index].UpdatedConnectionValue(isControlChanged);
+        }
+        catch (KeyNotFoundException)
+        {
+            Dictionary.ToList().ForEach(node =>
+                node.Value.Outputs.ToList().ForEach(output =>
+                    output.Connection.Where(port => port.Id == id).ToList()
+                        .ForEach(port => output.Connection.Remove(port))));
+        }
+        catch
+        {
+            // ignore
+        }
     }
 
     public static void NotifyInputConnectionAdd(string inId, int inIndex, string outId, int outIndex)
