@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics;
 using System.Windows.Media;
 using NodeVideoEffects.Utility;
 using Vortice.Direct2D1;
@@ -76,7 +77,11 @@ public abstract class NodeLogic : IDisposable
 
     public virtual void Dispose()
     {
-        Logger.Write(LogLevel.Info, $"Disposing NodeLogic: {Name}(id: {Id})");
+    }
+
+    private void DisposeBase()
+    {
+        Logger.Write(LogLevel.Info, $"Disposing NodeLogic: {Name}(id: {Id})", new StackTrace());
         try
         {
             foreach (var input in Inputs)
@@ -88,13 +93,15 @@ public abstract class NodeLogic : IDisposable
         {
             // ignored
         }
+
+        Dispose();
     }
 
     ~NodeLogic()
     {
         if (Id != "")
             NodesManager.RemoveNode(Id);
-        Dispose();
+        DisposeBase();
     }
 
     private void SubscribeToInputChanges()

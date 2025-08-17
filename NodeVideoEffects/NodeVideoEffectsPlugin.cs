@@ -1,6 +1,6 @@
-﻿using NodeVideoEffects.Core;
+﻿using System.ComponentModel.DataAnnotations;
+using NodeVideoEffects.Core;
 using NodeVideoEffects.Utility;
-using System.ComponentModel.DataAnnotations;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Exo;
 using YukkuriMovieMaker.Player.Video;
@@ -9,17 +9,16 @@ using YukkuriMovieMaker.Resources.Localization;
 
 namespace NodeVideoEffects;
 
-[VideoEffect("NodeVideoEffects", [VideoEffectCategories.Filtering], ["NVE", "ノード"], ResourceType = typeof(Texts), IsAviUtlSupported = false)]
+[VideoEffect("NodeVideoEffects", [VideoEffectCategories.Filtering], ["NVE", "ノード"], ResourceType = typeof(Texts),
+    IsAviUtlSupported = false)]
 public class NodeVideoEffectsPlugin : VideoEffectBase
 {
     private bool _isCreated;
+
+    private List<NodeInfo> _nodes = [];
     private NodeProcessor? _processor;
 
-    ~NodeVideoEffectsPlugin()
-    {
-        Window?.Close();
-        NodesManager.RemoveItem(Id);
-    }
+    internal NodeEditor? Window = null;
 
     public override string Label => "NodeVideoEffects";
 
@@ -37,13 +36,14 @@ public class NodeVideoEffectsPlugin : VideoEffectBase
         }
     }
 
-    private List<NodeInfo> _nodes = [];
-
-    internal NodeEditor? Window = null;
-
     internal List<NodeInfo> EditorNodes
     {
         set => Set(ref _nodes, value, nameof(Nodes), nameof(EditorNodes));
+    }
+
+    ~NodeVideoEffectsPlugin()
+    {
+        Window?.Close();
     }
 
     public override IEnumerable<string> CreateExoVideoFilters(int keyFrameIndex,

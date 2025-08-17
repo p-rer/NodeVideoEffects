@@ -52,6 +52,8 @@ public sealed class Input : INotifyPropertyChanged, IDisposable
         }
     }
 
+    public object? DefaultValue => _value.Value;
+
     /// <summary>
     /// Type of input value
     /// </summary>

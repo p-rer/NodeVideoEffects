@@ -20,8 +20,6 @@ public partial class Editor : INotifyPropertyChanged
     private const double DotSize = 1;
     private const double Tolerance = 0.001;
 
-    private static readonly Lock Locker = new();
-
     private readonly Dictionary<(string, string), Connector> _connectors = [];
 
     private readonly VisualBrush _dotBrush;
@@ -113,10 +111,7 @@ public partial class Editor : INotifyPropertyChanged
 
     private void OnTaskCountChanged(object? sender, int newCount)
     {
-        lock (Locker)
-        {
-            Dispatcher.Invoke(() => { RunningTaskCount = newCount; });
-        }
+        RunningTaskCount = newCount;
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;

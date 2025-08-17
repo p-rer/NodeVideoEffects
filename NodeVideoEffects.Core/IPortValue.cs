@@ -1,5 +1,5 @@
-﻿using NodeVideoEffects.Control;
-using System.Windows.Media;
+﻿using System.Windows.Media;
+using NodeVideoEffects.Control;
 
 namespace NodeVideoEffects.Core;
 
@@ -13,9 +13,14 @@ public interface IPortValue : IDisposable
     /// <summary>
     /// Value of port
     /// </summary>
-    public object Value { get; }
+    public object? Value { get; }
 
     public Color Color { get; }
+
+    /// <summary>
+    ///     Control for input port
+    /// </summary>
+    public IControl Control { get; }
 
     public void SetValue(object? value)
     {
@@ -28,9 +33,4 @@ public interface IPortValue : IDisposable
     /// </summary>
     /// <param name="value">Value</param>
     protected void _SetValue(object? value);
-
-    /// <summary>
-    /// Control for input port
-    /// </summary>
-    public IControl Control { get; }
 }

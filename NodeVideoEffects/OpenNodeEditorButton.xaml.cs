@@ -14,21 +14,24 @@ namespace NodeVideoEffects;
 /// </summary>
 public partial class OpenNodeEditorButton : IPropertyEditorControl2
 {
-    public event EventHandler? BeginEdit;
-    public event EventHandler? EndEdit;
-
-    public ItemProperty[]? ItemProperties { get; set; }
-
     public OpenNodeEditorButton()
     {
         InitializeComponent();
+    }
+
+    public ItemProperty[]? ItemProperties { get; set; }
+    public event EventHandler? BeginEdit;
+    public event EventHandler? EndEdit;
+
+    public void SetEditorInfo(IEditorInfo info)
+    {
     }
 
     private void Button_Click(object sender, RoutedEventArgs e)
     {
         if (ItemProperties is null) throw new InvalidOperationException("ItemProperties is not set.");
         if (((NodeVideoEffectsPlugin)ItemProperties[0].Item).Window != null) return;
-        
+
         BeginEdit?.Invoke(this, EventArgs.Empty);
 
         var pluginItem = (NodeVideoEffectsPlugin)ItemProperties[0].Item;
@@ -40,10 +43,7 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
         };
 
         var parentWindow = Window.GetWindow(this);
-        if (parentWindow != null)
-        {
-            window.CommandBindings.AddRange(parentWindow.CommandBindings);
-        }
+        if (parentWindow != null) window.CommandBindings.AddRange(parentWindow.CommandBindings);
 
         window.Show();
 
@@ -56,23 +56,21 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
                 Logger.Write(LogLevel.Debug, "No changes detected in nodes. Exiting NodesUpdated event handler.");
                 return;
             }
+
             BeginEdit?.Invoke(this, EventArgs.Empty);
             pluginItem.EditorNodes = window.Nodes;
             EndEdit?.Invoke(this, EventArgs.Empty);
             Logger.Write(LogLevel.Debug, "NodesUpdated event processed.");
         };
 
-        window.Closed += (_, _) =>
+        window.Closing += (_, _) =>
         {
             if (ItemProperties == null) return;
             window.ClearEvents();
-            window = pluginItem.Window = null;
+            pluginItem.Window = null;
+            window = null;
         };
 
         EndEdit?.Invoke(this, EventArgs.Empty);
-    }
-
-    public void SetEditorInfo(IEditorInfo info)
-    {
     }
 }

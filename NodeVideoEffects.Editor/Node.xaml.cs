@@ -1,9 +1,9 @@
-﻿using NodeVideoEffects.Core;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using NodeVideoEffects.Core;
 
 namespace NodeVideoEffects.Editor;
 
@@ -13,18 +13,12 @@ namespace NodeVideoEffects.Editor;
 public partial class Node
 {
     private readonly string _name;
+    private Editor? _editor;
+    private bool _isClicking;
 
     private bool _isDragging;
-    private bool _isClicking;
-    private Canvas? _wrapperCanvas;
-    private Editor? _editor;
     private Point _lastPos;
-
-    public string Id { get; }
-    public Type Type { get; }
-    public List<object?> Values { get; } = [];
-
-    public event PropertyChangedEventHandler ValueChanged = delegate { };
+    private Canvas? _wrapperCanvas;
 
     public Node(NodeLogic node)
     {
@@ -47,10 +41,11 @@ public partial class Node
             {
                 var inputPort = new InputPort(input, node.Id, index);
                 InputsPanel.Children.Add(inputPort);
-                Values.Add(input.Value);
+                Values.Add(input.DefaultValue);
                 if (input.PortInfo.Id != "")
                     inputPort.Loaded += (_, _) => inputPort.PortControl.Visibility = Visibility.Hidden;
-                input.PropertyChanged += (isChangedByControl, _) => ValueChanged(isChangedByControl, new PropertyChangedEventArgs(_name));
+                input.PropertyChanged += (isChangedByControl, _) =>
+                    ValueChanged(isChangedByControl, new PropertyChangedEventArgs(_name));
                 index++;
             }
         }
@@ -60,6 +55,12 @@ public partial class Node
             _editor = FindParent<Editor>(this);
         };
     }
+
+    public string Id { get; }
+    public Type Type { get; }
+    public List<object?> Values { get; } = [];
+
+    public event PropertyChangedEventHandler ValueChanged = delegate { };
 
     private static T? FindParent<T>(DependencyObject? child) where T : DependencyObject
     {
