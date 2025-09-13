@@ -63,7 +63,7 @@ public class CreateMaskNode : NodeLogic
                 Convert.ToInt32(Inputs[1].Value),
                 Convert.ToSingle(Inputs[2].Value),
                 (bool?)Inputs[3].Value ?? false ? 1 : 0);
-        if (_videoEffect.Update(((ImageWrapper?)Inputs[0].Value)?.Image, out var output))
+        if (_videoEffect.Update(out var output, ((ImageWrapper?)Inputs[0].Value)?.Image))
             Outputs[0].Value = new MaskWrapper(output);
         return Task.CompletedTask;
     }

@@ -193,7 +193,7 @@ public class VideoEffectsLoader : IDisposable
         }
     }
 
-    public bool Update(ID2D1Image? image, out ID2D1Image? output)
+    public bool Update(out ID2D1Image? output, params ID2D1Image?[] image)
     {
         output = null;
         switch (_type)
@@ -208,7 +208,7 @@ public class VideoEffectsLoader : IDisposable
                     {
                         if (_processor.Output.NativePointer == IntPtr.Zero)
                             _processor = _videoEffect.CreateVideoEffect(NodesManager.GetContext(_id));
-                        _processor.SetInput(image);
+                        _processor.SetInput(image[0]);
                         _processor.Update(NodesManager.GetInfo(_id));
                         output = _processor.Output;
                         return true;
@@ -225,7 +225,8 @@ public class VideoEffectsLoader : IDisposable
                 {
                     try
                     {
-                        _shaderEffect.SetInput(0, image, true);
+                        for (var i = 0; i < image?.Length; i++)
+                            _shaderEffect.SetInput(i, image[i], true);
                         output = _shaderEffect.Output;
                         return true;
                     }
@@ -281,11 +282,11 @@ public class VideoEffectsLoader : IDisposable
     }
 
     public static VideoEffectsLoader LoadEffectSync(List<(Type type, string name)> properties,
-        string shaderResourceId, string effectId)
+        string shaderResourceId, string effectId, int inputImageNum = 1)
     {
         if (shaderResourceId == "")
             throw new ArgumentException("Shader resource id is empty.");
-        var effect = ShaderEffect.Create(effectId, properties, shaderResourceId);
+        var effect = ShaderEffect.Create(effectId, properties, shaderResourceId, inputImageNum);
         if (effect.IsEnabled) return new VideoEffectsLoader(effect, effectId);
         effect.Dispose();
         effect = null;
@@ -343,11 +344,12 @@ public class VideoEffectsLoader : IDisposable
         {
         }
 
-        public static ShaderEffect Create(string effectId, List<(Type type, string name)> properties, string shaderId)
+        public static ShaderEffect Create(string effectId, List<(Type type, string name)> properties, string shaderId,
+            int inputImageNum)
         {
             // Generate a unique class name based on properties
             var className = $"ShaderEffect_{shaderId}_{string.Join("_", properties.Select(p => p.type.Name + p.name))}";
-            var effectType = GenerateEffectType(className, properties, shaderId);
+            var effectType = GenerateEffectType(className, properties, shaderId, inputImageNum);
 
             var context = NodesManager.GetContext(effectId);
             var effectInstance = Activator.CreateInstance(effectType, context) as ShaderEffect
@@ -400,7 +402,8 @@ public class VideoEffectsLoader : IDisposable
             property.SetValue(this, value);
         }
 
-        private static Type GenerateEffectType(string className, List<(Type, string)> properties, string shaderId)
+        private static Type GenerateEffectType(string className, List<(Type, string)> properties, string shaderId,
+            int inputImageNum)
         {
             AssemblyName assemblyName = new("DynamicID2D1PropertiesAssembly");
 #if ASM_EXPORT
@@ -413,7 +416,8 @@ public class VideoEffectsLoader : IDisposable
 
             var typeBuilder = moduleBuilder.DefineType(className, TypeAttributes.Public, typeof(ShaderEffect));
 
-            var effectImplType = DynamicEffectImplGenerator.GenerateEffectImpl(properties, shaderId, moduleBuilder);
+            var effectImplType =
+                DynamicEffectImplGenerator.GenerateEffectImpl(properties, shaderId, moduleBuilder, inputImageNum);
 
             var index = 0;
             foreach (var (type, name) in properties)

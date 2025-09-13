@@ -41,7 +41,7 @@ public class MosaicNode : NodeLogic
         if (_videoEffect == null) return;
         await (await _videoEffect.SetValue("MosaicType", (MosaicType)((int?)Inputs[1].Value ?? 2)))
             .SetValue("Size", (float?)Inputs[2].Value ?? 10f);
-        if (_videoEffect.Update(((ImageWrapper?)Inputs[0].Value)?.Image, out var output))
+        if (_videoEffect.Update(out var output, ((ImageWrapper?)Inputs[0].Value)?.Image))
             Outputs[0].Value = new ImageWrapper(output);
     }
 

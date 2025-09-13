@@ -15,7 +15,7 @@ public static class DynamicEffectImplGenerator
     private static readonly Dictionary<string, Type> TypeCache = new();
 
     public static Type GenerateEffectImpl(List<(Type type, string name)> fields, string shaderId,
-        ModuleBuilder moduleBuild)
+        ModuleBuilder moduleBuild, int inputImageNum)
     {
         // Ensure unique type name based on shader name and field definitions
         var typeName = $"ShaderEffectImpl_{shaderId}_{string.Join("_", fields.Select(f => f.type.Name + f.name))}";
@@ -38,7 +38,7 @@ public static class DynamicEffectImplGenerator
                                                ?? throw new InvalidOperationException("Cannot get the constructor");
         var customEffectAttributeBuilder = new CustomAttributeBuilder(
             customEffectAttributeConstructor,
-            [1, null, null, null, null]
+            [inputImageNum, null, null, null, null]
         );
         effectImplTypeBuilder.SetCustomAttribute(customEffectAttributeBuilder);
 
