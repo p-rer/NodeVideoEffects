@@ -48,6 +48,7 @@
     <ItemGroup>
         <None Remove="Effect\LensBlur.cso"/>
         <EmbeddedResource Include="Effect\LensBlur.cso"/>
+        <EmbeddedResource Include="Composite\CreateMask.cso"/>
     </ItemGroup>
 
 </Project>
