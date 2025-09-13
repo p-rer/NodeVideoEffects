@@ -1,10 +1,13 @@
-﻿using System.Collections.Immutable;
+﻿// #define ASM_EXPORT
+
+using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
 using System.Numerics;
 using System.Reflection;
 using System.Reflection.Emit;
 using NodeVideoEffects.Utility;
 using SharpGen.Runtime;
+using Vortice;
 using Vortice.Direct2D1;
 using Vortice.Mathematics;
 using YukkuriMovieMaker.Commons;
@@ -14,6 +17,14 @@ using YukkuriMovieMaker.Plugin;
 using YukkuriMovieMaker.Plugin.Effects;
 
 namespace NodeVideoEffects.Core;
+
+public delegate void MapInputRectsToOutputRectDelegate(
+    RawRect[] inputRects,
+    RawRect[] inputOpaqueSubRects,
+    out RawRect outputRect,
+    out RawRect outputOpaqueSubRect);
+
+public delegate void MapOutputRectToInputRectsDelegate(RawRect outputRect, RawRect[] inputRects);
 
 public class VideoEffectsLoader : IDisposable
 {
@@ -229,6 +240,28 @@ public class VideoEffectsLoader : IDisposable
         }
     }
 
+    public VideoEffectsLoader SetInputImageMargin(Rect margin)
+    {
+        if (_type != EffectType.ShaderEffect || _shaderEffect == null) return this;
+        lock (_shaderEffect)
+        {
+            _shaderEffect?.SetInputImageMargin(margin);
+        }
+
+        return this;
+    }
+
+    public VideoEffectsLoader SetOutputImageMargin(Rect margin)
+    {
+        if (_type != EffectType.ShaderEffect || _shaderEffect == null) return this;
+        lock (_shaderEffect)
+        {
+            _shaderEffect?.SetOutputImageMargin(margin);
+        }
+
+        return this;
+    }
+
     public static async Task<VideoEffectsLoader> LoadEffect(string name, string id)
     {
         return await Task.Run(() => LoadEffectSync(name, id));
@@ -304,6 +337,8 @@ public class VideoEffectsLoader : IDisposable
 
     public abstract class ShaderEffect : D2D1CustomShaderEffectBase
     {
+        private int _propertiesCount;
+
         public ShaderEffect(nint ptr) : base(ptr)
         {
         }
@@ -315,10 +350,12 @@ public class VideoEffectsLoader : IDisposable
             var effectType = GenerateEffectType(className, properties, shaderId);
 
             var context = NodesManager.GetContext(effectId);
-            var effectInstance = Activator.CreateInstance(effectType, context)
+            var effectInstance = Activator.CreateInstance(effectType, context) as ShaderEffect
                                  ?? throw new InvalidOperationException("Cannot create effect instance");
 
-            return effectInstance as ShaderEffect
+            effectInstance._propertiesCount = properties.Count;
+
+            return effectInstance
                    ?? throw new InvalidOperationException("Cannot cast to ShaderEffect");
         }
 
@@ -337,6 +374,22 @@ public class VideoEffectsLoader : IDisposable
             property.SetValue(this, value);
         }
 
+        public void SetInputImageMargin(Rect margin)
+        {
+            SetValue(_propertiesCount + 0, (int)margin.Left);
+            SetValue(_propertiesCount + 1, (int)margin.Top);
+            SetValue(_propertiesCount + 2, (int)margin.Right);
+            SetValue(_propertiesCount + 3, (int)margin.Bottom);
+        }
+
+        public void SetOutputImageMargin(Rect margin)
+        {
+            SetValue(_propertiesCount + 4, (int)margin.Left);
+            SetValue(_propertiesCount + 5, (int)margin.Top);
+            SetValue(_propertiesCount + 6, (int)margin.Right);
+            SetValue(_propertiesCount + 7, (int)margin.Bottom);
+        }
+
         public void SetValueByName(string propertyName, object? value)
         {
             // 指定されたプロパティ名（名前文字列）に対応するプロパティを取得する（BindingFlags: 公開・インスタンス）
@@ -350,10 +403,13 @@ public class VideoEffectsLoader : IDisposable
         private static Type GenerateEffectType(string className, List<(Type, string)> properties, string shaderId)
         {
             AssemblyName assemblyName = new("DynamicID2D1PropertiesAssembly");
+#if ASM_EXPORT
+            var persistedAssemblyBuilder = new PersistedAssemblyBuilder(assemblyName, typeof(object).Assembly);
+            var moduleBuilder = persistedAssemblyBuilder.DefineDynamicModule("MainModule");
+#else
             var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
-            //PersistedAssemblyBuilder persistedAssemblyBuilder = new(assemblyName, typeof(object).Assembly);
-            //ModuleBuilder moduleBuilder = persistedAssemblyBuilder.DefineDynamicModule("MainModule");
             var moduleBuilder = assemblyBuilder.DefineDynamicModule("MainModule");
+#endif
 
             var typeBuilder = moduleBuilder.DefineType(className, TypeAttributes.Public, typeof(ShaderEffect));
 
@@ -450,7 +506,9 @@ public class VideoEffectsLoader : IDisposable
             ctorIl.Emit(OpCodes.Ret);
 
             var generateEffectType = typeBuilder.CreateTypeInfo().AsType();
-            //persistedAssemblyBuilder.Save("EffectModule.dll");
+#if ASM_EXPORT
+            persistedAssemblyBuilder.Save("EffectModule.dll");
+#endif
             return generateEffectType
                    ?? throw new InvalidOperationException("Cannot create the type");
 

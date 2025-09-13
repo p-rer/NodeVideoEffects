@@ -1,6 +1,4 @@
-﻿using NodeVideoEffects.Nodes.Basic;
-using NodeVideoEffects.Core;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
 using System.Windows;
@@ -8,6 +6,9 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
+using NodeVideoEffects.Core;
+using NodeVideoEffects.Nodes.Basic;
+using NodeVideoEffects.Utility;
 
 namespace NodeVideoEffects.Editor;
 
@@ -16,7 +17,6 @@ namespace NodeVideoEffects.Editor;
 /// </summary>
 public partial class NodeExplorer
 {
-    public ObservableCollection<NodesTree> Root { get; } = [];
     private Type? _type;
     private Window? _window;
 
@@ -96,6 +96,8 @@ public partial class NodeExplorer
         Loaded += (_, _) => { _window = FindParent<Window>(this); };
     }
 
+    public ObservableCollection<NodesTree> Root { get; } = [];
+
     private static T? FindParent<T>(DependencyObject? child) where T : DependencyObject
     {
         if (child == null) return null;
@@ -159,14 +161,21 @@ public partial class NodeExplorer
                             var editor = FindParent<Editor>(element);
                             if (editor != null)
                             {
-                                NodeLogic? node;
+                                NodeLogic? node = null;
                                 try
                                 {
-                                    node = Activator.CreateInstance(_type, editor.ItemId) as NodeLogic;
+                                    try
+                                    {
+                                        node = Activator.CreateInstance(_type, editor.ItemId) as NodeLogic;
+                                    }
+                                    catch (MissingMethodException)
+                                    {
+                                        node = Activator.CreateInstance(_type, []) as NodeLogic;
+                                    }
                                 }
-                                catch
+                                catch (Exception exception)
                                 {
-                                    node = Activator.CreateInstance(_type, []) as NodeLogic;
+                                    Logger.Write(LogLevel.Error, exception.Message, exception);
                                 }
 
                                 if (node != null)
@@ -197,11 +206,11 @@ public partial class NodeExplorer
 
 public class NodesTree : INotifyPropertyChanged
 {
-    private bool _isExpanded = true;
     private readonly string _text = "";
     private readonly Type? _type;
-    private NodesTree? _parent;
     private ObservableCollection<NodesTree>? _children;
+    private bool _isExpanded = true;
+    private NodesTree? _parent;
 
     public bool IsExpanded
     {

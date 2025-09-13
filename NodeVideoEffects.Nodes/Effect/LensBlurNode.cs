@@ -1,6 +1,7 @@
-using System.Windows.Media;
 using NodeVideoEffects.Core;
 using Vortice.Direct2D1;
+using Vortice.Mathematics;
+using Colors = System.Windows.Media.Colors;
 
 namespace NodeVideoEffects.Nodes.Effect;
 
@@ -28,6 +29,12 @@ public class LensBlurNode : NodeLogic
         if (id == "") return;
         _effectId = id;
         _shaderId = VideoEffectsLoader.RegisterShader("LensBlur.cso");
+        _videoEffect = VideoEffectsLoader.LoadEffectSync([
+            (typeof(float), "Radius"),
+            (typeof(float), "Brightness"),
+            (typeof(float), "EdgeStrength"),
+            (typeof(float), "Quality")
+        ], _shaderId, _effectId);
     }
 
     public override void UpdateContext(ID2D1DeviceContext6 context)
@@ -44,11 +51,15 @@ public class LensBlurNode : NodeLogic
     public override Task Calculate()
     {
         if (_videoEffect == null) return Task.CompletedTask;
-        _videoEffect.SetValue(
-            Convert.ToSingle(Inputs[1].Value),
-            Convert.ToSingle(Inputs[2].Value),
-            Convert.ToSingle(Inputs[3].Value),
-            Convert.ToSingle(Inputs[4].Value));
+        var radius = Convert.ToSingle(Inputs[1].Value);
+        _videoEffect
+            .SetInputImageMargin(new Rect { Bottom = radius, Left = radius, Top = radius, Right = radius })
+            .SetOutputImageMargin(new Rect { Bottom = radius, Left = radius, Top = radius, Right = radius })
+            .SetValue(
+                radius,
+                Convert.ToSingle(Inputs[2].Value),
+                Convert.ToSingle(Inputs[3].Value),
+                Convert.ToSingle(Inputs[4].Value));
         if (_videoEffect.Update(((ImageWrapper?)Inputs[0].Value)?.Image, out var output))
             Outputs[0].Value = new ImageWrapper(output);
         return Task.CompletedTask;

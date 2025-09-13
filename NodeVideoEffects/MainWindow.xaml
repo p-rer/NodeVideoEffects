@@ -27,7 +27,8 @@
             </MenuItem>
             <MenuItem Header="{x:Static utility:Text.View}">
                 <MenuItem Header="{x:Static utility:Text.ResetView}" Click="ResetView" />
-                <MenuItem Header="Open Log..." Click="OpenLogViewer" />
+                <MenuItem Header="Open log..." Click="OpenLogViewer" />
+                <MenuItem Header="Delete all log" Click="LogsDelete" />
             </MenuItem>
             <MenuItem Header="{x:Static utility:Text.Help}">
                 <MenuItem Header="{x:Static utility:Text.CheckUpdate}" Click="CheckUpdate" />

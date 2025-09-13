@@ -1,8 +1,8 @@
-﻿using NodeVideoEffects.Editor;
-using NodeVideoEffects.Core;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
+using NodeVideoEffects.Core;
+using NodeVideoEffects.Editor;
 using NodeVideoEffects.Utility;
 
 namespace NodeVideoEffects;
@@ -12,23 +12,11 @@ namespace NodeVideoEffects;
 /// </summary>
 public partial class NodeEditor
 {
-    public List<NodeInfo> Nodes
-    {
-        get => EditSpace.Nodes;
-        set => EditSpace.Nodes = value;
-    }
-
-    public string ItemId
-    {
-        get => EditSpace.ItemId;
-        set => EditSpace.ItemId = value;
-    }
-
     private static readonly RoutedCommand AllSelectCommand = new();
     private static readonly RoutedCommand RemoveCommand = new();
+    private readonly string _commit;
 
     private readonly string _tag;
-    private readonly string _commit;
 
     public NodeEditor()
     {
@@ -54,6 +42,18 @@ public partial class NodeEditor
         InputBindings.Add(new KeyBinding(
             RemoveCommand,
             new KeyGesture(Key.Delete)));
+    }
+
+    public List<NodeInfo> Nodes
+    {
+        get => EditSpace.Nodes;
+        set => EditSpace.Nodes = value;
+    }
+
+    public string ItemId
+    {
+        get => EditSpace.ItemId;
+        set => EditSpace.ItemId = value;
     }
 
     private void ShowAbout(object sender, RoutedEventArgs e)
@@ -112,5 +112,10 @@ public partial class NodeEditor
     private void Close(object sender, RoutedEventArgs e)
     {
         Close();
+    }
+
+    private void LogsDelete(object sender, RoutedEventArgs e)
+    {
+        Logger.Clear();
     }
 }
