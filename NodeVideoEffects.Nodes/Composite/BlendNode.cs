@@ -1,6 +1,8 @@
-﻿using NodeVideoEffects.Core;
-using System.Windows.Media;
+﻿using System.Windows.Media;
+using NodeVideoEffects.Core;
+using NodeVideoEffects.Utility;
 using Vortice.Direct2D1;
+using YukkuriMovieMaker.Resources.Localization;
 using Blend = Vortice.Direct2D1.Effects.Blend;
 using Enum = NodeVideoEffects.Core.Enum;
 
@@ -15,43 +17,43 @@ public class BlendNode : NodeLogic
         [
             new Input(new Enum(
                 [
-                    "Multiply",
-                    "Screen",
-                    "Darken",
-                    "Lighten",
-                    "Dissolve",
-                    "ColorBurn",
-                    "LinearBurn",
-                    "DarkerColor",
-                    "LighterColor",
-                    "ColorDodge",
-                    "LinearDodge",
-                    "Overlay",
-                    "SoftLight",
-                    "HardLight",
-                    "VividLight",
-                    "LinearLight",
-                    "PinLight",
-                    "HardMix",
-                    "Difference",
-                    "Exclusion",
-                    "Hue",
-                    "Saturation",
-                    "Color",
-                    "Luminosity",
-                    "Subtract",
-                    "Division"
+                    Texts.BlendMultiplyName,
+                    Texts.BlendScreenName,
+                    Texts.BlendDarkerName,
+                    Texts.BlendLighterName,
+                    Texts.BlendDissolveName,
+                    Texts.BlendColorBurnName,
+                    Texts.BlendLinearBurnName,
+                    Texts.BlendDarkerColorName,
+                    Texts.BlendLighterColorName,
+                    Texts.BlendColorDodgeName,
+                    Texts.BlendLinearDodgeName,
+                    Texts.BlendOverlayName,
+                    Texts.BlendSoftLightName,
+                    Texts.BlendHardLightName,
+                    Texts.BlendVividLightName,
+                    Texts.BlendLinearLightName,
+                    Texts.BlendPinLightName,
+                    Texts.BlendHardMixName,
+                    Texts.BlendDifferenceName,
+                    Texts.BlendExclusionName,
+                    Texts.BlendHueName,
+                    Texts.BlendSaturationName,
+                    Texts.BlendColorName,
+                    Texts.BlendLuminosityName,
+                    Texts.BlendSubtractName,
+                    Texts.BlendDivisionName
                 ]),
-                "Mode"),
-            new Input(new Image(null), "Input1"),
-            new Input(new Image(null), "Input2")
+                Text_Node.Mode),
+            new Input(new Image(null), Text_Node.Input1),
+            new Input(new Image(null), Text_Node.Input2)
         ],
         [
-            new Output(new Image(null), "Output")
+            new Output(new Image(null), Text_Node.Output)
         ],
-        "Blend",
+        Text_Node.BlendNode,
         Colors.DarkViolet,
-        "Composite"
+        Text_Node.CompositeCategory
     )
     {
         if (id == "") return;

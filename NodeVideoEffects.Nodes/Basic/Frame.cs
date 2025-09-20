@@ -10,10 +10,10 @@ public class Frame : NodeLogic
 
     public Frame(string id = "") : base(
         [],
-        [new Output(new Number(0, 0, null, 0), "Frame")],
+        [new Output(new Number(0, 0, null, 0), Text_Node.Frame)],
         Text_Node.FrameNode,
         Colors.IndianRed,
-        "Basic")
+        Text_Node.BasicCategory)
     {
         _id = id;
         NodesManager.FrameChanged += Input_PropertyChanged;

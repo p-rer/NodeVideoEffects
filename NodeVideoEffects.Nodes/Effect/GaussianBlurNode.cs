@@ -13,15 +13,15 @@ public class GaussianBlurNode : NodeLogic
 
     public GaussianBlurNode(string id) : base(
         [
-            new Input(new Image(null), "In"),
-            new Input(new Number(10, 0, 250, 4), "Level")
+            new Input(new Image(null), Text_Node.Input),
+            new Input(new Number(10, 0, 250, 4), Text_Node.Level)
         ],
         [
-            new Output(new Image(null), "Out")
+            new Output(new Image(null), Text_Node.Output)
         ],
         Text_Node.GaussianBlurNode,
         Colors.LawnGreen,
-        "Effect")
+        Text_Node.EffectCategory)
     {
         if (id == "") return;
         _blur = new GaussianBlur(NodesManager.GetContext(id).DeviceContext);

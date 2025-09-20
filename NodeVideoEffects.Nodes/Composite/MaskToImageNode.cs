@@ -1,5 +1,6 @@
 using System.Windows.Media;
 using NodeVideoEffects.Core;
+using NodeVideoEffects.Utility;
 
 namespace NodeVideoEffects.Nodes.Composite;
 
@@ -7,14 +8,14 @@ public class MaskToImageNode : NodeLogic
 {
     public MaskToImageNode() : base(
         [
-            new Input(new Mask(null), "Mask")
+            new Input(new Mask(null), Text_Node.Mask)
         ],
         [
-            new Output(new Image(null), "Image")
+            new Output(new Image(null), Text_Node.Image)
         ],
-        "Mask To Image",
+        Text_Node.MaskToImageNode,
         Colors.DarkViolet,
-        "Composite")
+        Text_Node.CompositeCategory)
     {
     }
 

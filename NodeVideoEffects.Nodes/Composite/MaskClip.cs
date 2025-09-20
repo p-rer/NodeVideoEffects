@@ -1,5 +1,6 @@
 using System.Windows.Media;
 using NodeVideoEffects.Core;
+using NodeVideoEffects.Utility;
 using Vortice.Direct2D1;
 
 namespace NodeVideoEffects.Nodes.Composite;
@@ -12,16 +13,16 @@ public class MaskClip : NodeLogic
 
     public MaskClip(string id) : base(
         [
-            new Input(new Image(null), "Input"),
-            new Input(new Mask(null), "Mask"),
-            new Input(new Bool(false), "Invert")
+            new Input(new Image(null), Text_Node.Input),
+            new Input(new Mask(null), Text_Node.Mask),
+            new Input(new Bool(false), Text_Node.Invert)
         ],
         [
-            new Output(new Image(null), "Output")
+            new Output(new Image(null), Text_Node.Output)
         ],
-        "Clip with Mask",
+        Text_Node.ClipWithMaskNode,
         Colors.DarkViolet,
-        "Composite")
+        Text_Node.CompositeCategory)
     {
         if (id == "") return;
         _effectId = id;

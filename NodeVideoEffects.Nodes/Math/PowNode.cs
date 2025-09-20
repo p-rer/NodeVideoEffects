@@ -8,15 +8,15 @@ public class PowNode : NodeLogic
 {
     public PowNode() : base(
         [
-            new Input(new Number(0f, null, null, null), "Base"),
-            new Input(new Number(0f, null, null, null), "Exponent")
+            new Input(new Number(0f, null, null, null), Text_Node.Base),
+            new Input(new Number(0f, null, null, null), Text_Node.Exponent)
         ],
         [
-            new Output(new Number(0f, null, null, null), "Result")
+            new Output(new Number(0f, null, null, null), Text_Node.Result)
         ],
         Text_Node.PowNode,
         Colors.LightCoral,
-        "Math/Basic")
+        $"{Text_Node.MathCategory}/{Text_Node.BasicCategory}")
     {
     }
 

@@ -8,15 +8,15 @@ public class SubNode : NodeLogic
 {
     public SubNode() : base(
         [
-            new Input(new Number(0f, null, null, null), "Value1"),
-            new Input(new Number(0f, null, null, null), "Value2")
+            new Input(new Number(0f, null, null, null), Text_Node.Value1),
+            new Input(new Number(0f, null, null, null), Text_Node.Value2)
         ],
         [
-            new Output(new Number(0f, null, null, null), "Result")
+            new Output(new Number(0f, null, null, null), Text_Node.Result)
         ],
         Text_Node.SubNode,
         Colors.LightCoral,
-        "Math/Basic")
+        $"{Text_Node.MathCategory}/{Text_Node.BasicCategory}")
     {
     }
 

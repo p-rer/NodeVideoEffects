@@ -8,16 +8,16 @@ public class RootNode : NodeLogic
 {
     public RootNode() : base(
         [
-            new Input(new Number(0f, null, null, null), "Radicand"),
-            new Input(new Number(1f, null, null, null), "Degree"),
-            new Input(new Bool(true), "Allow 0th root")
+            new Input(new Number(0f, null, null, null), Text_Node.Radicand),
+            new Input(new Number(1f, null, null, null), Text_Node.Degree),
+            new Input(new Bool(true), Text_Node.Allow0thRoot)
         ],
         [
-            new Output(new Number(0f, null, null, null), "Result")
+            new Output(new Number(0f, null, null, null), Text_Node.Result)
         ],
         Text_Node.RootNode,
         Colors.LightCoral,
-        "Math/Basic")
+        $"{Text_Node.MathCategory}/{Text_Node.BasicCategory}")
     {
     }
 

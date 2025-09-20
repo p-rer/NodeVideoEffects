@@ -1,6 +1,7 @@
 using System.Numerics;
 using System.Windows.Media;
 using NodeVideoEffects.Core;
+using NodeVideoEffects.Utility;
 using Vortice.Direct2D1;
 using Vortice.Direct2D1.Effects;
 
@@ -13,16 +14,18 @@ public class BrightnessNode : NodeLogic
 
     public BrightnessNode(string id) : base(
         [
-            new Input(new Image(null), "In"),
-            new Input(new FloatVector2(1.0f, "Threshold", 1.0f, "Value", 0.0f, 1.0f), "White Point"),
-            new Input(new FloatVector2(0.0f, "Threshold", 0.0f, "Value", 0.0f, 1.0f), "Black Point")
+            new Input(new Image(null), Text_Node.Input),
+            new Input(new FloatVector2(1.0f, Text_Node.Threshold, 1.0f, Text_Node.Value, 0.0f, 1.0f),
+                Text_Node.WhitePoint),
+            new Input(new FloatVector2(0.0f, Text_Node.Threshold, 0.0f, Text_Node.Value, 0.0f, 1.0f),
+                Text_Node.BlackPoint)
         ],
         [
-            new Output(new Image(null), "Out")
+            new Output(new Image(null), Text_Node.Output)
         ],
-        "Brightness",
+        Text_Node.Brightness,
         Colors.LawnGreen,
-        "Effect")
+        Text_Node.EffectCategory)
     {
         if (id == "") return;
         _brightness = new Brightness(NodesManager.GetContext(id).DeviceContext);

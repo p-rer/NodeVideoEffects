@@ -1,5 +1,6 @@
 ﻿using System.Windows.Media;
 using NodeVideoEffects.Core;
+using NodeVideoEffects.Utility;
 using Vortice.Direct2D1;
 using YukkuriMovieMaker.Project.Effects;
 using Enum = NodeVideoEffects.Core.Enum;
@@ -13,17 +14,22 @@ public class MosaicNode : NodeLogic
 
     public MosaicNode(string id) : base(
         [
-            new Input(new Image(null), "In"),
-            new Input(new Enum(["Circle", "Triangle", "Rectangle", "Hexagon", "Delaunay", "Voronoi"], 2),
-                "Mosaic Type"),
-            new Input(new Number(10, 1, 250, 4), "Level")
+            new Input(new Image(null), Text_Node.Input),
+            new Input(
+                new Enum(
+                [
+                    Text_Node.Circle, Text_Node.Triangle, Text_Node.Rectangle, Text_Node.Hexagon, Text_Node.Delaunay,
+                    Text_Node.Voronoi
+                ], 2),
+                Text_Node.MosaicType),
+            new Input(new Number(10, 1, 250, 4), Text_Node.Level)
         ],
         [
-            new Output(new Image(null), "Out")
+            new Output(new Image(null), Text_Node.Output)
         ],
-        "Mosaic",
+        Text_Node.MosaicNode,
         Colors.LawnGreen,
-        "Effect")
+        Text_Node.EffectCategory)
     {
         if (id == "")
             return;

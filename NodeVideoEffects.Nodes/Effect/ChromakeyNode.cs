@@ -1,6 +1,7 @@
 using System.Numerics;
 using System.Windows.Media;
 using NodeVideoEffects.Core;
+using NodeVideoEffects.Utility;
 using Vortice.Direct2D1;
 using Vortice.Direct2D1.Effects;
 
@@ -13,18 +14,18 @@ public class ChromakeyNode : NodeLogic
 
     public ChromakeyNode(string id) : base(
         [
-            new Input(new Image(null), "In"),
-            new Input(new ColorValue(Colors.White), "Key Color"),
-            new Input(new Number(0.1f, 0, 1, 4), "Tolerance"),
-            new Input(new Bool(false), "Invert Alpha"),
-            new Input(new Bool(false), "Feather")
+            new Input(new Image(null), Text_Node.Input),
+            new Input(new ColorValue(Colors.White), Text_Node.KeyColor),
+            new Input(new Number(0.1f, 0, 1, 4), Text_Node.Tolerance),
+            new Input(new Bool(false), Text_Node.InvertAlpha),
+            new Input(new Bool(false), Text_Node.Feather)
         ],
         [
-            new Output(new Image(null), "Out")
+            new Output(new Image(null), Text_Node.Output)
         ],
-        "Chromakey",
+        Text_Node.ChromakeyNode,
         Colors.LawnGreen,
-        "Effect")
+        Text_Node.EffectCategory)
     {
         if (id == "") return;
         _chromakey = new ChromaKey(NodesManager.GetContext(id).DeviceContext);

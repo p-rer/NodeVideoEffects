@@ -1,4 +1,5 @@
 using NodeVideoEffects.Core;
+using NodeVideoEffects.Utility;
 using Vortice.Direct2D1;
 using Vortice.Mathematics;
 using Colors = System.Windows.Media.Colors;
@@ -13,18 +14,18 @@ public class LensBlurNode : NodeLogic
 
     public LensBlurNode(string id) : base(
         [
-            new Input(new Image(null), "In"),
-            new Input(new Number(10, 0, 2000, 1), "Radius"),
-            new Input(new Number(100, 0, 1000, 1), "Brightness"),
-            new Input(new Number(2, 0, 10, 1), "EdgeStrength"),
-            new Input(new Number(16, 0.5f, 100, 1), "Quality")
+            new Input(new Image(null), Text_Node.Input),
+            new Input(new Number(10, 0, 2000, 1), Text_Node.Radius),
+            new Input(new Number(100, 0, 1000, 1), Text_Node.Brightness),
+            new Input(new Number(2, 0, 10, 1), Text_Node.EdgeStrength),
+            new Input(new Number(16, 0.5f, 100, 1), Text_Node.Quality)
         ],
         [
-            new Output(new Image(null), "Out")
+            new Output(new Image(null), Text_Node.Output)
         ],
-        "Lens Blur",
+        Text_Node.LensBlurNode,
         Colors.LawnGreen,
-        "Effect")
+        Text_Node.EffectCategory)
     {
         if (id == "") return;
         _effectId = id;

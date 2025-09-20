@@ -5,7 +5,63 @@ MulNode,乗算ノード,乗算,multiplication,乘法,乘法,곱셈,multiplicaci�
 SubNode,減算ノード,減算,subtraction,减法,減法,뺄셈,resta,الطرح
 PowNode,べき乗ノード,べき乗,Power,力量,力量,거듭제곱,Fuerza,قوة
 RootNode,累乗根ノード,累乗根,Radical root,根,根,누승근,Raíz radical,الجذر الجذري
-Input,入力,入力,Input,输入,輸入,입력,Aporte,مدخل
-Output,出力,出力,Output,输出,輸出,출력,Producción,الناتج
 FrameNode,フレームノード,フレーム,Frame,框架,框架,프레임,Marco,إطار
 GaussianBlurNode,ガウシアンブラーノード,ガウシアンブラー,Gaussian Blur,高斯模糊,高斯模糊,가우시안 블러,Desenfoque gaussiano,التمويه الغاوسي
+LensBlurNode,レンズブラーノード,レンズブラー,Lens Blur,镜头模糊,鏡頭模糊,렌즈 블러,Niebla de lente,تمويه العدسة
+MosaicNode,モザイクノード,モザイク,Mosaic,Mosaic,馬賽克,모자이크,Mosaico,فسيفساء
+ChromakeyNode,クロマキーノード,クロマキー,Chromakey,色度键,色度鍵,크로마키,Chroma key,المفتاح اللوني
+CreateMaskNode,マスク生成ノード,マスク生成,Create Mask,创建蒙版,創建遮罩,마스크 생성,Crear máscara,إنشاء قناع
+ClipWithMaskNode,マスクでクリップノード,マスクでクリップ,Clip with Mask,使用蒙版裁剪,使用遮罩裁剪,마스크로 클립,Recortar con máscara,قص بالقناع
+MaskToImageNode,マスクを画像に変換ノード,マスクを画像に変換,Mask to Image,蒙版转图,遮罩轉圖片,마스크를 이미지로 변환,De máscara a imagen,تحويل القناع إلى صورة
+BlendNode,ブレンドノード,ブレンド,Blend,混合,混合,블렌드,Mezcla,دمج
+
+CompositeCategory,合成,合成,Composite,合成,合成,합성,Composición,تركيب
+BasicCategory,基本カテゴリー,基本,Basic,Básico,基本,기본,Categoría básica,الفئة الأساسية
+EffectCategory,エフェクトカテゴリー,エフェクト,Effect,Efecto,效果,효과,Categoría de efecto,فئة التأثير
+MathCategory,数学カテゴリー,数学,Math,Matemáticas,數學,수학,Categoría de matemáticas,فئة الرياضيات
+
+Input,入力,入力,Input,输入,輸入,입력,Aporte,مدخل
+Input1,入力1,入力1,Input1,输入1,輸入1,입력1,Entrada1,المدخل1
+Input2,入力2,入力2,Input2,输入2,輸入2,입력2,Entrada2,المدخل2
+Output,出力,出力,Output,输出,輸出,출력,Producción,الناتج
+Value,値,値,Value,数值,數值,값,Valor,القيمة
+Value1,値1,値1,Value1,数值1,數值1,값1,Valor1,القيمة1
+Value2,値2,値2,Value2,数值2,數值2,값2,Valor2,القيمة2
+Result,結果,結果,Result,结果,結果,결과,Resultado,النتيجة
+Level,強度,強度,Level,强度,強度,강도,Nivel,المستوى
+Mode,モード,モード,Mode,模式,模式,모드,Modo,وضع
+Radius,半径,半径,Radius,半径,半徑,반지름,Radio,نصف القطر
+EdgeStrength,輪郭強度,輪郭強度,Edge Strength,边缘强度,邊緣強度,엣지 강도,Fuerza del borde,قوة الحافة
+Quality,品質,品質,Quality,质量,品質,품질,Calidad,جودة
+Tolerance,許容範囲,許容範囲,Tolerance,容差,容差,허용치,Tolerancia,تحمل
+Threshold,閾値,閾値,Threshold,阈值,閾值,임계값,Umbral,عتبة
+Feather,境界のぼかし,境界のぼかし,Feather,羽化,羽化,페더,Desvanecimiento,تنعيم الحافة
+Frame,フレーム,フレーム,Frame,帧,幀,프레임,Fotograma,إطار
+Image,画像,画像,Image,图像,影像,이미지,Imagen,صورة
+Mask,マスク,マスク,Mask,蒙版,遮罩,마스크,Máscara,قناع
+KeyColor,キーの色,キー色,Key Color,键色,鍵色,키 색상,Color clave,لون المفتاح
+Invert,反転,反転,Invert,反转,反轉,반전,Invertir,عكس
+InvertAlpha,透明度を反転させる,アルファを反転,Invert Alpha,反转透明度,反轉透明度,알파 반전,Invertir alfa,عكس ألفا
+Offset,オフセット,オフセット,Offset,偏移,偏移,오프셋,Desplazamiento,إزاحة
+Hue,色相,色相,Hue,色相,色相,색상,Tono,درجة اللون
+Saturation,彩度,彩度,Saturation,饱和度,飽和度,채도,Saturación,التشبع
+Brightness,明度,明度,Brightness,亮度,亮度,밝기,Brillo,السطوع
+Red,赤,赤,Red,红色,紅色,빨강,Rojo,أحمر
+Green,緑,緑,Green,绿色,綠色,초록,Verde,أخضر
+Blue,青,青,Blue,蓝色,藍色,파랑,Azul,أزرق
+Alpha,アルファ,アルファ,Alpha,阿尔法,阿爾法,알파,Alfa,ألفا
+Base,累乗の底,底,Base,底数,底數,밑,Base,الأساس
+Exponent,指数,指数,Exponent,指数,指數,지수,Exponente,الأس
+Radicand,被開平数,被開平数,Radicand,被开方数,被開方數,근수,Radicando,المقدار الجذري
+Degree,累乗根,累乗根,Degree,幂根,冪根,거듭제곱근,Grado,الدرجة
+AllowDiv0,0除算を許可する（答えを0と見做す）,0除算の許可,Allow Div0,允许除以0,允許除以0,0으로 나누기 허용,Permitir Div0,السماح بالقسمة على صفر
+Allow0thRoot,0乗根を許可する（答えを0と見做す）,0乗根の許可,Allow 0th Root,允许零次根,允許零次根,0차 근 허용,Permitir raíz 0,السماح بالجذر الصفري
+Circle,円,円,Circle,圆,圓,원,Círculo,دائرة
+Triangle,三角形,三角形,Triangle,三角形,三角形,삼각형,Triángulo,مثلث
+Rectangle,四角形,四角形,Rectangle,矩形,矩形,사각형,Rectángulo,مستطيل
+Hexagon,六角形,六角形,Hexagon,六边形,六邊形,육각형,Hexágono,مسدس
+Delaunay,ドロネー,ドロネー,Delaunay,德劳内,德勞內,드로네,Delaunay,ديلاوني
+Voronoi,ボロノイ,ボロノイ,Voronoi,沃罗诺伊,沃羅諾伊,보로노이,Voronoi,فورونوي
+MosaicType,モザイクの種類,モザイクの種類,Mosaic Type,马赛克类型,馬賽克類型,모자이크 종류,Tipo de mosaico,نوع الفسيفساء
+WhitePoint,ホワイトポイント,ホワイトポイント,White Point,白点,白點,화이트 포인트,Punto blanco,نقطة بيضاء
+BlackPoint,ブラックポイント,ブラックポイント,Black Point,黑点,黑點,블랙 포인트,Punto negro,نقطة سوداء

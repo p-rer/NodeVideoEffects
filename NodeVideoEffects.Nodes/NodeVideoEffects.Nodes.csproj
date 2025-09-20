@@ -38,7 +38,7 @@
             <HintPath>$(YMM4DirPath)Vortice.Mathematics.dll</HintPath>
         </Reference>
         <Reference Include="YukkuriMovieMaker">
-            <HintPath>$(YMM4DirPath)YukkuriMovieMaker.dll</HintPath>
+            <HintPath>..\..\..\..\..\ymm4\YukkuriMovieMaker.dll</HintPath>
         </Reference>
         <Reference Include="YukkuriMovieMaker.Plugin">
             <HintPath>$(YMM4DirPath)YukkuriMovieMaker.Plugin.dll</HintPath>

@@ -1,4 +1,5 @@
 using NodeVideoEffects.Core;
+using NodeVideoEffects.Utility;
 using Vortice.Direct2D1;
 using Colors = System.Windows.Media.Colors;
 using Enum = NodeVideoEffects.Core.Enum;
@@ -13,27 +14,27 @@ public class CreateMaskNode : NodeLogic
 
     public CreateMaskNode(string id) : base(
         [
-            new Input(new Image(null), "Image"),
+            new Input(new Image(null), Text_Node.Image),
             new Input(new Enum(
                 [
-                    "Hue",
-                    "Saturation",
-                    "Brightness",
-                    "Red",
-                    "Green",
-                    "Blue",
-                    "Alpha"
+                    Text_Node.Hue,
+                    Text_Node.Saturation,
+                    Text_Node.Brightness,
+                    Text_Node.Red,
+                    Text_Node.Green,
+                    Text_Node.Blue,
+                    Text_Node.Alpha
                 ]),
-                "Mode"),
-            new Input(new Number(0.0f, 0.0f, 1.0f, 2), "Offset"),
-            new Input(new Bool(false), "Invert")
+                Text_Node.Mode),
+            new Input(new Number(0.0f, 0.0f, 1.0f, 2), Text_Node.Offset),
+            new Input(new Bool(false), Text_Node.Invert)
         ],
         [
-            new Output(new Mask(null), "Mask")
+            new Output(new Mask(null), Text_Node.Mask)
         ],
-        "Create Mask",
+        Text_Node.CreateMaskNode,
         Colors.DarkViolet,
-        "Composite")
+        Text_Node.CompositeCategory)
     {
         if (id == "") return;
         _effectId = id;

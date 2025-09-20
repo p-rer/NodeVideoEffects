@@ -11,10 +11,10 @@ public class InputNode : NodeLogic
 
     public InputNode() : base(
         [],
-        [new Output(new Image(null), "Input", true)],
+        [new Output(new Image(null), Text_Node.Input, true)],
         Text_Node.Input,
         Colors.PaleVioletRed,
-        "Basic")
+        Text_Node.BasicCategory)
     {
     }
 
