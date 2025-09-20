@@ -1,5 +1,5 @@
-﻿using NodeVideoEffects.Core;
-using System.Windows.Media;
+﻿using System.Windows.Media;
+using NodeVideoEffects.Core;
 using NodeVideoEffects.Utility;
 
 namespace NodeVideoEffects.Nodes.Math;
@@ -15,7 +15,7 @@ public class RootNode : NodeLogic
         [
             new Output(new Number(0f, null, null, null), "Result")
         ],
-        Text.RootNode,
+        Text_Node.RootNode,
         Colors.LightCoral,
         "Math/Basic")
     {

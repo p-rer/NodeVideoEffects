@@ -24,7 +24,8 @@ public class NodeVideoEffectsPlugin : VideoEffectBase
 
     public string Id { get; set; } = "";
 
-    [Display(Name = nameof(Text.NodeEditor), GroupName = nameof(Text.NodeVideoEffects), ResourceType = typeof(Text))]
+    [Display(Name = nameof(Text_UI.NodeEditor), GroupName = nameof(Text_UI.NodeVideoEffects),
+        ResourceType = typeof(Text_UI))]
     [OpenNodeEditor]
     public List<NodeInfo> Nodes
     {

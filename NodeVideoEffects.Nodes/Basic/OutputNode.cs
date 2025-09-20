@@ -9,7 +9,7 @@ public class OutputNode : NodeLogic
     public OutputNode() : base(
         [new Input(new Image(null), "Output")],
         [],
-        Text.Output,
+        Text_Node.Output,
         Colors.PaleVioletRed,
         "Basic")
     {

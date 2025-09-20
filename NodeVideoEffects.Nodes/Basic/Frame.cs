@@ -1,5 +1,5 @@
-﻿using NodeVideoEffects.Core;
-using System.Windows.Media;
+﻿using System.Windows.Media;
+using NodeVideoEffects.Core;
 using NodeVideoEffects.Utility;
 
 namespace NodeVideoEffects.Nodes.Basic;
@@ -11,7 +11,7 @@ public class Frame : NodeLogic
     public Frame(string id = "") : base(
         [],
         [new Output(new Number(0, 0, null, 0), "Frame")],
-        Text.FrameNode,
+        Text_Node.FrameNode,
         Colors.IndianRed,
         "Basic")
     {

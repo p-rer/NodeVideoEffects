@@ -1,5 +1,5 @@
-﻿using NodeVideoEffects.Core;
-using System.Windows.Media;
+﻿using System.Windows.Media;
+using NodeVideoEffects.Core;
 using NodeVideoEffects.Utility;
 
 namespace NodeVideoEffects.Nodes.Math;
@@ -14,7 +14,7 @@ public class MulNode : NodeLogic
         [
             new Output(new Number(0f, null, null, null), "Result")
         ],
-        Text.MulNode,
+        Text_Node.MulNode,
         Colors.LightCoral,
         "Math/Basic")
     {

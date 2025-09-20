@@ -19,7 +19,7 @@ public class GaussianBlurNode : NodeLogic
         [
             new Output(new Image(null), "Out")
         ],
-        Text.GaussianBlurNode,
+        Text_Node.GaussianBlurNode,
         Colors.LawnGreen,
         "Effect")
     {

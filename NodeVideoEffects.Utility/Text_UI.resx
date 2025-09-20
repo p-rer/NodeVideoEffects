@@ -76,14 +76,4 @@
 <data name="CheckUpdate" xml:space="preserve"><value>更新を確認...</value></data>
 <data name="ShowAbout" xml:space="preserve"><value>概要...</value></data>
 <data name="About" xml:space="preserve"><value>概要</value></data>
-<data name="AddNode" xml:space="preserve"><value>加算</value></data>
-<data name="DivNode" xml:space="preserve"><value>除算</value></data>
-<data name="MulNode" xml:space="preserve"><value>乗算</value></data>
-<data name="SubNode" xml:space="preserve"><value>減算</value></data>
-<data name="PowNode" xml:space="preserve"><value>べき乗</value></data>
-<data name="RootNode" xml:space="preserve"><value>累乗根</value></data>
-<data name="Input" xml:space="preserve"><value>入力</value></data>
-<data name="Output" xml:space="preserve"><value>出力</value></data>
-<data name="FrameNode" xml:space="preserve"><value>フレーム</value></data>
-<data name="GaussianBlurNode" xml:space="preserve"><value>ガウシアンブラー</value></data>
 </root>

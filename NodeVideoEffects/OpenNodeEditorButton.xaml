@@ -6,6 +6,6 @@
              xmlns:utility="clr-namespace:NodeVideoEffects.Utility;assembly=NodeVideoEffects.Utility"
              mc:Ignorable="d">
     <Grid>
-        <Button Grid.Row="0" Content="{x:Static utility:Text.OpenEditor}" Click="Button_Click" />
+        <Button Grid.Row="0" Content="{x:Static utility:Text_UI.OpenEditor}" Click="Button_Click" />
     </Grid>
 </UserControl>

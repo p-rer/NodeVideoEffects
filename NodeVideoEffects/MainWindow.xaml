@@ -7,7 +7,7 @@
         xmlns:utility="clr-namespace:NodeVideoEffects.Utility;assembly=NodeVideoEffects.Utility"
         xmlns:local="clr-namespace:NodeVideoEffects"
         mc:Ignorable="d"
-        Title="{x:Static utility:Text.Editor}" MinHeight="450" MinWidth="800">
+        Title="{x:Static utility:Text_UI.Editor}" MinHeight="450" MinWidth="800">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*" MinWidth="30" MaxWidth="300" />
@@ -19,20 +19,20 @@
             <RowDefinition Height="1*" />
         </Grid.RowDefinitions>
         <Menu Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3">
-            <MenuItem Header="{x:Static utility:Text.File}">
-                <MenuItem Header="{x:Static utility:Text.Close}" Click="Close" />
+            <MenuItem Header="{x:Static utility:Text_UI.File}">
+                <MenuItem Header="{x:Static utility:Text_UI.Close}" Click="Close" />
             </MenuItem>
-            <MenuItem Header="{x:Static utility:Text.Edit}" IsEnabled="False">
-                <MenuItem Header="{x:Static utility:Text.Copy}" />
+            <MenuItem Header="{x:Static utility:Text_UI.Edit}" IsEnabled="False">
+                <MenuItem Header="{x:Static utility:Text_UI.Copy}" />
             </MenuItem>
-            <MenuItem Header="{x:Static utility:Text.View}">
-                <MenuItem Header="{x:Static utility:Text.ResetView}" Click="ResetView" />
+            <MenuItem Header="{x:Static utility:Text_UI.View}">
+                <MenuItem Header="{x:Static utility:Text_UI.ResetView}" Click="ResetView" />
                 <MenuItem Header="Open log..." Click="OpenLogViewer" />
                 <MenuItem Header="Delete all log" Click="LogsDelete" />
             </MenuItem>
-            <MenuItem Header="{x:Static utility:Text.Help}">
-                <MenuItem Header="{x:Static utility:Text.CheckUpdate}" Click="CheckUpdate" />
-                <MenuItem Header="{x:Static utility:Text.ShowAbout}" Click="ShowAbout" />
+            <MenuItem Header="{x:Static utility:Text_UI.Help}">
+                <MenuItem Header="{x:Static utility:Text_UI.CheckUpdate}" Click="CheckUpdate" />
+                <MenuItem Header="{x:Static utility:Text_UI.ShowAbout}" Click="ShowAbout" />
             </MenuItem>
         </Menu>
         <local:DockablePanelField Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="1">

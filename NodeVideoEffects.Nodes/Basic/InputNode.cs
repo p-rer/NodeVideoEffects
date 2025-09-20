@@ -1,5 +1,5 @@
-﻿using NodeVideoEffects.Core;
-using System.Windows.Media;
+﻿using System.Windows.Media;
+using NodeVideoEffects.Core;
 using NodeVideoEffects.Utility;
 using Vortice.Direct2D1;
 
@@ -12,9 +12,11 @@ public class InputNode : NodeLogic
     public InputNode() : base(
         [],
         [new Output(new Image(null), "Input", true)],
-        Text.Input,
+        Text_Node.Input,
         Colors.PaleVioletRed,
-        "Basic") { }
+        "Basic")
+    {
+    }
 
     public ID2D1Image? Image
     {
