@@ -26,9 +26,11 @@ public static class DynamicEffectImplGenerator
         var effectImplTypeBuilder = moduleBuild.DefineType(
             typeName,
             TypeAttributes.Public | TypeAttributes.Class | TypeAttributes.AutoClass | TypeAttributes.AnsiClass |
-            TypeAttributes.BeforeFieldInit,
-            typeof(EffectImplBase)
+            TypeAttributes.BeforeFieldInit
         );
+
+        var baseType = typeof(D2D1CustomShaderEffectImplBase<>).MakeGenericType(effectImplTypeBuilder);
+        effectImplTypeBuilder.SetParent(baseType);
 
         var customEffectAttributeConstructor = typeof(CustomEffectAttribute).GetConstructor(
                                                [
@@ -55,7 +57,7 @@ public static class DynamicEffectImplGenerator
         // Add fields to the struct
         foreach (var field in fields)
             constantBufferTypeBuilder.DefineField(field.name, field.type, FieldAttributes.Public);
-        for (var i = 0; i < 8; i++)
+        for (var i = 0; i < 4 * (1 + inputImageNum); i++)
             constantBufferTypeBuilder.DefineField("margin" + i, typeof(int), FieldAttributes.Public);
         var constantBufferType = constantBufferTypeBuilder.CreateType();
 
@@ -126,11 +128,12 @@ public static class DynamicEffectImplGenerator
 
             // UpdateConstants()
             setIl.Emit(OpCodes.Ldarg_0);
-            setIl.Emit(OpCodes.Callvirt, typeof(EffectImplBase).GetMethod(
-                                             "UpdateConstants",
-                                             BindingFlags.Instance | BindingFlags.NonPublic)
-                                         ?? throw new InvalidOperationException(
-                                             "Cannot get the method \"UpdateConstants\""));
+            setIl.Emit(OpCodes.Callvirt, TypeBuilder.GetMethod(baseType,
+                typeof(D2D1CustomShaderEffectImplBase<>).GetMethod(
+                    "UpdateConstants",
+                    BindingFlags.Instance | BindingFlags.NonPublic)
+                ?? throw new InvalidOperationException(
+                    "Cannot get the method \"UpdateConstants\"")));
             setIl.Emit(OpCodes.Nop);
             setIl.Emit(OpCodes.Ret);
 
@@ -159,13 +162,13 @@ public static class DynamicEffectImplGenerator
         }
 
         List<MethodBuilder> marginGetter = new();
-        for (var i = 0; i < 8; i++)
+        for (var i = 0; i < 4 * (1 + inputImageNum); i++)
         {
             //
             // Define getter
             //
-            // get_margin{0-7}() {
-            //     return constantBufferField.margin{0-7};
+            // get_margin{0...}() {
+            //     return constantBufferField.margin{0...};
             // }
             //
             var getter = effectImplTypeBuilder.DefineMethod(
@@ -185,8 +188,8 @@ public static class DynamicEffectImplGenerator
 
             //
             // Define setter
-            // set_margin{0-7}(value) {
-            //     constantBufferField.margin{0-7} = value;
+            // set_margin{0...}(value) {
+            //     constantBufferField.margin{0...} = value;
             // }
             //
             var setter = effectImplTypeBuilder.DefineMethod(
@@ -197,7 +200,7 @@ public static class DynamicEffectImplGenerator
             );
             var setIl = setter.GetILGenerator();
 
-            // Set constantBuffer.margin{0-7} = value
+            // Set constantBuffer.margin{0...} = value
             setIl.Emit(OpCodes.Ldarg_0);
             setIl.Emit(OpCodes.Ldflda, constantBufferField);
             setIl.Emit(OpCodes.Ldarg_1);
@@ -239,7 +242,7 @@ public static class DynamicEffectImplGenerator
             MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig |
             MethodAttributes.RTSpecialName,
             CallingConventions.Standard,
-            []
+            Type.EmptyTypes
         );
 
         var ctorIl = constructor.GetILGenerator();
@@ -249,22 +252,17 @@ public static class DynamicEffectImplGenerator
             typeof(VideoEffectsLoader).GetMethod("GetShader", BindingFlags.Public | BindingFlags.Static)
             ?? throw new InvalidOperationException("Cannot get the method \"GetShader\""));
         ctorIl.Emit(OpCodes.Call,
-            typeof(EffectImplBase).GetConstructor([typeof(byte[])]) ??
-            throw new InvalidOperationException("Cannot get the constructor"));
-        ctorIl.Emit(OpCodes.Nop);
-        ctorIl.Emit(OpCodes.Nop);
+            TypeBuilder.GetConstructor(baseType, typeof(D2D1CustomShaderEffectImplBase<>)
+                                                     .GetConstructor([typeof(byte[])])
+                                                 ?? throw new InvalidOperationException("Cannot get the constructor")));
         ctorIl.Emit(OpCodes.Ret);
+
 
         //
         // Define UpdateConstants method
-        // unsafe protected override void UpdateConstants() {
-        //     fixed(void* buffer = &constantBuffer) {
-        //         typeof(ID2D1DrawInfo).GetMethod(
-        //             "SetPixelShaderConstantBuffer", 
-        //             BindingFlags.NonPublic | BindingFlags.Instance,
-        //            [typeof(void*), typeof(int)])
-        //         ?.Invoke(drawInfo, [(IntPtr)buffer, sizeof(ConstantBuffer)]);
-        //     }
+        // protected override void UpdateConstants()
+        // {
+        //    drawInformation?.SetPixelShaderConstantBuffer(in constantBuffer);
         // }
         //
         var updateConstantsMethod = effectImplTypeBuilder.DefineMethod(
@@ -276,92 +274,30 @@ public static class DynamicEffectImplGenerator
         );
 
         var updateIl = updateConstantsMethod.GetILGenerator();
-        updateIl.DeclareLocal(typeof(void*));
-        updateIl.DeclareLocal(constantBufferType.MakeByRefType(), true);
-        var updateCallLabel = updateIl.DefineLabel();
-        var updateRetLabel = updateIl.DefineLabel();
+        var updateLabel1 = updateIl.DefineLabel();
+        var updateLabel2 = updateIl.DefineLabel();
+        updateIl.Emit(OpCodes.Ldarg_0);
+        updateIl.Emit(OpCodes.Ldfld, TypeBuilder.GetField(baseType,
+            typeof(D2D1CustomShaderEffectImplBase<>).GetField("drawInformation",
+                BindingFlags.NonPublic | BindingFlags.Instance)
+            ?? throw new InvalidOperationException("Cannot get the field \"drawInformation\"")));
+        updateIl.Emit(OpCodes.Dup);
+        updateIl.Emit(OpCodes.Brtrue, updateLabel1);
 
-        // fixed(void* buffer = &constantBuffer) { ...
+        updateIl.Emit(OpCodes.Pop);
+        updateIl.Emit(OpCodes.Br_S, updateLabel2);
+
+        updateIl.MarkLabel(updateLabel1);
         updateIl.Emit(OpCodes.Ldarg_0);
         updateIl.Emit(OpCodes.Ldflda, constantBufferField);
-        updateIl.Emit(OpCodes.Stloc_1);
-        updateIl.Emit(OpCodes.Ldloc_1);
-        updateIl.Emit(OpCodes.Conv_U);
-        updateIl.Emit(OpCodes.Stloc_0);
+        updateIl.Emit(OpCodes.Call, typeof(ID2D1DrawInfo).GetMethods(BindingFlags.Public | BindingFlags.Instance)
+            .First(m => m is { Name: "SetPixelShaderConstantBuffer", IsGenericMethodDefinition: true }
+                        && m.GetParameters().Length == 1
+                        && m.GetParameters()[0].ParameterType.IsByRef).MakeGenericMethod(constantBufferType));
 
-        // MethodInfo? meth = typeof(ID2D1DrawInfo).GetMethod("SetPixelShaderConstantBuffer", BindingFlags.NonPublic | BindingFlags.Instance, [typeof(void).MakePointerType(), typeof(int)])
-        updateIl.Emit(OpCodes.Ldtoken, typeof(ID2D1DrawInfo));
-        updateIl.Emit(OpCodes.Call, typeof(Type).GetMethod("GetTypeFromHandle")
-                                    ?? throw new InvalidOperationException(
-                                        "Cannot get the method \"GetTypeFromHandle\""));
-        updateIl.Emit(OpCodes.Ldstr, "SetPixelShaderConstantBuffer");
-        updateIl.Emit(OpCodes.Ldc_I4_S, 36);
-        updateIl.Emit(OpCodes.Ldc_I4_2);
-        updateIl.Emit(OpCodes.Newarr, typeof(Type));
-        updateIl.Emit(OpCodes.Dup);
-        updateIl.Emit(OpCodes.Ldc_I4_0);
-        updateIl.Emit(OpCodes.Ldtoken, typeof(void*));
-        updateIl.Emit(OpCodes.Call, typeof(Type).GetMethod("GetTypeFromHandle")
-                                    ?? throw new InvalidOperationException(
-                                        "Cannot get the method \"GetTypeFromHandle\""));
-        updateIl.Emit(OpCodes.Stelem_Ref);
-        updateIl.Emit(OpCodes.Dup);
-        updateIl.Emit(OpCodes.Ldc_I4_1);
-        updateIl.Emit(OpCodes.Ldtoken, typeof(int));
-        updateIl.Emit(OpCodes.Call, typeof(Type).GetMethod("GetTypeFromHandle")
-                                    ?? throw new InvalidOperationException(
-                                        "Cannot get the method \"GetTypeFromHandle\""));
-        updateIl.Emit(OpCodes.Stelem_Ref);
-        updateIl.Emit(OpCodes.Call, typeof(Type).GetMethod("GetMethod",
-                                        BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance,
-                                        [typeof(string), typeof(BindingFlags), typeof(Type[])])
-                                    ?? throw new InvalidOperationException("Cannot get the method \"GetMethod\""));
-        updateIl.Emit(OpCodes.Dup);
-        updateIl.Emit(OpCodes.Brtrue_S, updateCallLabel);
-
-        // if (meth is not null) {
-        updateIl.Emit(OpCodes.Pop);
-        updateIl.Emit(OpCodes.Br_S, updateRetLabel);
-
-        //     meth.Invoke(drawInfo, [(IntPtr)buffer, sizeof(ConstantBuffer)]);
-        // }
-        updateIl.MarkLabel(updateCallLabel);
-        updateIl.Emit(OpCodes.Ldarg_0);
-        updateIl.Emit(OpCodes.Ldfld,
-            typeof(EffectImplBase).GetField("drawInformation", BindingFlags.Instance | BindingFlags.NonPublic)
-            ?? throw new InvalidOperationException("Cannot get the field \"drawInformation\""));
-        updateIl.Emit(OpCodes.Ldc_I4_2);
-        updateIl.Emit(OpCodes.Newarr, typeof(object));
-        updateIl.Emit(OpCodes.Dup);
-        updateIl.Emit(OpCodes.Ldc_I4_0);
-        updateIl.Emit(OpCodes.Ldloc_0);
-        updateIl.Emit(OpCodes.Box, typeof(IntPtr));
-        updateIl.Emit(OpCodes.Stelem_Ref);
-        updateIl.Emit(OpCodes.Dup);
-        updateIl.Emit(OpCodes.Ldc_I4_1);
-        updateIl.Emit(OpCodes.Sizeof, constantBufferType);
-        updateIl.Emit(OpCodes.Box, typeof(int));
-        updateIl.Emit(OpCodes.Stelem_Ref);
-        updateIl.Emit(OpCodes.Call, typeof(MethodBase).GetMethod("Invoke",
-                                        BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance,
-                                        [typeof(object), typeof(object[])])
-                                    ?? throw new InvalidOperationException("Cannot get the method \"Invoke\""));
-        updateIl.Emit(OpCodes.Pop);
-
-        // return;
-        updateIl.MarkLabel(updateRetLabel);
-        updateIl.Emit(OpCodes.Ldc_I4_0);
-        updateIl.Emit(OpCodes.Conv_U);
-        updateIl.Emit(OpCodes.Stloc_1);
+        updateIl.MarkLabel(updateLabel2);
         updateIl.Emit(OpCodes.Ret);
 
-        effectImplTypeBuilder.DefineMethodOverride(
-            updateConstantsMethod,
-            typeof(EffectImplBase).GetMethod("UpdateConstants",
-                BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance,
-                Type.EmptyTypes)
-            ?? throw new InvalidOperationException("Cannot get the method \"UpdateConstants\"")
-        );
 
         //
         // public override void MapInputRectsToOutputRect(RawRect[] inputRects,
@@ -436,11 +372,6 @@ public static class DynamicEffectImplGenerator
         mapInputRectsToOutputRectIl.Emit(OpCodes.Initobj, typeof(RawRect));
         mapInputRectsToOutputRectIl.Emit(OpCodes.Ret);
 
-        effectImplTypeBuilder.DefineMethodOverride(
-            mapInputRectsToOutputRectMethod,
-            typeof(EffectImplBase).GetMethod("MapInputRectsToOutputRect")
-            ?? throw new InvalidOperationException("Cannot get the method \"MapInputRectsToOutputRect\""));
-
         //
         // public override void MapOutputRectToInputRects(RawRect outputRect, RawRect[] inputRects)
         // {
@@ -449,6 +380,14 @@ public static class DynamicEffectImplGenerator
         //         outputRect.Top - margin5,
         //         outputRect.Right + margin6,
         //         outputRect.Bottom + margin7);
+        //
+        //if inputImageNum > 0:
+        //     inputRects[1] = new RawRect(
+        //         outputRect.Left - margin8,
+        //         outputRect.Top - margin9,
+        //         outputRect.Right + margin10,
+        //         outputRect.Bottom + margin11);
+        //     ...
         // }
         //
         var mapOutputRectToInputRectsMethod = effectImplTypeBuilder.DefineMethod(
@@ -459,52 +398,51 @@ public static class DynamicEffectImplGenerator
 
         var mapOutputRectToInputRectsIl = mapOutputRectToInputRectsMethod.GetILGenerator();
 
-        mapOutputRectToInputRectsIl.Emit(OpCodes.Ldarg_2);
-        mapOutputRectToInputRectsIl.Emit(OpCodes.Ldc_I4_0);
+        for (var i = 0; i < inputImageNum; i++)
+        {
+            mapOutputRectToInputRectsIl.Emit(OpCodes.Ldarg_2);
+            mapOutputRectToInputRectsIl.Emit(OpCodes.Ldc_I4, i);
 
-        mapOutputRectToInputRectsIl.Emit(OpCodes.Ldarg_1);
-        mapOutputRectToInputRectsIl.Emit(OpCodes.Ldfld, typeof(RawRect).GetField(nameof(RawRect.Left))
-                                                        ?? throw new InvalidOperationException(
-                                                            "Cannot get the field \"Left\""));
-        mapOutputRectToInputRectsIl.Emit(OpCodes.Ldarg_0);
-        mapOutputRectToInputRectsIl.Emit(OpCodes.Call, marginGetter[4]);
-        mapOutputRectToInputRectsIl.Emit(OpCodes.Sub);
+            mapOutputRectToInputRectsIl.Emit(OpCodes.Ldarg_1);
+            mapOutputRectToInputRectsIl.Emit(OpCodes.Ldfld, typeof(RawRect).GetField(nameof(RawRect.Left))
+                                                            ?? throw new InvalidOperationException(
+                                                                "Cannot get the field \"Left\""));
+            mapOutputRectToInputRectsIl.Emit(OpCodes.Ldarg_0);
+            mapOutputRectToInputRectsIl.Emit(OpCodes.Call, marginGetter[4 * i + 4]);
+            mapOutputRectToInputRectsIl.Emit(OpCodes.Sub);
 
-        mapOutputRectToInputRectsIl.Emit(OpCodes.Ldarg_1);
-        mapOutputRectToInputRectsIl.Emit(OpCodes.Ldfld, typeof(RawRect).GetField(nameof(RawRect.Top))
-                                                        ?? throw new InvalidOperationException(
-                                                            "Cannot get the field \"Top\""));
-        mapOutputRectToInputRectsIl.Emit(OpCodes.Ldarg_0);
-        mapOutputRectToInputRectsIl.Emit(OpCodes.Call, marginGetter[5]);
-        mapOutputRectToInputRectsIl.Emit(OpCodes.Sub);
+            mapOutputRectToInputRectsIl.Emit(OpCodes.Ldarg_1);
+            mapOutputRectToInputRectsIl.Emit(OpCodes.Ldfld, typeof(RawRect).GetField(nameof(RawRect.Top))
+                                                            ?? throw new InvalidOperationException(
+                                                                "Cannot get the field \"Top\""));
+            mapOutputRectToInputRectsIl.Emit(OpCodes.Ldarg_0);
+            mapOutputRectToInputRectsIl.Emit(OpCodes.Call, marginGetter[4 * i + 5]);
+            mapOutputRectToInputRectsIl.Emit(OpCodes.Sub);
 
-        mapOutputRectToInputRectsIl.Emit(OpCodes.Ldarg_1);
-        mapOutputRectToInputRectsIl.Emit(OpCodes.Ldfld, typeof(RawRect).GetField(nameof(RawRect.Right))
-                                                        ?? throw new InvalidOperationException(
-                                                            "Cannot get the field \"Right\""));
-        mapOutputRectToInputRectsIl.Emit(OpCodes.Ldarg_0);
-        mapOutputRectToInputRectsIl.Emit(OpCodes.Call, marginGetter[6]);
-        mapOutputRectToInputRectsIl.Emit(OpCodes.Add);
+            mapOutputRectToInputRectsIl.Emit(OpCodes.Ldarg_1);
+            mapOutputRectToInputRectsIl.Emit(OpCodes.Ldfld, typeof(RawRect).GetField(nameof(RawRect.Right))
+                                                            ?? throw new InvalidOperationException(
+                                                                "Cannot get the field \"Right\""));
+            mapOutputRectToInputRectsIl.Emit(OpCodes.Ldarg_0);
+            mapOutputRectToInputRectsIl.Emit(OpCodes.Call, marginGetter[4 * i + 6]);
+            mapOutputRectToInputRectsIl.Emit(OpCodes.Add);
 
-        mapOutputRectToInputRectsIl.Emit(OpCodes.Ldarg_1);
-        mapOutputRectToInputRectsIl.Emit(OpCodes.Ldfld, typeof(RawRect).GetField(nameof(RawRect.Bottom))
-                                                        ?? throw new InvalidOperationException(
-                                                            "Cannot get the field \"Bottom\""));
-        mapOutputRectToInputRectsIl.Emit(OpCodes.Ldarg_0);
-        mapOutputRectToInputRectsIl.Emit(OpCodes.Call, marginGetter[7]);
-        mapOutputRectToInputRectsIl.Emit(OpCodes.Add);
+            mapOutputRectToInputRectsIl.Emit(OpCodes.Ldarg_1);
+            mapOutputRectToInputRectsIl.Emit(OpCodes.Ldfld, typeof(RawRect).GetField(nameof(RawRect.Bottom))
+                                                            ?? throw new InvalidOperationException(
+                                                                "Cannot get the field \"Bottom\""));
+            mapOutputRectToInputRectsIl.Emit(OpCodes.Ldarg_0);
+            mapOutputRectToInputRectsIl.Emit(OpCodes.Call, marginGetter[4 * i + 7]);
+            mapOutputRectToInputRectsIl.Emit(OpCodes.Add);
 
-        mapOutputRectToInputRectsIl.Emit(OpCodes.Newobj, typeof(RawRect).GetConstructors()[0]);
-        mapOutputRectToInputRectsIl.Emit(OpCodes.Stelem, typeof(RawRect));
+            mapOutputRectToInputRectsIl.Emit(OpCodes.Newobj, typeof(RawRect).GetConstructors()[0]);
+            mapOutputRectToInputRectsIl.Emit(OpCodes.Stelem, typeof(RawRect));
+        }
+
         mapOutputRectToInputRectsIl.Emit(OpCodes.Ret);
 
-        effectImplTypeBuilder.DefineMethodOverride(
-            mapOutputRectToInputRectsMethod,
-            typeof(EffectImplBase).GetMethod("MapOutputRectToInputRects")
-            ?? throw new InvalidOperationException("Cannot get the method \"MapOutputRectToInputRects\""));
-
         // Create the type and cache it
-        var generatedType = effectImplTypeBuilder.CreateTypeInfo().AsType();
+        var generatedType = effectImplTypeBuilder.CreateType();
         TypeCache.Add(typeName, generatedType);
         return generatedType;
     }

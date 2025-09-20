@@ -1,5 +1,6 @@
-﻿// #define ASM_EXPORT
+﻿//#define ASM_EXPORT
 
+using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
 using System.Numerics;
@@ -7,7 +8,6 @@ using System.Reflection;
 using System.Reflection.Emit;
 using NodeVideoEffects.Utility;
 using SharpGen.Runtime;
-using Vortice;
 using Vortice.Direct2D1;
 using Vortice.Mathematics;
 using YukkuriMovieMaker.Commons;
@@ -18,17 +18,9 @@ using YukkuriMovieMaker.Plugin.Effects;
 
 namespace NodeVideoEffects.Core;
 
-public delegate void MapInputRectsToOutputRectDelegate(
-    RawRect[] inputRects,
-    RawRect[] inputOpaqueSubRects,
-    out RawRect outputRect,
-    out RawRect outputOpaqueSubRect);
-
-public delegate void MapOutputRectToInputRectsDelegate(RawRect outputRect, RawRect[] inputRects);
-
 public class VideoEffectsLoader : IDisposable
 {
-    private static readonly Dictionary<string, byte[]> ShaderDictionaries = [];
+    private static readonly ConcurrentDictionary<string, byte[]> ShaderDictionaries = [];
     private readonly string _id;
     private readonly ShaderEffect? _shaderEffect;
     private readonly EffectType _type;
@@ -201,7 +193,7 @@ public class VideoEffectsLoader : IDisposable
             case EffectType.VideoEffect when _videoEffect != null:
             {
                 _processor ??= _videoEffect.CreateVideoEffect(NodesManager.GetContext(_id));
-                if (image == null) return false;
+                if (image[0] == null) return false;
                 lock (_processor)
                 {
                     try
@@ -225,7 +217,7 @@ public class VideoEffectsLoader : IDisposable
                 {
                     try
                     {
-                        for (var i = 0; i < image?.Length; i++)
+                        for (var i = 0; i < image.Length; i++)
                             _shaderEffect.SetInput(i, image[i], true);
                         output = _shaderEffect.Output;
                         return true;
@@ -252,7 +244,7 @@ public class VideoEffectsLoader : IDisposable
         return this;
     }
 
-    public VideoEffectsLoader SetOutputImageMargin(Rect margin)
+    public VideoEffectsLoader SetOutputImageMargin(params Rect[] margin)
     {
         if (_type != EffectType.ShaderEffect || _shaderEffect == null) return this;
         lock (_shaderEffect)
@@ -327,6 +319,7 @@ public class VideoEffectsLoader : IDisposable
 
     public static byte[] GetShader(string id)
     {
+        Logger.Write(LogLevel.Info, $"Loading shader \"{id}\".");
         return ShaderDictionaries[id];
     }
 
@@ -384,12 +377,15 @@ public class VideoEffectsLoader : IDisposable
             SetValue(_propertiesCount + 3, (int)margin.Bottom);
         }
 
-        public void SetOutputImageMargin(Rect margin)
+        public void SetOutputImageMargin(Rect[] margins)
         {
-            SetValue(_propertiesCount + 4, (int)margin.Left);
-            SetValue(_propertiesCount + 5, (int)margin.Top);
-            SetValue(_propertiesCount + 6, (int)margin.Right);
-            SetValue(_propertiesCount + 7, (int)margin.Bottom);
+            for (var i = 0; i < margins.Length; i++)
+            {
+                SetValue(_propertiesCount + 4 * i + 4, (int)margins[i].Left);
+                SetValue(_propertiesCount + 4 * i + 5, (int)margins[i].Top);
+                SetValue(_propertiesCount + 4 * i + 6, (int)margins[i].Right);
+                SetValue(_propertiesCount + 4 * i + 7, (int)margins[i].Bottom);
+            }
         }
 
         public void SetValueByName(string propertyName, object? value)
@@ -473,7 +469,7 @@ public class VideoEffectsLoader : IDisposable
                 setterIl.Emit(OpCodes.Call, typeof(ID2D1Properties).GetMethod("SetValue", [typeof(int), type])
                                             ?? throw new InvalidOperationException(
                                                 "Cannot get the method \"SetValue\""));
-                getterIl.Emit(OpCodes.Nop);
+                setterIl.Emit(OpCodes.Nop);
                 setterIl.Emit(OpCodes.Ret);
 
                 // Define the property
