@@ -13,28 +13,17 @@ namespace NodeVideoEffects.Control;
 public sealed partial class NumberPort : IControl
 {
     private readonly float _def;
-    private float _value;
-    private readonly float _min;
-    private readonly float _max;
     private readonly int _dig;
+    private readonly float _max;
+    private readonly float _min;
 
     private bool _isClicking;
     private bool _isDragging;
     private bool _isEditing;
     private Point _startPoint;
+    private float _value;
 
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-    [DllImport("User32.dll")]
-    private static extern bool SetCursorPos(int x, int y);
-
-    public object? Value
-    {
-        get => _value;
-        set => Update((float?)value ?? _def);
-    }
-
-    public NumberPort(float def, float value, float min, float max, int dig)
+    public NumberPort(float def, float value, float min, float max, int dig, string unit)
     {
         InitializeComponent();
 
@@ -44,7 +33,19 @@ public sealed partial class NumberPort : IControl
         _max = max;
         _dig = dig;
         Box.Text = Math.Round(_value, _dig).ToString("F" + _dig);
+        Unit.Content = unit;
     }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    public object? Value
+    {
+        get => _value;
+        set => Update((float?)value ?? _def);
+    }
+
+    [DllImport("User32.dll")]
+    private static extern bool SetCursorPos(int x, int y);
 
     private void OnPropertyChanged(string propertyName)
     {
