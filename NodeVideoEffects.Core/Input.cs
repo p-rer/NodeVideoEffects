@@ -1,6 +1,7 @@
-﻿using NodeVideoEffects.Control;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Windows.Media;
+using NodeVideoEffects.Control;
+using NodeVideoEffects.Utility;
 
 namespace NodeVideoEffects.Core;
 
@@ -9,10 +10,10 @@ namespace NodeVideoEffects.Core;
 /// </summary>
 public sealed class Input : INotifyPropertyChanged, IDisposable
 {
-    private readonly IPortValue _value;
-    private PortInfo _portInfo = new();
-
     private readonly Lock _locker = new();
+    private readonly IPortValue _value;
+    private bool _disposed;
+    private PortInfo _portInfo = new();
 
     /// <summary>
     /// Create new input port object
@@ -21,6 +22,7 @@ public sealed class Input : INotifyPropertyChanged, IDisposable
     /// <param name="name">This port's name</param>
     public Input(IPortValue value, string name)
     {
+        _disposed = false;
         _value = value;
         Name = name;
     }
@@ -32,27 +34,25 @@ public sealed class Input : INotifyPropertyChanged, IDisposable
     {
         get
         {
-            if (_portInfo.Id == "") return _value.Value;
-            try
+            if (_disposed || _portInfo.Id == "") return _value.Value;
+            lock (_locker)
             {
-                lock (_locker)
-                {
-                    var task = NodesManager.GetOutputValue(_portInfo.Id, _portInfo.Index);
-                    return task.GetAwaiter().GetResult();
-                }
-            }
-            catch
-            {
-                return null;
+                var task = NodesManager.GetOutputValue(_portInfo.Id, _portInfo.Index);
+                var result = task.GetAwaiter().GetResult();
+                Logger.Write(LogLevel.Debug,
+                    $"Get input value from connected node {_portInfo.Id} ({Name}), index {_portInfo.Index} - {result?.ToString() ?? "null"}");
+                return result;
             }
         }
         set
         {
             if (_value == value) return;
             _value.SetValue(value);
-            OnPropertyChanged(nameof(Value));
+            OnPropertyChanged(nameof(Value), _portInfo.Id == "");
         }
     }
+
+    public object? DefaultValue => _value.Value;
 
     /// <summary>
     /// Type of input value
@@ -76,9 +76,19 @@ public sealed class Input : INotifyPropertyChanged, IDisposable
     /// </summary>
     public PortInfo PortInfo => _portInfo;
 
-    public void UpdatedConnectionValue()
+    public void Dispose()
     {
-        OnPropertyChanged(nameof(Value));
+        _value.Dispose();
+        _disposed = true;
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    public void UpdatedConnectionValue(bool isControlChanged)
+    {
+        if (!isControlChanged)
+            return;
+        OnPropertyChanged(nameof(Value), false);
     }
 
     /// <summary>
@@ -102,20 +112,15 @@ public sealed class Input : INotifyPropertyChanged, IDisposable
     /// <param name="index">Index of this port</param>
     public void RemoveConnection(string id, int index)
     {
+        if (id == "")
+            _portInfo.Id = "";
         if (_portInfo.Id == "") return;
         NodesManager.NotifyInputConnectionRemove(id, index, _portInfo.Id, _portInfo.Index);
         _portInfo.Id = "";
     }
 
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-    private void OnPropertyChanged(string propertyName)
+    private void OnPropertyChanged(string propertyName, bool isChangedByControl)
     {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
-
-    public void Dispose()
-    {
-        _value.Dispose();
+        PropertyChanged?.Invoke(isChangedByControl, new PropertyChangedEventArgs(propertyName));
     }
 }

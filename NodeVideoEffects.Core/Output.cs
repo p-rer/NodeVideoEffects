@@ -10,16 +10,19 @@ public class Output : IDisposable
     private readonly IPortValue _value;
     private object? _result;
     private bool _isSuccess;
+    private readonly bool _noCache;
 
     /// <summary>
     /// Create new output port object
     /// </summary>
     /// <param name="value">PortValue</param>
     /// <param name="name">This port's name</param>
-    public Output(IPortValue value, string name)
+    /// <param name="noCache">If true, this port will not cache the value</param>
+    public Output(IPortValue value, string name, bool noCache = false)
     {
         _value = value;
         Name = name;
+        _noCache = noCache;
     }
 
     /// <summary>
@@ -27,12 +30,12 @@ public class Output : IDisposable
     /// </summary>
     public object? Value
     {
-        get => _isSuccess ? _result : null;
+        get => !_noCache & _isSuccess ? _result : null;
         set
         {
+            IsSuccess = !_noCache & true;
             _value.SetValue(value);
             _result = _value.Value;
-            IsSuccess = true;
         }
     }
 
@@ -55,13 +58,20 @@ public class Output : IDisposable
     /// </summary>
     public bool IsSuccess
     {
-        get => _isSuccess;
+        get => !_noCache & _isSuccess;
         set
         {
-            _isSuccess = value;
+            _isSuccess = !_noCache & value;
             if (Connection.Count == 0) return;
             foreach (var connection in Connection) NodesManager.NotifyOutputChanged(connection.Id, connection.Index);
         }
+    }
+
+    internal void SetIsSuccess(bool isSuccess, bool isChangedByControl)
+    {
+        _isSuccess = !_noCache & isSuccess;
+        if (Connection.Count == 0) return;
+        foreach (var connection in Connection) NodesManager.NotifyOutputChanged(connection.Id, connection.Index, isChangedByControl);
     }
 
     /// <summary>

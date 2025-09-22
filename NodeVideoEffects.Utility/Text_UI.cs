@@ -3,4 +3,4 @@
 namespace NodeVideoEffects.Utility;
 
 [AutoGenLocalizer]
-partial class Text;
+partial class Text_UI;

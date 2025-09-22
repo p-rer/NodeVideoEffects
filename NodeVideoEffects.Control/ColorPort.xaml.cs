@@ -12,7 +12,13 @@ public partial class ColorPort : IControl
     public event PropertyChangedEventHandler? PropertyChanged;
     private bool _suppressRgbChannelCallback;
     private bool _suppressSelectedColorCallback;
-    public object? Value { get; set; }
+    public object? Value
+    {
+        get => Color.FromArgb(Alpha, Red, Green, Blue);
+        set =>
+            (Alpha, Red, Green, Blue) = (((Color?)value)?.A ?? 0xff, ((Color?)value)?.R ?? 0xff,
+                ((Color?)value)?.G ?? 0xff, ((Color?)value)?.B ?? 0xff);
+    }
 
     public static readonly DependencyProperty SelectedColorProperty =
         DependencyProperty.Register(nameof(SelectedColor), typeof(Color), typeof(ColorPort),

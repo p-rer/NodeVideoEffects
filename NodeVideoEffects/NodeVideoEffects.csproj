@@ -28,6 +28,7 @@
         <ProjectReference Include="..\NodeVideoEffects.Core\NodeVideoEffects.Core.csproj"/>
         <AdditionalFiles Include="**\*.csv"/>
         <ProjectReference Include="..\NodeVideoEffects.Updater\NodeVideoEffects.Updater.csproj"/>
+        <ProjectReference Include="..\NodeVideoEffects.Utility\NodeVideoEffects.Utility.csproj"/>
         <ProjectReference Include="..\UtilityControls\UtilityControls\UtilityControls.csproj"/>
     </ItemGroup>
 
@@ -61,7 +62,7 @@
 
     <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
         <Exec Command="git rev-parse --short HEAD &gt;$(ProjectDir)git_id.txt&#xD;"/>
-        <Exec Command="git describe --tags --abbrev=0 2&gt;/dev/null &amp;&amp; git describe --tags --abbrev=0 &gt; $(ProjectDir)git_tag.txt&#xD;"/>
+        <Exec Command="git describe --tags --abbrev=0 &gt; $(ProjectDir)git_tag.txt&#xD;"/>
     </Target>
 
     <ItemGroup>

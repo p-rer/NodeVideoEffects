@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:utility="clr-namespace:NodeVideoEffects.Utility;assembly=NodeVideoEffects.Utility"
         mc:Ignorable="d"
-        Title="{x:Static utility:Text.About}" Height="200" Width="300"
+        Title="{x:Static utility:Text_UI.About}" Height="200" Width="300"
         BorderBrush="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" BorderThickness="1"
         WindowStyle="None" ResizeMode="NoResize" ShowInTaskbar="False" WindowStartupLocation="CenterOwner">
     <Grid>
@@ -17,7 +17,7 @@
         </Grid.RowDefinitions>
         <Label FontSize="20" Content="NodeVideoEffects" Grid.Row="0" />
         <Label Name="Ver" Content="" UseLayoutRounding="False" Grid.Row="1" />
-        <Button Content="{x:Static utility:Text.Close}" Click="Close" Grid.Row="3" HorizontalAlignment="Right"
+        <Button Content="{x:Static utility:Text_UI.Close}" Click="Close" Grid.Row="3" HorizontalAlignment="Right"
                 Width="70" Height="30" VerticalAlignment="Center" />
     </Grid>
 </Window>

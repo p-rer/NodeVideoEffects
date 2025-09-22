@@ -16,13 +16,3 @@ Help,ヘルプ,ヘルプ,Help,帮助,幫助,도움말,Ayuda,مساعدة
 CheckUpdate,更新を確認...,更新を確認...,Check for updates...,检查更新...,检查更新...,업데이트 확인...,Buscar actualizaciones...,التحقق من التحديثات...
 ShowAbout,概要...,概要...,About...,关于...,關於...,About...,Acerca de...,حول...
 About,概要,概要,About,关于,關於,About,Acerca de,حول
-AddNode,加算ノード,加算,Addition,加法,加法,덧셈,Suma,إضافة
-DivNode,除算ノード,除算,division,除法,除法,나눗셈,división,قسم
-MulNode,乗算ノード,乗算,multiplication,乘法,乘法,곱셈,multiplicación,الضرب
-SubNode,減算ノード,減算,subtraction,减法,減法,뺄셈,resta,الطرح
-PowNode,べき乗ノード,べき乗,Power,力量,力量,거듭제곱,Fuerza,قوة
-RootNode,累乗根ノード,累乗根,Radical root,根,根,누승근,Raíz radical,الجذر الجذري
-Input,入力,入力,Input,输入,輸入,입력,Aporte,مدخل
-Output,出力,出力,Output,输出,輸出,출력,Producción,الناتج
-FrameNode,フレームノード,フレーム,Frame,框架,框架,프레임,Marco,إطار
-GaussianBlurNode,ガウシアンブラーノード,ガウシアンブラー,Gaussian Blur,高斯模糊,高斯模糊,가우시안 블러,Desenfoque gaussiano,التمويه الغاوسي

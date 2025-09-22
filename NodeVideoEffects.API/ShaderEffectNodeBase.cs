@@ -9,9 +9,9 @@ namespace NodeVideoEffects.API;
 /// </summary>
 public abstract class ShaderEffectNodeBase : NodeLogic
 {
-    private readonly string _shaderId = "";
     private readonly string _effectId = "";
     private readonly List<(Type, string)>? _properties;
+    private readonly string _shaderId = "";
     private VideoEffectsLoader? _videoEffect;
 
     /// <summary>
@@ -46,7 +46,7 @@ public abstract class ShaderEffectNodeBase : NodeLogic
     {
         (_videoEffect ??= await VideoEffectsLoader.LoadEffect(_properties!, _shaderId, _effectId))
             .SetValue(_properties!.Select((property, i) => Convert.ChangeType(values[i], property.Item1)))
-            .Update(input, out var output);
+            .Update(out var output, input);
         return output;
     }
 }

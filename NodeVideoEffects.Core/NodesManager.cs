@@ -1,6 +1,6 @@
-﻿using NodeVideoEffects.Utility;
-using System.ComponentModel;
-using Vortice.Direct2D1;
+﻿using System.ComponentModel;
+using System.Reflection;
+using NodeVideoEffects.Utility;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
 
@@ -10,7 +10,25 @@ public static class NodesManager
 {
     private static readonly Dictionary<string, NodeLogic> Dictionary = [];
     private static readonly List<string> Items = [];
-    private static readonly Dictionary<string, ID2D1Image?> Images = [];
+
+    private static readonly Dictionary<string, IGraphicsDevicesAndContext> Contexts = [];
+
+    private static readonly Dictionary<string, EffectDescription> EffectDescription = [];
+
+    /// <summary>
+    ///     Now frame
+    /// </summary>
+    public static Dictionary<string, int> Frame { get; } = [];
+
+    /// <summary>
+    ///     Length of the item
+    /// </summary>
+    public static Dictionary<string, int> Length { get; } = [];
+
+    /// <summary>
+    ///     FPS of the YMM4 project
+    /// </summary>
+    public static Dictionary<string, int> Fps { get; } = [];
 
     /// <summary>
     /// Get output port value from node id and port index
@@ -23,17 +41,29 @@ public static class NodesManager
         try
         {
             var node = Dictionary[id];
-            if (node.GetType().FullName == "NodeVideoEffects.Nodes.Basic.InputNode")
-                return new ImageWrapper(Images[id[..id.IndexOf('-')]]);
+            switch (node.GetType().FullName)
+            {
+                case "NodeVideoEffects.Nodes.Basic.Frame":
+                    return (float)Frame[id[..id.IndexOf('-')]];
+            }
 
-            if (node.Outputs[index].IsSuccess)
-                return node.GetOutput(index);
-            if (EffectDescription[id[..id.IndexOf('-')]].Usage == TimelineSourceUsage.Exporting)
-                await node.Calculate();
-            else
-                await TaskTracker.RunTrackedTask(node.Calculate);
+            try
+            {
+                if (GetInfo(id[..id.IndexOf('-')]).Usage == TimelineSourceUsage.Playing &&
+                    node.Outputs[index].IsSuccess)
+                    return node.GetOutput(index);
+            }
+            catch
+            {
+                /*ignored*/
+            }
 
-            return node.GetOutput(index);
+            await TaskTracker.RunTrackedTask(node.Calculate);
+
+            var result = node.GetOutput(index);
+            Logger.Write(LogLevel.Debug,
+                $"Get output value from node {id} ({node.Name}), index {index} - {result?.ToString() ?? "null"}");
+            return result;
         }
         catch (Exception e)
         {
@@ -45,14 +75,6 @@ public static class NodesManager
     public static NodeLogic? GetNode(string id)
     {
         return Dictionary.GetValueOrDefault(id);
-    }
-
-    public static PropertyChangedEventHandler InputUpdated = delegate { };
-
-    public static void SetInput(string id, ID2D1Image? image)
-    {
-        Images[id] = image;
-        InputUpdated.Invoke(null, new PropertyChangedEventArgs(null));
     }
 
     public static bool CheckConnection(string inId, string outId)
@@ -81,9 +103,23 @@ public static class NodesManager
         return result;
     }
 
-    public static void NotifyOutputChanged(string id, int index)
+    public static void NotifyOutputChanged(string id, int index, bool isControlChanged = false)
     {
-        Task.Run(() => Dictionary[id].Inputs[index].UpdatedConnectionValue());
+        try
+        {
+            Dictionary[id].Inputs[index].UpdatedConnectionValue(isControlChanged);
+        }
+        catch (KeyNotFoundException)
+        {
+            Dictionary.ToList().ForEach(node =>
+                node.Value.Outputs.ToList().ForEach(output =>
+                    output.Connection.Where(port => port.Id == id).ToList()
+                        .ForEach(port => output.Connection.Remove(port))));
+        }
+        catch
+        {
+            // ignore
+        }
     }
 
     public static void NotifyInputConnectionAdd(string inId, int inIndex, string outId, int outIndex)
@@ -118,37 +154,57 @@ public static class NodesManager
 
     public static void AddNode(string id, NodeLogic node)
     {
-        Dictionary.Add(id, node);
+        if (!Dictionary.TryAdd(id, node)) Dictionary[id] = node;
     }
 
     public static void RemoveNode(string id)
     {
-        if (!string.IsNullOrEmpty(id)) Dictionary.Remove(id);
+        if (string.IsNullOrEmpty(id)) return;
+        Dictionary.TryGetValue(id, out var node);
+        if (node == null) return;
+        node.Outputs.Select(output => output.Connection).ToList()
+            .ForEach(connections => connections
+                .ForEach(connection =>
+                {
+                    if (connection.Id == "") return;
+                    Dictionary[connection.Id].Inputs[connection.Index].RemoveConnection("", 0);
+                }));
+        node.Inputs.Select(input => input.PortInfo).ToList()
+            .Where(connection => connection.Id == id)
+            .ToList()
+            .ForEach(connection =>
+                node.Inputs.Select(input => input.PortInfo).ToList().Remove(connection));
+        node.Dispose();
+        Dictionary.Remove(id);
     }
 
     public static bool AddItem(string id)
     {
-        if (Items.Contains(id)) return false;
+        if (string.IsNullOrEmpty(id) || Items.Contains(id)) return false;
         Items.Add(id);
-        Images.Add(id, null);
         return true;
     }
 
     public static void RemoveItem(string id)
     {
-        if (Images.TryGetValue(id, out var image)) image?.Dispose();
-        Images.Remove(id);
+        Dictionary.Select(kvp => kvp.Key)
+            .ToList()
+            .ForEach(key =>
+            {
+                if (!key.StartsWith(id)) return;
+                Dictionary.TryGetValue(key, out var node);
+                node?.Dispose();
+                Dictionary.Remove(key);
+            });
         Items.Remove(id);
-        _ = Dictionary.Where(kvp => kvp.Key.StartsWith(id))
-            .Select(kvp => Dictionary.Remove(kvp.Key));
     }
-
-    private static readonly Dictionary<string, IGraphicsDevicesAndContext> Contexts = [];
 
     public static void SetContext(string id, IGraphicsDevicesAndContext context)
     {
         if (!Contexts.TryAdd(id, context))
             Contexts[id] = context;
+        Dictionary.Where(kvp => kvp.Key.StartsWith(id)).ToList()
+            .ForEach(kvp => kvp.Value.UpdateContext(context.DeviceContext));
     }
 
     public static IGraphicsDevicesAndContext GetContext(string id)
@@ -156,25 +212,10 @@ public static class NodesManager
         return Contexts[id];
     }
 
-    /// <summary>
-    /// Now frame
-    /// </summary>
-    public static Dictionary<string, int> Frame { get; private set; } = [];
-
-    /// <summary>
-    /// Length of the item
-    /// </summary>
-    public static Dictionary<string, int> Length { get; private set; } = [];
-
-    /// <summary>
-    /// FPS of the YMM4 project
-    /// </summary>
-    public static Dictionary<string, int> Fps { get; private set; } = [];
-
-    private static readonly Dictionary<string, EffectDescription> EffectDescription = [];
-
-    internal static void SetInfo(string id, EffectDescription info)
+    public static void SetInfo(string id, EffectDescription info)
     {
+        if (Assembly.GetCallingAssembly().GetName().Name != "NodeVideoEffects")
+            return;
         if (!Frame.ContainsKey(id))
         {
             Frame.Add(id, info.ItemPosition.Frame);
@@ -214,30 +255,30 @@ public static class NodesManager
     /// <summary>
     /// Now frame has changed
     /// </summary>
-    public static event PropertyChangedEventHandler FrameChanged = delegate { };
+    public static event PropertyChangedEventHandler? FrameChanged;
 
     /// <summary>
     /// Length of the item has changed
     /// </summary>
-    public static event PropertyChangedEventHandler LengthChanged = delegate { };
+    public static event PropertyChangedEventHandler? LengthChanged;
 
     /// <summary>
     /// FPS of the YMM4 project has changed
     /// </summary>
-    public static event PropertyChangedEventHandler FpsChanged = delegate { };
+    public static event PropertyChangedEventHandler? FpsChanged;
 
     private static void OnFrameChanged(string propertyName)
     {
-        FrameChanged(null, new PropertyChangedEventArgs(propertyName));
+        FrameChanged?.Invoke(false, new PropertyChangedEventArgs(propertyName));
     }
 
     private static void OnLengthChanged(string propertyName)
     {
-        LengthChanged(null, new PropertyChangedEventArgs(propertyName));
+        LengthChanged?.Invoke(null, new PropertyChangedEventArgs(propertyName));
     }
 
     private static void OnFPSChanged(string propertyName)
     {
-        FpsChanged(null, new PropertyChangedEventArgs(propertyName));
+        FpsChanged?.Invoke(null, new PropertyChangedEventArgs(propertyName));
     }
 }

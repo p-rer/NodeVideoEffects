@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>net9.0-windows</TargetFramework>
@@ -13,6 +13,9 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Reference Include="SharpGen.Runtime">
+            <HintPath>$(YMM4DirPath)SharpGen.Runtime.dll</HintPath>
+        </Reference>
         <Reference Include="Vortice.Direct2D1">
             <HintPath>$(YMM4DirPath)Vortice.Direct2D1.dll</HintPath>
         </Reference>

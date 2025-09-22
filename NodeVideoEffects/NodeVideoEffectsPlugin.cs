@@ -1,6 +1,6 @@
-﻿using NodeVideoEffects.Core;
+﻿using System.ComponentModel.DataAnnotations;
+using NodeVideoEffects.Core;
 using NodeVideoEffects.Utility;
-using System.ComponentModel.DataAnnotations;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Exo;
 using YukkuriMovieMaker.Player.Video;
@@ -9,23 +9,23 @@ using YukkuriMovieMaker.Resources.Localization;
 
 namespace NodeVideoEffects;
 
-[VideoEffect("NodeVideoEffects", [VideoEffectCategories.Filtering], ["NVE", "ノード"], ResourceType = typeof(Texts), IsAviUtlSupported = false)]
+[VideoEffect("NodeVideoEffects", [VideoEffectCategories.Filtering], ["NVE", "ノード"], ResourceType = typeof(Texts),
+    IsAviUtlSupported = false)]
 public class NodeVideoEffectsPlugin : VideoEffectBase
 {
     private bool _isCreated;
+
+    private List<NodeInfo> _nodes = [];
     private NodeProcessor? _processor;
 
-    ~NodeVideoEffectsPlugin()
-    {
-        Window?.Close();
-        NodesManager.RemoveItem(Id);
-    }
+    internal NodeEditor? Window = null;
 
     public override string Label => "NodeVideoEffects";
 
     public string Id { get; set; } = "";
 
-    [Display(Name = nameof(Text.NodeEditor), GroupName = nameof(Text.NodeVideoEffects), ResourceType = typeof(Text))]
+    [Display(Name = nameof(Text_UI.NodeEditor), GroupName = nameof(Text_UI.NodeVideoEffects),
+        ResourceType = typeof(Text_UI))]
     [OpenNodeEditor]
     public List<NodeInfo> Nodes
     {
@@ -37,13 +37,14 @@ public class NodeVideoEffectsPlugin : VideoEffectBase
         }
     }
 
-    private List<NodeInfo> _nodes = [];
-
-    internal NodeEditor? Window = null;
-
     internal List<NodeInfo> EditorNodes
     {
         set => Set(ref _nodes, value, nameof(Nodes), nameof(EditorNodes));
+    }
+
+    ~NodeVideoEffectsPlugin()
+    {
+        Window?.Close();
     }
 
     public override IEnumerable<string> CreateExoVideoFilters(int keyFrameIndex,
@@ -56,12 +57,9 @@ public class NodeVideoEffectsPlugin : VideoEffectBase
     {
         if (_isCreated)
         {
-            NodesManager.SetContext(Id, devices);
-            _processor!.Context = devices.DeviceContext;
-#if DEBUG
+            _processor!.UpdateContext(devices);
             Logger.Write(LogLevel.Debug, $"Reloaded the effect processor, ID: \"{Id}\".");
             Logger.Write(LogLevel.Debug, "Nodes", Nodes);
-#endif // Debug
             return _processor;
         }
 

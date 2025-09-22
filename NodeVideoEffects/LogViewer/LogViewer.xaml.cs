@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -10,12 +11,17 @@ namespace NodeVideoEffects.LogViewer;
 /// <summary>
 /// Interaction logic for LogViewer.xaml
 /// </summary>
-public partial class LogViewer
+public partial class LogViewer : INotifyPropertyChanged
 {
     private static LogViewer? _openedWindow;
-    private ImmutableList<(DateTime, LogLevel, string, object?)> _logs = [];
+    public ObservableCollection<Tuple<DateTime, LogLevel, string, object?>> Logs { get; private set; } = [];
     private double _currentTargetOffset;
     private bool _isBottom = true;
+
+    public bool IsDebugFiltered { get; set; } = true;
+    public bool IsInfoFiltered { get; set; } = true;
+    public bool IsWarnFiltered { get; set; } = true;
+    public bool IsErrorFiltered { get; set; } = true;
 
     public LogViewer()
     {
@@ -48,12 +54,10 @@ public partial class LogViewer
 
     private void Update()
     {
-        var currentLogs = Logger.Read();
-        foreach (var log in currentLogs.Where(log => !_logs.Contains(log)))
-            Dispatcher.Invoke(() => Viewer.Children.Add(new LogItem(log)));
+        Logs = new ObservableCollection<Tuple<DateTime, LogLevel, string, object?>>(Logger.Read());
         if (_isBottom)
             Dispatcher.Invoke(ScrollViewer.ScrollToBottom);
-        _logs = currentLogs;
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Logs)));
     }
 
     private void OnPreviewMouseWheel(object sender, MouseWheelEventArgs e)
@@ -108,6 +112,22 @@ public partial class LogViewer
     {
         _isBottom = sender is ScrollViewer scrollViewer && scrollViewer.VerticalOffset >= scrollViewer.ScrollableHeight;
     }
+
+    private void ClearButton_Click(object sender, RoutedEventArgs e)
+    {
+        Logger.Clear();
+    }
+
+    private void ToggleButton_IsCheckChanged(object sender, RoutedEventArgs e)
+    {
+        Logger.Filter(
+            (byte)((IsDebugFiltered ? 0x01 : 0) |
+                   (IsInfoFiltered ? 0x02 : 0) |
+                   (IsWarnFiltered ? 0x04 : 0) |
+                   (IsErrorFiltered ? 0x08 : 0)));
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
 }
 
 /// <summary>

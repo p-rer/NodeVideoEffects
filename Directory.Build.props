@@ -1,5 +1,5 @@
 <Project>
     <PropertyGroup>
-        <YMM4DirPath>C:\Program Files\ymm4\</YMM4DirPath>
+        <YMM4DirPath>C:\ymm4\</YMM4DirPath>
     </PropertyGroup>
 </Project>

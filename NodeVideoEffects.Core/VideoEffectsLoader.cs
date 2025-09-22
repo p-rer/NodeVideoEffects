@@ -1,33 +1,31 @@
-﻿using System.Collections.Immutable;
+﻿//#define ASM_EXPORT
+
+using System.Collections.Concurrent;
+using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
+using System.Numerics;
 using System.Reflection;
 using System.Reflection.Emit;
+using NodeVideoEffects.Utility;
+using SharpGen.Runtime;
 using Vortice.Direct2D1;
+using Vortice.Mathematics;
+using YukkuriMovieMaker.Commons;
+using YukkuriMovieMaker.ItemEditor;
 using YukkuriMovieMaker.Player.Video;
 using YukkuriMovieMaker.Plugin;
 using YukkuriMovieMaker.Plugin.Effects;
-using SharpGen.Runtime;
-using System.Numerics;
-using Vortice.Mathematics;
-using NodeVideoEffects.Utility;
-using YukkuriMovieMaker.Commons;
-using Enum = NodeVideoEffects.Core.Enum;
 
 namespace NodeVideoEffects.Core;
 
 public class VideoEffectsLoader : IDisposable
 {
+    private static readonly ConcurrentDictionary<string, byte[]> ShaderDictionaries = [];
+    private readonly string _id;
+    private readonly ShaderEffect? _shaderEffect;
+    private readonly EffectType _type;
     private readonly IVideoEffect? _videoEffect;
     private IVideoEffectProcessor? _processor;
-    private readonly ShaderEffect? _shaderEffect;
-    private readonly string _id;
-    private readonly EffectType _type;
-
-    private enum EffectType
-    {
-        VideoEffect,
-        ShaderEffect
-    }
 
     private VideoEffectsLoader(IVideoEffect? effect, string id)
     {
@@ -42,6 +40,14 @@ public class VideoEffectsLoader : IDisposable
         _shaderEffect = effect;
         _type = EffectType.ShaderEffect;
         _id = id;
+    }
+
+    public void Dispose()
+    {
+        _processor?.ClearInput();
+        _processor?.Dispose();
+        _processor = null;
+        GC.SuppressFinalize(this);
     }
 
     ~VideoEffectsLoader()
@@ -133,11 +139,9 @@ public class VideoEffectsLoader : IDisposable
                     propInfo.SetValue(targetObject, value);
                 }
 
-                if (_videoEffect is YukkuriMovieMaker.ItemEditor.IEditable editable) await editable.EndEditAsync();
+                if (_videoEffect is IEditable editable) await editable.EndEditAsync();
             }
                 break;
-            default:
-                return this;
         }
 
         return this;
@@ -181,7 +185,7 @@ public class VideoEffectsLoader : IDisposable
         }
     }
 
-    public bool Update(ID2D1Image? image, out ID2D1Image? output)
+    public bool Update(out ID2D1Image? output, params ID2D1Image?[] image)
     {
         output = null;
         switch (_type)
@@ -189,14 +193,14 @@ public class VideoEffectsLoader : IDisposable
             case EffectType.VideoEffect when _videoEffect != null:
             {
                 _processor ??= _videoEffect.CreateVideoEffect(NodesManager.GetContext(_id));
-                if (image == null) return false;
+                if (image[0] == null) return false;
                 lock (_processor)
                 {
                     try
                     {
                         if (_processor.Output.NativePointer == IntPtr.Zero)
                             _processor = _videoEffect.CreateVideoEffect(NodesManager.GetContext(_id));
-                        _processor.SetInput(image);
+                        _processor.SetInput(image[0]);
                         _processor.Update(NodesManager.GetInfo(_id));
                         output = _processor.Output;
                         return true;
@@ -213,7 +217,8 @@ public class VideoEffectsLoader : IDisposable
                 {
                     try
                     {
-                        _shaderEffect.SetInput(0, image, true);
+                        for (var i = 0; i < image.Length; i++)
+                            _shaderEffect.SetInput(i, image[i], true);
                         output = _shaderEffect.Output;
                         return true;
                     }
@@ -228,54 +233,124 @@ public class VideoEffectsLoader : IDisposable
         }
     }
 
-    public void Dispose()
+    public VideoEffectsLoader SetInputImageMargin(Rect margin)
     {
-        _processor?.ClearInput();
-        _processor?.Dispose();
-        _processor = null;
-        GC.SuppressFinalize(this);
+        if (_type != EffectType.ShaderEffect || _shaderEffect == null) return this;
+        lock (_shaderEffect)
+        {
+            _shaderEffect?.SetInputImageMargin(margin);
+        }
+
+        return this;
+    }
+
+    public VideoEffectsLoader SetOutputImageMargin(params Rect[] margin)
+    {
+        if (_type != EffectType.ShaderEffect || _shaderEffect == null) return this;
+        lock (_shaderEffect)
+        {
+            _shaderEffect?.SetOutputImageMargin(margin);
+        }
+
+        return this;
     }
 
     public static async Task<VideoEffectsLoader> LoadEffect(string name, string id)
     {
-        return await Task.Run(() =>
-            new VideoEffectsLoader(
-                Activator.CreateInstance(PluginLoader.VideoEffects.ToList().First(type => type.Name == name)) as
-                    IVideoEffect, id));
+        return await Task.Run(() => LoadEffectSync(name, id));
+    }
+
+    public static VideoEffectsLoader LoadEffectSync(string name, string id)
+    {
+        return new VideoEffectsLoader(
+            Activator.CreateInstance(PluginLoader.VideoEffects.ToList().First(type => type.Name == name)) as
+                IVideoEffect, id);
     }
 
     public static async Task<VideoEffectsLoader> LoadEffect(List<(Type type, string name)> properties,
         string shaderResourceId, string effectId)
     {
-        return await Task.Run(() =>
+        return await Task.Run(() => LoadEffectSync(properties, shaderResourceId, effectId));
+    }
+
+    public static VideoEffectsLoader LoadEffectSync(List<(Type type, string name)> properties,
+        string shaderResourceId, string effectId, int inputImageNum = 1)
+    {
+        if (shaderResourceId == "")
+            throw new ArgumentException("Shader resource id is empty.");
+        var effect = ShaderEffect.Create(effectId, properties, shaderResourceId, inputImageNum);
+        if (effect.IsEnabled) return new VideoEffectsLoader(effect, effectId);
+        effect.Dispose();
+        effect = null;
+        return new VideoEffectsLoader(effect, effectId);
+    }
+
+    public static string RegisterShader(string shaderName)
+    {
+        byte[] shader;
+        var asm = Assembly.GetCallingAssembly();
+        var resName = asm.GetManifestResourceNames().FirstOrDefault(a => a.EndsWith(shaderName), "");
+
+        if (resName == "")
         {
-            if (shaderResourceId == "")
-                throw new ArgumentException("Shader resource id is empty.");
-            var effect = ShaderEffect.Create(effectId, properties, shaderResourceId);
-            if (effect.IsEnabled) return new VideoEffectsLoader(effect, effectId);
-            effect.Dispose();
-            effect = null;
-            return new VideoEffectsLoader(effect, effectId);
-        });
+            Logger.Write(LogLevel.Error, $"The shader resource \"*.{shaderName}\" not found.");
+            return "";
+        }
+
+        using (var resourceStream = asm.GetManifestResourceStream(resName))
+        {
+            if (resourceStream == null)
+            {
+                Logger.Write(LogLevel.Error, $"The shader resource \"{resName}\" not found.");
+                return "";
+            }
+
+            using (var memoryStream = new MemoryStream())
+            {
+                resourceStream.CopyTo(memoryStream);
+                shader = memoryStream.ToArray();
+            }
+        }
+
+        var id = Guid.NewGuid().ToString("N");
+        ShaderDictionaries.TryAdd(id, shader);
+        return id;
+    }
+
+    public static byte[] GetShader(string id)
+    {
+        Logger.Write(LogLevel.Info, $"Loading shader \"{id}\".");
+        return ShaderDictionaries[id];
+    }
+
+    private enum EffectType
+    {
+        VideoEffect,
+        ShaderEffect
     }
 
     public abstract class ShaderEffect : D2D1CustomShaderEffectBase
     {
+        private int _propertiesCount;
+
         public ShaderEffect(nint ptr) : base(ptr)
         {
         }
 
-        public static ShaderEffect Create(string effectId, List<(Type type, string name)> properties, string shaderId)
+        public static ShaderEffect Create(string effectId, List<(Type type, string name)> properties, string shaderId,
+            int inputImageNum)
         {
             // Generate a unique class name based on properties
             var className = $"ShaderEffect_{shaderId}_{string.Join("_", properties.Select(p => p.type.Name + p.name))}";
-            var effectType = GenerateEffectType(className, properties, shaderId);
+            var effectType = GenerateEffectType(className, properties, shaderId, inputImageNum);
 
             var context = NodesManager.GetContext(effectId);
-            var effectInstance = Activator.CreateInstance(effectType, context)
+            var effectInstance = Activator.CreateInstance(effectType, context) as ShaderEffect
                                  ?? throw new InvalidOperationException("Cannot create effect instance");
 
-            return effectInstance as ShaderEffect
+            effectInstance._propertiesCount = properties.Count;
+
+            return effectInstance
                    ?? throw new InvalidOperationException("Cannot cast to ShaderEffect");
         }
 
@@ -294,6 +369,25 @@ public class VideoEffectsLoader : IDisposable
             property.SetValue(this, value);
         }
 
+        public void SetInputImageMargin(Rect margin)
+        {
+            SetValue(_propertiesCount + 0, (int)margin.Left);
+            SetValue(_propertiesCount + 1, (int)margin.Top);
+            SetValue(_propertiesCount + 2, (int)margin.Right);
+            SetValue(_propertiesCount + 3, (int)margin.Bottom);
+        }
+
+        public void SetOutputImageMargin(Rect[] margins)
+        {
+            for (var i = 0; i < margins.Length; i++)
+            {
+                SetValue(_propertiesCount + 4 * i + 4, (int)margins[i].Left);
+                SetValue(_propertiesCount + 4 * i + 5, (int)margins[i].Top);
+                SetValue(_propertiesCount + 4 * i + 6, (int)margins[i].Right);
+                SetValue(_propertiesCount + 4 * i + 7, (int)margins[i].Bottom);
+            }
+        }
+
         public void SetValueByName(string propertyName, object? value)
         {
             // 指定されたプロパティ名（名前文字列）に対応するプロパティを取得する（BindingFlags: 公開・インスタンス）
@@ -304,17 +398,22 @@ public class VideoEffectsLoader : IDisposable
             property.SetValue(this, value);
         }
 
-        private static Type GenerateEffectType(string className, List<(Type, string)> properties, string shaderId)
+        private static Type GenerateEffectType(string className, List<(Type, string)> properties, string shaderId,
+            int inputImageNum)
         {
             AssemblyName assemblyName = new("DynamicID2D1PropertiesAssembly");
+#if ASM_EXPORT
+            var persistedAssemblyBuilder = new PersistedAssemblyBuilder(assemblyName, typeof(object).Assembly);
+            var moduleBuilder = persistedAssemblyBuilder.DefineDynamicModule("MainModule");
+#else
             var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
-            //PersistedAssemblyBuilder persistedAssemblyBuilder = new(assemblyName, typeof(object).Assembly);
-            //ModuleBuilder moduleBuilder = persistedAssemblyBuilder.DefineDynamicModule("MainModule");
             var moduleBuilder = assemblyBuilder.DefineDynamicModule("MainModule");
+#endif
 
             var typeBuilder = moduleBuilder.DefineType(className, TypeAttributes.Public, typeof(ShaderEffect));
 
-            var effectImplType = DynamicEffectImplGenerator.GenerateEffectImpl(properties, shaderId, moduleBuilder);
+            var effectImplType =
+                DynamicEffectImplGenerator.GenerateEffectImpl(properties, shaderId, moduleBuilder, inputImageNum);
 
             var index = 0;
             foreach (var (type, name) in properties)
@@ -370,7 +469,7 @@ public class VideoEffectsLoader : IDisposable
                 setterIl.Emit(OpCodes.Call, typeof(ID2D1Properties).GetMethod("SetValue", [typeof(int), type])
                                             ?? throw new InvalidOperationException(
                                                 "Cannot get the method \"SetValue\""));
-                getterIl.Emit(OpCodes.Nop);
+                setterIl.Emit(OpCodes.Nop);
                 setterIl.Emit(OpCodes.Ret);
 
                 // Define the property
@@ -407,7 +506,9 @@ public class VideoEffectsLoader : IDisposable
             ctorIl.Emit(OpCodes.Ret);
 
             var generateEffectType = typeBuilder.CreateTypeInfo().AsType();
-            //persistedAssemblyBuilder.Save("EffectModule.dll");
+#if ASM_EXPORT
+            persistedAssemblyBuilder.Save("EffectModule.dll");
+#endif
             return generateEffectType
                    ?? throw new InvalidOperationException("Cannot create the type");
 
@@ -438,44 +539,5 @@ public class VideoEffectsLoader : IDisposable
                 };
             }
         }
-    }
-
-    private static readonly Dictionary<string, byte[]> ShaderDictionaries = [];
-
-    public static string RegisterShader(string shaderName)
-    {
-        byte[] shader;
-        var asm = Assembly.GetCallingAssembly();
-        var resName = asm.GetManifestResourceNames().FirstOrDefault(a => a.EndsWith(shaderName), "");
-
-        if (resName == "")
-        {
-            Logger.Write(LogLevel.Error, $"The shader resource \"*.{shaderName}\" not found.");
-            return "";
-        }
-
-        using (var resourceStream = asm.GetManifestResourceStream(resName))
-        {
-            if (resourceStream == null)
-            {
-                Logger.Write(LogLevel.Error, $"The shader resource \"{resName}\" not found.");
-                return "";
-            }
-
-            using (var memoryStream = new MemoryStream())
-            {
-                resourceStream.CopyTo(memoryStream);
-                shader = memoryStream.ToArray();
-            }
-        }
-
-        var id = Guid.NewGuid().ToString("N");
-        ShaderDictionaries.TryAdd(id, shader);
-        return id;
-    }
-
-    public static byte[] GetShader(string id)
-    {
-        return ShaderDictionaries[id];
     }
 }

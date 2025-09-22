@@ -1,6 +1,5 @@
-﻿using NodeVideoEffects.Core;
-using System.ComponentModel;
-using System.Windows.Media;
+﻿using System.Windows.Media;
+using NodeVideoEffects.Core;
 using NodeVideoEffects.Utility;
 
 namespace NodeVideoEffects.Nodes.Basic;
@@ -11,21 +10,13 @@ public class Frame : NodeLogic
 
     public Frame(string id = "") : base(
         [],
-        [new Output(new Number(0, 0, null, 0), "Frame")],
-        Text.FrameNode,
+        [new Output(new Number(0, 0, null, 0), Text_Node.Frame)],
+        Text_Node.FrameNode,
         Colors.IndianRed,
-        "Basic")
+        Text_Node.BasicCategory)
     {
         _id = id;
-        NodesManager.FrameChanged += FRAME_PropertyChanged;
-        var value = NodesManager.Frame.GetValueOrDefault(_id, 0);
-        Outputs[0].Value = (float)value;
-    }
-
-    private void FRAME_PropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        var value = NodesManager.Frame.GetValueOrDefault(_id, 0);
-        Outputs[0].Value = value;
+        NodesManager.FrameChanged += Input_PropertyChanged;
     }
 
     public override Task Calculate()
