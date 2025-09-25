@@ -5,7 +5,6 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:utility="clr-namespace:NodeVideoEffects.Utility;assembly=NodeVideoEffects.Utility"
-        xmlns:local="clr-namespace:NodeVideoEffects"
         mc:Ignorable="d"
         Title="{x:Static utility:Text_UI.Editor}" MinHeight="450" MinWidth="800">
     <Grid>
@@ -35,15 +34,17 @@
                 <MenuItem Header="{x:Static utility:Text_UI.ShowAbout}" Click="ShowAbout" />
             </MenuItem>
         </Menu>
-        <local:DockablePanelField Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="1">
-            <local:DockablePanel Title="Explorer" DockLocation="Left" Priority="0">
-                <ContentControl x:Name="Explorer" />
-            </local:DockablePanel>
-            <local:DockablePanel Title="Editor" DockLocation="Center" Priority="1">
-                <nodeVideoEffects.Editor:Editor Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
-                                                x:Name="EditSpace"
-                                                NodesUpdated="EditSpace_NodesUpdated" />
-            </local:DockablePanel>
-        </local:DockablePanelField>
+        <Grid Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition MinWidth="350" MaxWidth="800" Width="350" />
+                <ColumnDefinition Width="5" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <ContentControl Grid.Column="0" x:Name="Explorer" />
+            <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
+            <nodeVideoEffects.Editor:Editor Grid.Column="2"
+                                            Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
+                                            x:Name="EditSpace" NodesUpdated="EditSpace_NodesUpdated" />
+        </Grid>
     </Grid>
 </Window>

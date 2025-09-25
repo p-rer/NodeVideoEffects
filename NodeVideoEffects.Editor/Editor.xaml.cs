@@ -1111,6 +1111,7 @@ public partial class Editor : INotifyPropertyChanged
 
         Canvas_Zoom(zoom);
         Keyboard.ClearFocus();
+        Focus();
     }
 
     [GeneratedRegex("[^0-9]")]
