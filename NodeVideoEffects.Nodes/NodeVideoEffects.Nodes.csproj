@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>net9.0-windows</TargetFramework>
@@ -38,7 +38,7 @@
             <HintPath>$(YMM4DirPath)Vortice.Mathematics.dll</HintPath>
         </Reference>
         <Reference Include="YukkuriMovieMaker">
-            <HintPath>..\..\..\..\..\ymm4\YukkuriMovieMaker.dll</HintPath>
+            <HintPath>$(YMM4DirPath)YukkuriMovieMaker.dll</HintPath>
         </Reference>
         <Reference Include="YukkuriMovieMaker.Plugin">
             <HintPath>$(YMM4DirPath)YukkuriMovieMaker.Plugin.dll</HintPath>
