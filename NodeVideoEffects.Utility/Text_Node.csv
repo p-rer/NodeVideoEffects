@@ -19,6 +19,7 @@ ChromakeyNode,クロマキーノード,クロマキー,Chromakey,色度键,色�
 CreateMaskNode,マスク生成ノード,マスク生成,Create Mask,创建蒙版,創建遮罩,마스크 생성,Crear máscara,إنشاء قناع
 ClipWithMaskNode,マスクでクリップノード,マスクでクリップ,Clip with Mask,使用蒙版裁剪,使用遮罩裁剪,마스크로 클립,Recortar con máscara,قص بالقناع
 MaskToImageNode,マスクを画像に変換ノード,マスクを画像に変換,Mask to Image,蒙版转图,遮罩轉圖片,마스크를 이미지로 변환,De máscara a imagen,تحويل القناع إلى صورة
+MaskThresholdNode,マスク閾値ノード,マスク閾値,Mask Threshold,蒙版阈值,遮罩閾值,마스크 임계값,Umbral de máscara,عتبة القناع
 BlendNode,ブレンドノード,ブレンド,Blend,混合,混合,블렌드,Mezcla,دمج
 
 CompositeCategory,合成,合成,Composite,合成,合成,합성,Composición,تركيب

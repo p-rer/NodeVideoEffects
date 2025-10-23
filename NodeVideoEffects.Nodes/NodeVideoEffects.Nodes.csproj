@@ -50,6 +50,8 @@
         <EmbeddedResource Include="Effect\LensBlur.cso"/>
         <EmbeddedResource Include="Composite\CreateMask.cso"/>
         <EmbeddedResource Include="Composite\MaskClip.cso"/>
+        <None Remove="Composite\MaskThreshold.cso"/>
+        <EmbeddedResource Include="Composite\MaskThreshold.cso"/>
     </ItemGroup>
 
 </Project>
