@@ -111,7 +111,7 @@ internal class NodeProcessor : IVideoEffectProcessor
                 }
             }
 
-            Logger.Write(LogLevel.Info, "Connection restoration completed.");
+            Logger.Write(LogLevel.Info, Text_UI.ConnectionRestorationCompleted);
         }
 
         var bitmapProperties = new BitmapProperties1(
@@ -127,27 +127,19 @@ internal class NodeProcessor : IVideoEffectProcessor
             bitmapProperties
         );
 
-        Logger.Write(LogLevel.Info, "NodeProcessor initialized successfully.");
+        Logger.Write(LogLevel.Info, Text_UI.NodeProcessorInitialized);
     }
 
     public ID2D1Image Output { private set; get; } = null!;
 
     public void SetInput(ID2D1Image? input)
     {
-        lock (_locker)
-        {
-            Logger.Write(LogLevel.Debug,
-                $"Setting input image: 0x{input?.NativePointer.ToString("x8") ?? "null"}");
-            _inputNode.Image = input;
-        }
+        lock (_locker) _inputNode.Image = input;
     }
 
     public void ClearInput()
     {
-        lock (_locker)
-        {
-            _inputNode.Image = null;
-        }
+        lock (_locker) _inputNode.Image = null;
     }
 
     public DrawDescription Update(EffectDescription effectDescription)
@@ -165,17 +157,15 @@ internal class NodeProcessor : IVideoEffectProcessor
 
                 _isCalculating = true;
                 output = ((ImageWrapper?)_outputNode.GetOutput(0))?.Image;
-                Logger.Write(LogLevel.Debug,
-                    $"Output image retrieved: 0x{output?.NativePointer.ToString("x8") ?? "null"}");
                 if (output == null || output.NativePointer == 0)
-                    throw new InvalidOperationException("Output image is null.");
+                    throw new InvalidOperationException(Text_UI.OutputImageIsNull);
                 _hasError = false;
                 return effectDescription.DrawDescription;
             }
             catch (Exception e)
             {
                 if (_hasError == false)
-                    Logger.Write(LogLevel.Error, $"{e.Message}\nItem ID: \"{_item.Id}\"", e);
+                    Logger.Write(LogLevel.Error, $"{_item.Id}", e);
                 _hasError = true;
 
                 SetBlankImage(out output);
@@ -195,7 +185,6 @@ internal class NodeProcessor : IVideoEffectProcessor
 
     public void Dispose()
     {
-        Logger.Write(LogLevel.Debug, "Disposing NodeProcessor resources.");
         ClearInput();
         _bitmap?.Dispose();
         _bitmap = null;

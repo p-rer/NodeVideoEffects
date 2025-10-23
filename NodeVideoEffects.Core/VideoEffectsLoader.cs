@@ -29,14 +29,14 @@ public class VideoEffectsLoader : IDisposable
 
     private VideoEffectsLoader(IVideoEffect? effect, string id)
     {
-        _videoEffect = effect ?? throw new ArgumentNullException(nameof(effect), @"Unable load effect");
+        _videoEffect = effect ?? throw new ArgumentNullException(nameof(effect), Text_UI.UnableLoadEffect);
         _type = EffectType.VideoEffect;
         _id = id;
     }
 
     private VideoEffectsLoader(ShaderEffect? effect, string id)
     {
-        if (effect == null) throw new ArgumentNullException(nameof(effect), @"Unable generate effect");
+        if (effect == null) throw new ArgumentNullException(nameof(effect), Text_UI.UnableGenerateEffect);
         _shaderEffect = effect;
         _type = EffectType.ShaderEffect;
         _id = id;
@@ -96,7 +96,7 @@ public class VideoEffectsLoader : IDisposable
                 // and match the property name (identifier) with the argument propertyName
                 var result = FindPropertyByDisplay(_videoEffect, propertyName);
                 if (result == null)
-                    throw new ArgumentException($@"The specified property '{propertyName}' was not found.",
+                    throw new ArgumentException(string.Format(Text_UI.PropertyNotFound, propertyName),
                         nameof(propertyName));
 
                 var (targetObject, propInfo) = result.Value;
@@ -108,10 +108,10 @@ public class VideoEffectsLoader : IDisposable
                     if (propInfo.GetValue(targetObject) is not Animation animObj)
                     {
                         if (!propInfo.CanWrite)
-                            throw new InvalidOperationException($"The property '{propertyName}' is read-only.");
+                            throw new InvalidOperationException(string.Format(Text_UI.PropertyReadOnly, propertyName));
                         animObj = Activator.CreateInstance<Animation>()
                                   ?? throw new InvalidOperationException(
-                                      "Unable to create an instance of Animation type.");
+                                      Text_UI.UnableCreateAnimationInstance);
                         // Set the Animation object to the target property only if it did not exist
                         propInfo.SetValue(targetObject, animObj);
                     }
@@ -121,7 +121,7 @@ public class VideoEffectsLoader : IDisposable
                         .GetProperty("Values", BindingFlags.Public | BindingFlags.Instance);
                     if (valuesProp == null || !valuesProp.CanRead || !valuesProp.CanWrite)
                         throw new InvalidOperationException(
-                            "The Values property of the Animation object was not found or is read-only.");
+                            Text_UI.AnimationValuesPropertyError);
 
                     // Create a new AnimationValue and add it to the existing list
                     var newList =
@@ -134,7 +134,7 @@ public class VideoEffectsLoader : IDisposable
                 else
                 {
                     if (!propInfo.CanWrite)
-                        throw new InvalidOperationException($"The property '{propertyName}' is read-only.");
+                        throw new InvalidOperationException(string.Format(Text_UI.PropertyReadOnly, propertyName));
                     // For non-Animation types, set the value to the property as usual
                     propInfo.SetValue(targetObject, value);
                 }
@@ -277,7 +277,7 @@ public class VideoEffectsLoader : IDisposable
         string shaderResourceId, string effectId, int inputImageNum = 1)
     {
         if (shaderResourceId == "")
-            throw new ArgumentException("Shader resource id is empty.");
+            throw new ArgumentException(Text_UI.ShaderResourceIdEmpty);
         var effect = ShaderEffect.Create(effectId, properties, shaderResourceId, inputImageNum);
         if (effect.IsEnabled) return new VideoEffectsLoader(effect, effectId);
         effect.Dispose();
@@ -293,7 +293,7 @@ public class VideoEffectsLoader : IDisposable
 
         if (resName == "")
         {
-            Logger.Write(LogLevel.Error, $"The shader resource \"*.{shaderName}\" not found.");
+            Logger.Write(LogLevel.Error, string.Format(Text_UI.ShaderResourceNotFound, shaderName));
             return "";
         }
 
@@ -301,7 +301,7 @@ public class VideoEffectsLoader : IDisposable
         {
             if (resourceStream == null)
             {
-                Logger.Write(LogLevel.Error, $"The shader resource \"{resName}\" not found.");
+                Logger.Write(LogLevel.Error, string.Format(Text_UI.ShaderResourceNotFound, shaderName));
                 return "";
             }
 
@@ -319,7 +319,7 @@ public class VideoEffectsLoader : IDisposable
 
     public static byte[] GetShader(string id)
     {
-        Logger.Write(LogLevel.Info, $"Loading shader \"{id}\".");
+        Logger.Write(LogLevel.Info, string.Format(Text_UI.LoadingShader, id));
         return ShaderDictionaries[id];
     }
 
@@ -346,12 +346,12 @@ public class VideoEffectsLoader : IDisposable
 
             var context = NodesManager.GetContext(effectId);
             var effectInstance = Activator.CreateInstance(effectType, context) as ShaderEffect
-                                 ?? throw new InvalidOperationException("Cannot create effect instance");
+                                 ?? throw new InvalidOperationException(Text_UI.CannotCreateEffectInstance);
 
             effectInstance._propertiesCount = properties.Count;
 
             return effectInstance
-                   ?? throw new InvalidOperationException("Cannot cast to ShaderEffect");
+                   ?? throw new InvalidOperationException(Text_UI.CannotCastToShaderEffect);
         }
 
         public void SetValueByIndex(int index, object? value)
@@ -359,12 +359,12 @@ public class VideoEffectsLoader : IDisposable
             var properties = GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
             if (index < 0 || index >= properties.Length)
-                throw new IndexOutOfRangeException("The specified index is out of range.");
+                throw new IndexOutOfRangeException(Text_UI.IndexOutOfRange);
 
             var property = properties[index];
 
             if (!property.CanWrite)
-                throw new InvalidOperationException($"The property '{property.Name}' is not writable.");
+                throw new InvalidOperationException(string.Format(Text_UI.PropertyReadOnly, property.Name));
 
             property.SetValue(this, value);
         }
@@ -393,8 +393,10 @@ public class VideoEffectsLoader : IDisposable
             // 指定されたプロパティ名（名前文字列）に対応するプロパティを取得する（BindingFlags: 公開・インスタンス）
             var property = GetType().GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
             if (property == null)
-                throw new ArgumentException($@"指定されたプロパティ '{propertyName}' が見つかりません。", nameof(propertyName));
-            if (!property.CanWrite) throw new InvalidOperationException($"プロパティ '{propertyName}' は書き込み不可です。");
+                throw new ArgumentException(string.Format(Text_UI.PropertyReadOnly, propertyName),
+                    nameof(propertyName));
+            if (!property.CanWrite)
+                throw new InvalidOperationException(string.Format(Text_UI.PropertyReadOnly, propertyName));
             property.SetValue(this, value);
         }
 
@@ -510,7 +512,7 @@ public class VideoEffectsLoader : IDisposable
             persistedAssemblyBuilder.Save("EffectModule.dll");
 #endif
             return generateEffectType
-                   ?? throw new InvalidOperationException("Cannot create the type");
+                   ?? throw new InvalidOperationException(Text_UI.CannotCreateType);
 
             MethodInfo? MakeGetterMethodInfo(Type type)
             {

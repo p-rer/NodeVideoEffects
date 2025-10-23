@@ -6,15 +6,16 @@ namespace NodeVideoEffects.Core;
 
 public class FloatVector2 : IPortValue
 {
+    private const int Digits = 6;
+    private readonly float _default1;
+    private readonly float _default2;
+    private readonly float _max;
+    private readonly float _min;
+    private readonly string _name1;
+    private readonly string _name2;
+    private readonly string _unit;
     private float _value1;
     private float _value2;
-    private readonly float _default1;
-    private readonly string _name1;
-    private readonly float _default2;
-    private readonly string _name2;
-    private readonly float _min;
-    private readonly float _max;
-    private const int Digits = 6;
 
     /// <summary>
     /// Create new number object
@@ -25,7 +26,9 @@ public class FloatVector2 : IPortValue
     /// <param name="name2">Name (2)</param>
     /// <param name="min">Min value</param>
     /// <param name="max">Max value</param>
-    public FloatVector2(float default1, string name1, float default2, string name2, float? min, float? max)
+    /// <param name="unit"></param>
+    public FloatVector2(float default1, string name1, float default2, string name2, float? min, float? max,
+        string unit = "")
     {
         _min = min ?? float.NaN;
         _max = max ?? float.NaN;
@@ -35,6 +38,7 @@ public class FloatVector2 : IPortValue
         _name2 = name2;
         _value1 = default1;
         _value2 = default2;
+        _unit = unit;
     }
 
     public Type Type => typeof(List<object?>);
@@ -72,7 +76,7 @@ public class FloatVector2 : IPortValue
     }
 
     public IControl Control => new StackPanelPort([
-        (new NumberPort(_default1, _value1, _min, _max, Digits), _name1),
-        (new NumberPort(_default2, _value1, _min, _max, Digits), _name2)
+        (new NumberPort(_default1, _value1, _min, _max, Digits, _unit), _name1),
+        (new NumberPort(_default2, _value1, _min, _max, Digits, _unit), _name2)
     ]);
 }

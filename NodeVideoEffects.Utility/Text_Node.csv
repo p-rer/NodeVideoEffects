@@ -4,6 +4,12 @@ DivNode,除算ノード,除算,division,除法,除法,나눗셈,división,قسم
 MulNode,乗算ノード,乗算,multiplication,乘法,乘法,곱셈,multiplicación,الضرب
 SubNode,減算ノード,減算,subtraction,减法,減法,뺄셈,resta,الطرح
 PowNode,べき乗ノード,べき乗,Power,力量,力量,거듭제곱,Fuerza,قوة
+SineNode,正弦ノード,正弦,Sine,正弦,正弦,사인,Seno,جيب
+CosineNode,余弦ノード,余弦,Cosine,余弦,餘弦,코사인,Coseno,جيب تمام
+TangentNode,正接ノード,正接,Tangent,正切,正切,탄젠트,Tangente,ظل
+ArcSineNode,逆正弦ノード,逆正弦,Arc Sine,反正弦,反正弦,아크사인,Arcoseno,قوس الجيب
+ArcCosineNode,逆余弦ノード,逆余弦,Arc Cosine,反余弦,反餘弦,아크코사인,Arcocoseno,قوس جيب التمام
+ArcTangentNode,逆正接ノード,逆正接,Arc Tangent,反正切,反正切,아크탄젠트,Arcotangente,قوس الظل
 RootNode,累乗根ノード,累乗根,Radical root,根,根,누승근,Raíz radical,الجذر الجذري
 FrameNode,フレームノード,フレーム,Frame,框架,框架,프레임,Marco,إطار
 GaussianBlurNode,ガウシアンブラーノード,ガウシアンブラー,Gaussian Blur,高斯模糊,高斯模糊,가우시안 블러,Desenfoque gaussiano,التمويه الغاوسي
@@ -19,6 +25,7 @@ CompositeCategory,合成,合成,Composite,合成,合成,합성,Composición,تر
 BasicCategory,基本カテゴリー,基本,Basic,Básico,基本,기본,Categoría básica,الفئة الأساسية
 EffectCategory,エフェクトカテゴリー,エフェクト,Effect,Efecto,效果,효과,Categoría de efecto,فئة التأثير
 MathCategory,数学カテゴリー,数学,Math,Matemáticas,數學,수학,Categoría de matemáticas,فئة الرياضيات
+TrigonometricCategory,三角関数カテゴリー,三角関数,Trigonometric,Trigonométrico,三角函數,삼각함수,Trigonométrica,فئة المثلثات
 
 Input,入力,入力,Input,输入,輸入,입력,Aporte,مدخل
 Input1,入力1,入力1,Input1,输入1,輸入1,입력1,Entrada1,المدخل1
@@ -31,6 +38,7 @@ Result,結果,結果,Result,结果,結果,결과,Resultado,النتيجة
 Level,強度,強度,Level,强度,強度,강도,Nivel,المستوى
 Mode,モード,モード,Mode,模式,模式,모드,Modo,وضع
 Radius,半径,半径,Radius,半径,半徑,반지름,Radio,نصف القطر
+Degree,角度,角度,Degree,角度,角度,각도,Grado,زاوية
 EdgeStrength,輪郭強度,輪郭強度,Edge Strength,边缘强度,邊緣強度,엣지 강도,Fuerza del borde,قوة الحافة
 Quality,品質,品質,Quality,质量,品質,품질,Calidad,جودة
 Tolerance,許容範囲,許容範囲,Tolerance,容差,容差,허용치,Tolerancia,تحمل

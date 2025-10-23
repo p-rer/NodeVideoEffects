@@ -62,7 +62,7 @@ public static class Logger
                 var log = new Tuple<DateTime, LogLevel, string, object?>(DateTime.Now, level, message, obj);
 #if DEBUG
 #else
-            if (level != LogLevel.Debug)
+                if (level == LogLevel.Debug) return;
 #endif
                 lock (LogsLock)
                 {

@@ -18,7 +18,6 @@ namespace NodeVideoEffects.Editor;
 public partial class NodeExplorer
 {
     private Type? _type;
-    private Window? _window;
 
     public NodeExplorer()
     {
@@ -53,18 +52,18 @@ public partial class NodeExplorer
                     obj = Activator.CreateInstance(type, []) as NodeLogic;
                 }
 
-                var category = obj?.Category?.Split('/') ?? ["(No Category)"];
+                var category = obj?.Category?.Split('/') ?? [Text_UI.NoCategory];
                 if ((type.Namespace?.Split('.') ?? [])[0] == "NodeVideoEffects")
                 {
                     var temp = new string[category.Length + 1];
-                    temp[0] = "Accessory";
+                    temp[0] = Text_UI.Accessory;
                     Array.Copy(category, 0, temp, 1, category.Length);
                     category = temp;
                 }
                 else
                 {
                     var temp = new string[category.Length + 1];
-                    temp[0] = "Extension";
+                    temp[0] = Text_UI.Extension;
                     Array.Copy(category, 0, temp, 1, category.Length);
                     category = temp;
                 }
@@ -92,8 +91,6 @@ public partial class NodeExplorer
                 currentNode?.Add(typeNode);
             }
         });
-
-        Loaded += (_, _) => { _window = FindParent<Window>(this); };
     }
 
     public ObservableCollection<NodesTree> Root { get; } = [];
@@ -124,79 +121,74 @@ public partial class NodeExplorer
 
     private void TextBlock_MouseMove(object sender, MouseEventArgs e)
     {
-        if (sender is TextBlock)
-            if (_type != null)
+        if (_type != null && sender is TextBlock textBlock)
+        {
+            var currentWindow = Window.GetWindow(textBlock);
+            var position = e.GetPosition(currentWindow);
+            if (currentWindow != null)
             {
-                var position = e.GetPosition(_window);
-                if (_window != null)
+                var result = VisualTreeHelper.HitTest(currentWindow, position);
+                if (result?.VisualHit is FrameworkElement element)
                 {
-                    var result = VisualTreeHelper.HitTest(_window, position);
-
-                    if (result?.VisualHit is FrameworkElement element)
-                    {
-                        var editor = FindParent<Editor>(element);
-                        Cursor = editor != null ? Cursors.Arrow : Cursors.No;
-                    }
+                    var editor = FindParent<Editor>(element);
+                    Cursor = editor != null ? Cursors.Arrow : Cursors.No;
                 }
             }
+        }
 
         e.Handled = true;
     }
 
     private void TextBlock_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
-        if (_type != null)
+        Cursor = Cursors.Arrow;
+        if (_type != null && sender is TextBlock textBlock)
         {
-            if (sender is TextBlock textBlock)
+            var currentWindow = Window.GetWindow(textBlock);
+            var position = e.GetPosition(currentWindow);
+
+            if (currentWindow != null)
             {
-                if (_type != null)
+                var result = VisualTreeHelper.HitTest(currentWindow, position);
+
+                if (result?.VisualHit is FrameworkElement element)
                 {
-                    var position = e.GetPosition(_window);
-                    if (_window != null)
+                    var editor = FindParent<Editor>(element);
+                    if (editor != null)
                     {
-                        var result = VisualTreeHelper.HitTest(_window, position);
-
-                        if (result?.VisualHit is FrameworkElement element)
+                        NodeLogic? node = null;
+                        try
                         {
-                            var editor = FindParent<Editor>(element);
-                            if (editor != null)
+                            try
                             {
-                                NodeLogic? node = null;
-                                try
-                                {
-                                    try
-                                    {
-                                        node = Activator.CreateInstance(_type, editor.ItemId) as NodeLogic;
-                                    }
-                                    catch (MissingMethodException)
-                                    {
-                                        node = Activator.CreateInstance(_type, []) as NodeLogic;
-                                    }
-                                }
-                                catch (Exception exception)
-                                {
-                                    Logger.Write(LogLevel.Error, exception.Message, exception);
-                                }
-
-                                if (node != null)
-                                {
-                                    node.Id = editor.ItemId + "-" + Guid.NewGuid().ToString("N");
-                                    for (var i = 0; i < (node.Inputs?.Length ?? 0); i++)
-                                        node.SetInputConnection(i, new PortInfo());
-                                    NodesManager.AddNode(node.Id, node);
-                                    editor.AddChildren(new Node(node),
-                                        editor.ConvertToTransform(e.GetPosition(editor)).X,
-                                        editor.ConvertToTransform(e.GetPosition(editor)).Y);
-                                    editor.OnNodesUpdated();
-                                }
+                                node = Activator.CreateInstance(_type, editor.ItemId) as NodeLogic;
                             }
+                            catch (MissingMethodException)
+                            {
+                                node = Activator.CreateInstance(_type, []) as NodeLogic;
+                            }
+                        }
+                        catch (Exception exception)
+                        {
+                            Logger.Write(LogLevel.Error, exception.Message, exception);
+                        }
+
+                        if (node != null)
+                        {
+                            node.Id = editor.ItemId + "-" + Guid.NewGuid().ToString("N");
+                            for (var i = 0; i < (node.Inputs?.Length ?? 0); i++)
+                                node.SetInputConnection(i, new PortInfo());
+                            NodesManager.AddNode(node.Id, node);
+                            editor.AddChildren(new Node(node),
+                                editor.ConvertToTransform(e.GetPosition(editor)).X,
+                                editor.ConvertToTransform(e.GetPosition(editor)).Y);
+                            editor.OnNodesUpdated();
                         }
                     }
                 }
-
-                textBlock.ReleaseMouseCapture();
             }
 
+            textBlock.ReleaseMouseCapture();
             _type = null;
         }
 

@@ -9,14 +9,18 @@
         <ResourceDictionary Source="Style/TextBox.xaml" />
     </UserControl.Resources>
     <Grid>
-        <TextBox Name="Box" PreviewTextInput="PreviewTextInput" KeyDown="ValueSubmit"
-                 DataObject.Pasting="TextBoxPasting"
-                 VerticalAlignment="Center" VerticalContentAlignment="Center"
-                 PreviewMouseDown="Box_PreviewMouseDown"
-                 PreviewMouseLeftButtonDown="Box_PreviewMouseLeftButtonDown"
-                 PreviewMouseMove="Box_PreviewMouseMove"
-                 PreviewMouseLeftButtonUp="Box_PreviewMouseLeftButtonUp"
-                 LostFocus="Box_LostFocus"
-                 Focusable="False" />
+        <StackPanel Orientation="Horizontal">
+            <TextBox Name="Box" PreviewTextInput="PreviewTextInput" KeyDown="ValueSubmit"
+                     DataObject.Pasting="TextBoxPasting"
+                     VerticalAlignment="Center" VerticalContentAlignment="Center"
+                     PreviewMouseDown="Box_PreviewMouseDown"
+                     PreviewMouseLeftButtonDown="Box_PreviewMouseLeftButtonDown"
+                     PreviewMouseMove="Box_PreviewMouseMove"
+                     PreviewMouseLeftButtonUp="Box_PreviewMouseLeftButtonUp"
+                     LostFocus="Box_LostFocus"
+                     Focusable="False" />
+            <Label Name="Unit" VerticalAlignment="Center" VerticalContentAlignment="Center"
+                   Foreground="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" />
+        </StackPanel>
     </Grid>
 </UserControl>

@@ -72,8 +72,46 @@
 <data name="Copy" xml:space="preserve"><value>コピー</value></data>
 <data name="View" xml:space="preserve"><value>表示</value></data>
 <data name="ResetView" xml:space="preserve"><value>表示をリセット</value></data>
+<data name="OpenLog" xml:space="preserve"><value>ログを開く...</value></data>
+<data name="DeleteAllLog" xml:space="preserve"><value>すべてのログを削除...</value></data>
 <data name="Help" xml:space="preserve"><value>ヘルプ</value></data>
 <data name="CheckUpdate" xml:space="preserve"><value>更新を確認...</value></data>
 <data name="ShowAbout" xml:space="preserve"><value>概要...</value></data>
 <data name="About" xml:space="preserve"><value>概要</value></data>
+<data name="Ready" xml:space="preserve"><value>準備完了</value></data>
+<data name="ReleaseMouseOnPortToConnect" xml:space="preserve"><value>接続するにはポート上でマウスボタンを離してください</value></data>
+<data name="ErrorWhileNodesConnecting" xml:space="preserve"><value>ノード接続中にエラーが発生しました</value></data>
+<data name="ErrorWhileRemovingNodes" xml:space="preserve"><value>ノード削除中にエラーが発生しました</value></data>
+<data name="ErrorWhileBuildingNodes" xml:space="preserve"><value>ノード構築中にエラーが発生しました</value></data>
+<data name="ErrorWhileRebuildingNodes" xml:space="preserve"><value>ノード再構築中にエラーが発生しました</value></data>
+<data name="ErrorWhileInitializingEditor" xml:space="preserve"><value>エディタ初期化中にエラーが発生しました</value></data>
+<data name="UnableLoadEffect" xml:space="preserve"><value>エフェクトを読み込めません</value></data>
+<data name="UnableGenerateEffect" xml:space="preserve"><value>エフェクトを生成できません</value></data>
+<data name="PropertyNotFound" xml:space="preserve"><value>指定されたプロパティ {0} が見つかりません</value></data>
+<data name="PropertyReadOnly" xml:space="preserve"><value>プロパティ {0} は読み取り専用です</value></data>
+<data name="UnableCreateAnimationInstance" xml:space="preserve"><value>アニメーション型のインスタンスを作成できません</value></data>
+<data name="AnimationValuesPropertyError" xml:space="preserve"><value>Animation オブジェクトの Values プロパティが見つからないか読み取り専用です</value></data>
+<data name="ShaderResourceIdEmpty" xml:space="preserve"><value>シェーダリソース ID が空です</value></data>
+<data name="ShaderResourceNotFound" xml:space="preserve"><value>シェーダリソース *.{0} が見つかりません</value></data>
+<data name="LoadingShader" xml:space="preserve"><value>シェーダ {0} を読み込んでいます</value></data>
+<data name="CannotCreateEffectInstance" xml:space="preserve"><value>エフェクトインスタンスを作成できません</value></data>
+<data name="CannotCastToShaderEffect" xml:space="preserve"><value>ShaderEffect にキャストできません</value></data>
+<data name="IndexOutOfRange" xml:space="preserve"><value>指定されたインデックスが範囲外です</value></data>
+<data name="CannotCreateType" xml:space="preserve"><value>型を作成できません</value></data>
+<data name="OutputImageIsNull" xml:space="preserve"><value>出力画像が null です</value></data>
+<data name="ConnectionRestorationCompleted" xml:space="preserve"><value>接続復旧が完了しました</value></data>
+<data name="NodeProcessorInitialized" xml:space="preserve"><value>ノードプロセッサの初期化が成功しました</value></data>
+<data name="Connecting" xml:space="preserve"><value>接続中...</value></data>
+<data name="RebuildingNodes" xml:space="preserve"><value>ノード再構築中...</value></data>
+<data name="Initializing" xml:space="preserve"><value>初期化中...</value></data>
+<data name="AllTasksCompleted" xml:space="preserve"><value>すべてのタスクが完了しました</value></data>
+<data name="RunningTasks" xml:space="preserve"><value>{0} 件のタスクを実行中</value></data>
+<data name="ItemPropertiesNotSet" xml:space="preserve"><value>アイテムプロパティが設定されていません</value></data>
+<data name="DisposingNodeLogic" xml:space="preserve"><value>ノードロジックを破棄中: {0}(id: {1})</value></data>
+<data name="NoCategory" xml:space="preserve"><value>（カテゴリなし）</value></data>
+<data name="Accessory" xml:space="preserve"><value>アクセサリ</value></data>
+<data name="Extension" xml:space="preserve"><value>拡張</value></data>
+<data name="FailedToGetLatestRelease" xml:space="preserve"><value>最新版の取得に失敗</value></data>
+<data name="NewVersionAvailableInfo" xml:space="preserve"><value>新しいバージョンが利用可能です。\n現在のバージョン: {0}\n最新バージョン: {1}</value></data>
+<data name="NewVersionAvailableConfirm" xml:space="preserve"><value>新しいバージョンが利用可能です。更新しますか？\n{0} -&gt; {1}</value></data>
 </root>

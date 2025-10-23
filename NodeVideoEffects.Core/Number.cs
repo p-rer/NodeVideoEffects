@@ -5,11 +5,12 @@ namespace NodeVideoEffects.Core;
 
 public class Number : IPortValue
 {
-    private float _value;
     private readonly float _default;
-    private readonly float _min;
-    private readonly float _max;
     private readonly int _digits;
+    private readonly float _max;
+    private readonly float _min;
+    private readonly string _unit;
+    private float _value;
 
     /// <summary>
     /// Create new number object
@@ -18,12 +19,14 @@ public class Number : IPortValue
     /// <param name="min">Min value</param>
     /// <param name="max">Max value</param>
     /// <param name="digits">Number of decimal places(max:6)</param>
-    public Number(float @default, float? min, float? max, int? digits)
+    /// <param name="unit">Unit string</param>
+    public Number(float @default, float? min, float? max, int? digits, string unit = "")
     {
         _min = min ?? float.NaN;
         _max = max ?? float.NaN;
         _default = @default;
         _value = @default;
+        _unit = unit;
         var nonNullDigits = digits ?? 6;
         _digits = nonNullDigits > 6 ? 6 : nonNullDigits < 0 ? 0 : nonNullDigits;
     }
@@ -56,5 +59,5 @@ public class Number : IPortValue
     {
     }
 
-    public IControl Control => new NumberPort(_default, _value, _min, _max, _digits);
+    public IControl Control => new NumberPort(_default, _value, _min, _max, _digits, _unit);
 }

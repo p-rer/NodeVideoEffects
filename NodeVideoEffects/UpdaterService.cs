@@ -14,7 +14,7 @@ public partial class UpdaterService : IPlugin
     public UpdaterService() : this(false)
     {
     }
-    
+
     public UpdaterService(bool force)
     {
         Task.Run(async () =>
@@ -32,17 +32,17 @@ public partial class UpdaterService : IPlugin
 #endif // PREVIEW_RELEASE
                 var responseBody = await GetLatestRelease(client, "p-rer", "NodeVideoEffects", isRelease);
                 var json = JObject.Parse(responseBody ??
-                                         throw new InvalidOperationException("Failed to get the latest release."));
+                                         throw new InvalidOperationException(Text_UI.FailedToGetLatestRelease));
                 var newVersion = ParseVersion(json["tag_name"]?.ToString());
 
                 var currentVersion = ParseVersion(ResourceLoader.FileLoad("git_tag.txt"));
                 if (newVersion <= currentVersion) return;
                 Logger.Write(LogLevel.Info,
-                    $"A new version is available.\nCurrent version: {currentVersion}, Latest version: {newVersion}");
+                    string.Format(Text_UI.NewVersionAvailableInfo, currentVersion, newVersion));
                 if (!force)
                 {
                     var result = MessageBox.Show(
-                        $"A new version is available. Do you want to update?\n{currentVersion} -> {newVersion}",
+                        string.Format(Text_UI.NewVersionAvailableConfirm, currentVersion, newVersion),
                         "Update", MessageBoxButton.YesNo, MessageBoxImage.Question);
                     if (result == MessageBoxResult.Yes)
                     {
@@ -104,7 +104,6 @@ public partial class UpdaterService : IPlugin
 
     public static async Task<bool> CheckUpdate()
     {
-
         using var client = new HttpClient();
 
         client.DefaultRequestHeaders.Add("User-Agent", ".Net Application");
@@ -118,7 +117,7 @@ public partial class UpdaterService : IPlugin
 #endif // PREVIEW_RELEASE
             var responseBody = await GetLatestRelease(client, "p-rer", "NodeVideoEffects", isRelease);
             var json = JObject.Parse(responseBody ??
-                                     throw new InvalidOperationException("Failed to get the latest release."));
+                                     throw new InvalidOperationException(Text_UI.FailedToGetLatestRelease));
             var newVersion = ParseVersion(json["tag_name"]?.ToString());
 
             var currentVersion = ParseVersion(ResourceLoader.FileLoad("git_tag.txt"));
@@ -132,6 +131,7 @@ public partial class UpdaterService : IPlugin
         {
             // ignore
         }
+
         return false;
     }
 

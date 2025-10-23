@@ -29,7 +29,7 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
 
     private void Button_Click(object sender, RoutedEventArgs e)
     {
-        if (ItemProperties is null) throw new InvalidOperationException("ItemProperties is not set.");
+        if (ItemProperties is null) throw new InvalidOperationException(Text_UI.ItemPropertiesNotSet);
         if (((NodeVideoEffectsPlugin)ItemProperties[0].Item).Window != null) return;
 
         BeginEdit?.Invoke(this, EventArgs.Empty);
@@ -49,18 +49,11 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
 
         window.NodesUpdated += (_, _) =>
         {
-            Logger.Write(LogLevel.Debug, "NodesUpdated event triggered.\nStack trace:",
-                Environment.StackTrace);
-            if (window == null)
-            {
-                Logger.Write(LogLevel.Debug, "No changes detected in nodes. Exiting NodesUpdated event handler.");
-                return;
-            }
+            if (window == null) return;
 
             BeginEdit?.Invoke(this, EventArgs.Empty);
             pluginItem.EditorNodes = window.Nodes;
             EndEdit?.Invoke(this, EventArgs.Empty);
-            Logger.Write(LogLevel.Debug, "NodesUpdated event processed.");
         };
 
         window.Closing += (_, _) =>
