@@ -58,8 +58,6 @@ public class NodeVideoEffectsPlugin : VideoEffectBase
         if (_isCreated)
         {
             _processor!.UpdateContext(devices);
-            Logger.Write(LogLevel.Debug, $"Reloaded the effect processor, ID: \"{Id}\".");
-            Logger.Write(LogLevel.Debug, "Nodes", Nodes);
             return _processor;
         }
 

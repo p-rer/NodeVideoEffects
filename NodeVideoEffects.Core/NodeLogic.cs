@@ -81,7 +81,7 @@ public abstract class NodeLogic : IDisposable
 
     private void DisposeBase()
     {
-        Logger.Write(LogLevel.Info, $"Disposing NodeLogic: {Name}(id: {Id})", new StackTrace());
+        Logger.Write(LogLevel.Info, string.Format(Text_UI.DisposingNodeLogic, Name, Id), new StackTrace());
         try
         {
             foreach (var input in Inputs)

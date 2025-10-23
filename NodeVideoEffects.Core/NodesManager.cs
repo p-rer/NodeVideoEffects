@@ -61,8 +61,6 @@ public static class NodesManager
             await TaskTracker.RunTrackedTask(node.Calculate);
 
             var result = node.GetOutput(index);
-            Logger.Write(LogLevel.Debug,
-                $"Get output value from node {id} ({node.Name}), index {index} - {result?.ToString() ?? "null"}");
             return result;
         }
         catch (Exception e)

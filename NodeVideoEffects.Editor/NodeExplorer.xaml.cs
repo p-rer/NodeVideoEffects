@@ -52,18 +52,18 @@ public partial class NodeExplorer
                     obj = Activator.CreateInstance(type, []) as NodeLogic;
                 }
 
-                var category = obj?.Category?.Split('/') ?? ["(No Category)"];
+                var category = obj?.Category?.Split('/') ?? [Text_UI.NoCategory];
                 if ((type.Namespace?.Split('.') ?? [])[0] == "NodeVideoEffects")
                 {
                     var temp = new string[category.Length + 1];
-                    temp[0] = "Accessory";
+                    temp[0] = Text_UI.Accessory;
                     Array.Copy(category, 0, temp, 1, category.Length);
                     category = temp;
                 }
                 else
                 {
                     var temp = new string[category.Length + 1];
-                    temp[0] = "Extension";
+                    temp[0] = Text_UI.Extension;
                     Array.Copy(category, 0, temp, 1, category.Length);
                     category = temp;
                 }

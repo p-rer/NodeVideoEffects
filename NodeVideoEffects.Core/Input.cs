@@ -1,7 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Windows.Media;
 using NodeVideoEffects.Control;
-using NodeVideoEffects.Utility;
 
 namespace NodeVideoEffects.Core;
 
@@ -39,8 +38,6 @@ public sealed class Input : INotifyPropertyChanged, IDisposable
             {
                 var task = NodesManager.GetOutputValue(_portInfo.Id, _portInfo.Index);
                 var result = task.GetAwaiter().GetResult();
-                Logger.Write(LogLevel.Debug,
-                    $"Get input value from connected node {_portInfo.Id} ({Name}), index {_portInfo.Index} - {result?.ToString() ?? "null"}");
                 return result;
             }
         }

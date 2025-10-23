@@ -76,7 +76,7 @@ public partial class Editor : INotifyPropertyChanged
         MouseMove += Canvas_MouseMove;
 
         ZoomValue.Text = (int)(_scale * 100) + "%";
-        InfoText = "Initializing...";
+        InfoText = Text_UI.Initializing;
 
         Loaded += EditorLoaded;
         TaskTracker.TaskCountChanged += OnTaskCountChanged;
@@ -127,7 +127,7 @@ public partial class Editor : INotifyPropertyChanged
     }
 
     public string RunningTaskText =>
-        _runningTaskCount == 0 ? "All tasks have completed" : $"Running {_runningTaskCount} task(s)";
+        _runningTaskCount == 0 ? Text_UI.AllTasksCompleted : string.Format(Text_UI.RunningTasks, _runningTaskCount);
 
     public string InfoText
     {
@@ -183,50 +183,33 @@ public partial class Editor : INotifyPropertyChanged
         }
         catch (Exception exception)
         {
-            InfoText = "Error occurred while initializing editor";
+            InfoText = Text_UI.ErrorWhileInitializingEditor;
             Logger.Write(LogLevel.Error, exception.Message, exception);
         }
     }
 
     private void BuildNodes()
     {
-        Logger.Write(LogLevel.Debug, $"BuildNodes started.\nNodesCount={Nodes.Count}");
         try
         {
-            Logger.Write(LogLevel.Debug, "Starting to add children for each node in Nodes.", Nodes);
             foreach (var info in Nodes)
             {
-                Logger.Write(LogLevel.Debug, $"Processing node with ID: {info.Id}.", info);
                 var node = NodesManager.GetNode(info.Id);
-                Logger.Write(LogLevel.Debug, $"Retrieved node from NodesManager for ID: {info.Id}.", node);
                 AddChildren(new Node(node!), info.X, info.Y);
-                Logger.Write(LogLevel.Debug, $"Added children for node ID: {info.Id}.", new { info.X, info.Y });
             }
 
-            Logger.Write(LogLevel.Debug, "Starting to set up connections for each node.", Nodes);
 
             foreach (var info in Nodes)
             {
-                Logger.Write(LogLevel.Debug, $"Setting up connections for node ID: {info.Id}.", info);
                 _nodes[info.Id].Loaded += (_, _) =>
                 {
-                    Logger.Write(LogLevel.Debug, $"Node loaded event triggered for ID: {info.Id}.", info);
                     for (var i = 0; i < info.Connections.Count; i++)
                     {
                         if (info.Connections[i].Id == "") continue;
-                        Logger.Write(LogLevel.Debug, $"Processing connection {i} for node ID: {info.Id}.",
-                            info.Connections[i]);
                         var inputPoint = _nodes[info.Id].GetPortPoint(Node.PortType.Input, i);
-                        Logger.Write(LogLevel.Debug,
-                            $"Retrieved input point for node ID: {info.Id}, port index: {i}.", inputPoint);
                         var outputPoint = _nodes[info.Connections[i].Id]
                             .GetPortPoint(Node.PortType.Output, info.Connections[i].Index);
-                        Logger.Write(LogLevel.Debug,
-                            $"Retrieved output point for connection ID: {info.Connections[i].Id}, port index: {info.Connections[i].Index}.",
-                            outputPoint);
                         var node = NodesManager.GetNode(info.Id);
-                        Logger.Write(LogLevel.Debug, $"Retrieved node for connection setup for ID: {info.Id}.",
-                            node);
                         var inputColor = node!.Inputs[i].Color;
                         var outputColor = NodesManager.GetNode(node.Inputs[i].PortInfo.Id)!
                             .Outputs[node.Inputs[i].PortInfo.Index].Color;
@@ -234,26 +217,17 @@ public partial class Editor : INotifyPropertyChanged
                             inputColor, outputColor,
                             new PortInfo(info.Id, i),
                             new PortInfo(info.Connections[i].Id, info.Connections[i].Index));
-                        Logger.Write(LogLevel.Debug,
-                            $"Connector added between node {info.Id} and connection {info.Connections[i].Id}.",
-                            new { info.Id, ConnectionIndex = i });
                         (_nodes[info.Id].InputsPanel.Children[i] as InputPort)!.PortControl.Visibility =
                             Visibility.Hidden;
-                        Logger.Write(LogLevel.Debug,
-                            $"Set visibility hidden for InputPort at node ID: {info.Id}, port index: {i}.");
                     }
-
-                    Logger.Write(LogLevel.Debug, $"Connection setup completed for node ID: {info.Id}.", info);
                 };
             }
 
-            InfoText = "Ready";
-            Logger.Write(LogLevel.Debug, "BuildNodes completed successfully.");
+            InfoText = Text_UI.Ready;
         }
         catch (Exception e)
         {
-            Logger.Write(LogLevel.Error, $"Exception in BuildNodes: {e.Message}", e);
-            InfoText = "Error occurred while building nodes";
+            InfoText = Text_UI.ErrorWhileBuildingNodes;
             Logger.Write(LogLevel.Error, e.Message, e);
         }
     }
@@ -262,139 +236,77 @@ public partial class Editor : INotifyPropertyChanged
     {
         try
         {
-            Logger.Write(LogLevel.Debug, "RebuildNodes started.", new { NodesToRebuildCount = infos.Count });
-            InfoText = "Rebuilding nodes...";
-            Logger.Write(LogLevel.Debug, "Rebuilding nodes: removing deleted nodes.", infos);
+            InfoText = Text_UI.RebuildingNodes;
 
             // Remove deleted nodes
             var newNodesId = infos.Select(node => node.Id).ToHashSet();
             foreach (var id in _nodes.Select(node => node.Key).Where(id => !newNodesId.Contains(id)))
-            {
-                Logger.Write(LogLevel.Debug, $"Removing node with ID: {id} as it no longer exists in new infos.",
-                    id);
                 NodesManager.RemoveNode(id);
-            }
 
-            Logger.Write(LogLevel.Debug, "Rebuilding nodes: creating new nodes.", infos);
             // Create new node
             infos.ForEach(info =>
             {
-                Logger.Write(LogLevel.Debug, $"Processing new node info for ID: {info.Id}.", info);
-                if (_nodes.ContainsKey(info.Id))
-                {
-                    Logger.Write(LogLevel.Debug, $"Node with ID: {info.Id} already exists. Skipping creation.",
-                        info);
-                    return;
-                }
+                if (_nodes.ContainsKey(info.Id)) return;
 
                 var type = info.Type;
                 NodeLogic? obj;
                 try
                 {
-                    Logger.Write(LogLevel.Debug,
-                        $"Attempting to create instance of type {type} using Activator with ItemId.", type);
                     obj = Activator.CreateInstance(type, ItemId) as NodeLogic;
-                    Logger.Write(LogLevel.Debug, "Instance creation succeeded using first method.", obj);
                 }
                 catch
                 {
-                    Logger.Write(LogLevel.Debug,
-                        $"Exception during instance creation for node ID: {info.Id}. Trying alternative constructor.",
-                        info);
                     obj = Activator.CreateInstance(type, []) as NodeLogic;
-                    Logger.Write(LogLevel.Debug, "Instance creation succeeded using alternative method.", obj);
                 }
 
-                if (obj == null)
-                {
-                    Logger.Write(LogLevel.Debug,
-                        $"Instance creation returned null for node ID: {info.Id}. Skipping.", info);
-                    return;
-                }
+                if (obj == null) return;
 
                 obj.Id = info.Id;
                 NodesManager.AddNode(info.Id, obj);
-                Logger.Write(LogLevel.Debug, $"New node with ID: {info.Id} added to NodesManager.", obj);
                 for (var i = 0; i < info.Values.Count; i++)
                 {
-                    Logger.Write(LogLevel.Debug,
-                        $"Setting input value and connection for node ID: {info.Id}, input index: {i}.",
-                        new { Value = info.Values[i], Connection = info.Connections[i] });
                     obj.SetInput(i, info.Values[i]);
                     obj.SetInputConnection(i, info.Connections[i]);
-                    Logger.Write(LogLevel.Debug,
-                        $"Input value and connection set for node ID: {info.Id}, input index: {i}.");
                 }
             });
 
-            Logger.Write(LogLevel.Debug, "Awaiting tasks for connection updates.", infos);
             await Task.WhenAll(infos.Select(info =>
             {
                 return Task.Run(() =>
                 {
-                    Logger.Write(LogLevel.Debug, $"Updating connections in background for node ID: {info.Id}.",
-                        info);
-                    if (!_infos.TryGetValue(info.Id, out var value))
-                    {
-                        Logger.Write(LogLevel.Debug, $"No existing info found for node ID: {info.Id} in _infos.",
-                            info);
-                        return;
-                    }
+                    if (!_infos.TryGetValue(info.Id, out var value)) return;
 
                     var i = 0;
                     foreach (var connection in value.Connections)
                     {
                         if (connection.Id != info.Connections[i].Id)
                         {
-                            Logger.Write(LogLevel.Debug,
-                                $"Connection mismatch for node ID: {info.Id} at index {i}. Removing and resetting connection.",
-                                new
-                                {
-                                    NodeId = info.Id, Index = i, OldConnection = connection,
-                                    NewConnection = info.Connections[i]
-                                });
                             NodesManager.GetNode(info.Id)?.RemoveInputConnection(i);
                             if (info.Connections[i].Id != "")
                                 NodesManager.GetNode(info.Id)?.SetInputConnection(i, info.Connections[i]);
-                            Logger.Write(LogLevel.Debug, $"Connection updated for node ID: {info.Id} at index {i}.",
-                                info.Connections[i]);
                         }
 
                         i++;
                     }
-
-                    Logger.Write(LogLevel.Debug, $"Background connection update completed for node ID: {info.Id}.",
-                        info);
                 });
             }));
 
-            Logger.Write(LogLevel.Debug, "Clearing _infos dictionary.", _infos);
             _infos.Clear();
-            infos.ForEach(value =>
-            {
-                Logger.Write(LogLevel.Debug, $"Adding node info to _infos for node ID: {value.Id}.", value);
-                _infos.Add(value.Id, value);
-            });
+            infos.ForEach(value => _infos.Add(value.Id, value));
 
-            Logger.Write(LogLevel.Debug, "Invoking Dispatcher to update UI elements.");
             Dispatcher.Invoke(() =>
             {
-                Logger.Write(LogLevel.Debug, "Clearing Canvas and node collections.",
-                    new { CanvasChildrenCount = Canvas.Children.Count, NodesCount = _nodes.Count });
                 Canvas.Children.Clear();
                 _nodes.Clear();
                 _selectingNodes.Clear();
                 _connectors.Clear();
 
-                Logger.Write(LogLevel.Debug, "Calling BuildNodes from Dispatcher.Invoke.");
                 BuildNodes();
             });
-            Logger.Write(LogLevel.Debug, "RebuildNodes completed successfully.");
         }
         catch (Exception e)
         {
-            Logger.Write(LogLevel.Error, $"Exception in RebuildNodes: {e.Message}", e);
-            InfoText = "Error occurred while rebuilding nodes";
+            InfoText = Text_UI.ErrorWhileRebuildingNodes;
             Logger.Write(LogLevel.Error, e.Message, e);
         }
     }
@@ -523,7 +435,7 @@ public partial class Editor : INotifyPropertyChanged
         }
         catch (Exception e)
         {
-            InfoText = "Error occurred while removing nodes";
+            InfoText = Text_UI.ErrorWhileRemovingNodes;
             Logger.Write(LogLevel.Error, e.Message, e);
         }
     }
@@ -541,7 +453,7 @@ public partial class Editor : INotifyPropertyChanged
             if (_previewPath != null) return;
             await Task.Delay(1000);
             if (_previewPath != null)
-                await Dispatcher.InvokeAsync(() => InfoText = "Release the mouse button on the port to connect");
+                await Dispatcher.InvokeAsync(() => InfoText = Text_UI.ReleaseMouseOnPortToConnect);
         });
         if (_previewPath != null) Canvas.Children.Remove(_previewPath);
         Canvas.Children.Add(_previewPath = new Path()
@@ -562,14 +474,14 @@ public partial class Editor : INotifyPropertyChanged
     {
         if (_previewPath != null) Canvas.Children.Remove(_previewPath);
         _previewPath = null;
-        InfoText = "Ready";
+        InfoText = Text_UI.Ready;
     }
 
     public void AddConnector(Point pos1, Point pos2, Color col1, Color col2, PortInfo inputPort, PortInfo outputPort)
     {
         try
         {
-            InfoText = "Connecting...";
+            InfoText = Text_UI.Connecting;
             if (_connectors.ContainsKey((inputPort.Id + ";" + inputPort.Index, outputPort.Id + ";" + outputPort.Index)))
             {
                 Canvas.Children.Remove(
@@ -603,11 +515,11 @@ public partial class Editor : INotifyPropertyChanged
                     index == inputPort.Index ? outputPort : connection).ToList()
             };
             OnNodesUpdated();
-            InfoText = "Ready";
+            InfoText = Text_UI.Ready;
         }
         catch (Exception e)
         {
-            InfoText = "Error occurred while connecting";
+            InfoText = Text_UI.ErrorWhileNodesConnecting;
             Logger.Write(LogLevel.Error, e.Message, e);
         }
     }
@@ -925,7 +837,7 @@ public partial class Editor : INotifyPropertyChanged
 
                 if (removingSelection)
                 {
-                    InfoText = "Ready";
+                    InfoText = Text_UI.Ready;
                     _selectingNodes = [];
                     return;
                 }
