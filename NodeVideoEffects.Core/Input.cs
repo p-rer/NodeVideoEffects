@@ -10,7 +10,6 @@ namespace NodeVideoEffects.Core;
 public sealed class Input : INotifyPropertyChanged, IDisposable
 {
     private readonly Lock _locker = new();
-    private readonly IPortValue _value;
     private bool _disposed;
     private PortInfo _portInfo = new();
 
@@ -22,7 +21,7 @@ public sealed class Input : INotifyPropertyChanged, IDisposable
     public Input(IPortValue value, string name)
     {
         _disposed = false;
-        _value = value;
+        PortValue = value;
         Name = name;
     }
 
@@ -33,7 +32,7 @@ public sealed class Input : INotifyPropertyChanged, IDisposable
     {
         get
         {
-            if (_disposed || _portInfo.Id == "") return _value.Value;
+            if (_disposed || _portInfo.Id == "") return PortValue.Value;
             lock (_locker)
             {
                 var task = NodesManager.GetOutputValue(_portInfo.Id, _portInfo.Index);
@@ -43,20 +42,22 @@ public sealed class Input : INotifyPropertyChanged, IDisposable
         }
         set
         {
-            if (_value == value) return;
-            _value.SetValue(value);
+            if (PortValue == value) return;
+            PortValue.SetValue(value);
             OnPropertyChanged(nameof(Value), _portInfo.Id == "");
         }
     }
 
-    public object? DefaultValue => _value.Value;
+    public IPortValue PortValue { get; }
+
+    public object? DefaultValue => PortValue.Value;
 
     /// <summary>
     /// Type of input value
     /// </summary>
-    public Type Type => _value.Type;
+    public Type Type => PortValue.Type;
 
-    public Color Color => _value.Color;
+    public Color Color => PortValue.Color;
 
     /// <summary>
     /// Name of this input port
@@ -66,7 +67,7 @@ public sealed class Input : INotifyPropertyChanged, IDisposable
     /// <summary>
     /// Control of this input port
     /// </summary>
-    public IControl Control => _value.Control;
+    public IControl Control => PortValue.Control;
 
     /// <summary>
     /// Node id and output port connected to this port
@@ -75,7 +76,7 @@ public sealed class Input : INotifyPropertyChanged, IDisposable
 
     public void Dispose()
     {
-        _value.Dispose();
+        PortValue.Dispose();
         _disposed = true;
     }
 

@@ -21,6 +21,8 @@ ClipWithMaskNode,マスクでクリップノード,マスクでクリップ,Clip
 MaskToImageNode,マスクを画像に変換ノード,マスクを画像に変換,Mask to Image,蒙版转图,遮罩轉圖片,마스크를 이미지로 변환,De máscara a imagen,تحويل القناع إلى صورة
 MaskThresholdNode,マスク閾値ノード,マスク閾値,Mask Threshold,蒙版阈值,遮罩閾值,마스크 임계값,Umbral de máscara,عتبة القناع
 BlendNode,ブレンドノード,ブレンド,Blend,混合,混合,블렌드,Mezcla,دمج
+ImageInputNode,画像入力ノード,画像入力,Image Input,图像输入,影像輸入,이미지 입력,Entrada de imagen,إدخال الصورة
+VideoInputNode,動画入力ノード,動画入力,Video Input,视频输入,影片輸入,비디오 입력,Entrada de video,إدخال الفيديو
 
 CompositeCategory,合成,合成,Composite,合成,合成,합성,Composición,تركيب
 BasicCategory,基本カテゴリー,基本,Basic,Básico,基本,기본,Categoría básica,الفئة الأساسية
@@ -47,6 +49,9 @@ Threshold,閾値,閾値,Threshold,阈值,閾值,임계값,Umbral,عتبة
 Feather,境界のぼかし,境界のぼかし,Feather,羽化,羽化,페더,Desvanecimiento,تنعيم الحافة
 Frame,フレーム,フレーム,Frame,帧,幀,프레임,Fotograma,إطار
 Image,画像,画像,Image,图像,影像,이미지,Imagen,صورة
+Video,映像,映像,Video,视频,影片,비디오,Video,فيديو
+Audio,音声,音声,Audio,音频,音訊,오디오,Audio,صوت
+File,ファイル,ファイル,File,文件,檔案,파일,Archivo,ملف
 Mask,マスク,マスク,Mask,蒙版,遮罩,마스크,Máscara,قناع
 KeyColor,キーの色,キー色,Key Color,键色,鍵色,키 색상,Color clave,لون المفتاح
 Invert,反転,反転,Invert,反转,反轉,반전,Invertir,عكس

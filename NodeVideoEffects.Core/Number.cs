@@ -29,6 +29,7 @@ public class Number : IPortValue
         _unit = unit;
         var nonNullDigits = digits ?? 6;
         _digits = nonNullDigits > 6 ? 6 : nonNullDigits < 0 ? 0 : nonNullDigits;
+        Control = new NumberPort(_default, _value, _min, _max, _digits, _unit);
     }
 
     public Type Type => typeof(float);
@@ -59,5 +60,10 @@ public class Number : IPortValue
     {
     }
 
-    public IControl Control => new NumberPort(_default, _value, _min, _max, _digits, _unit);
+    public IControl Control { get; }
+
+    public void ChengePortSetting(float? min, float? max, int? digits, string? unit)
+    {
+        ((NumberPort)Control).ChangeSetting(min, max, digits, unit);
+    }
 }

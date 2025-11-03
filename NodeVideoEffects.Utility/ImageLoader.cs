@@ -1,19 +1,19 @@
 using System.Numerics;
 using Vortice.Direct2D1;
 using YukkuriMovieMaker.Commons;
-using YukkuriMovieMaker.Player.Video.Effects;
 using YukkuriMovieMaker.Plugin;
+using YukkuriMovieMaker.Plugin.FileSource;
 
 namespace NodeVideoEffects.Utility;
 
-public class ImageLoader
+public static class ImageLoader
 {
     public static ID2D1Image LoadImage(IGraphicsDevicesAndContext context, string filePath)
     {
-        using var drawingEffect = new DrawingEffect(context);
-        var dc = context.DeviceContext;
-        var source = ImageFileSourceFactory.Create(context, filePath) ??
-                     new ImageFileSource(context.DeviceContext.CreateEmptyBitmap());
+        var device = context.CreateContext();
+        var dc = device.DeviceContext;
+        var source = ImageFileSourceFactory.Create(device, filePath) ??
+                     new ImageFileSource(dc.CreateEmptyBitmap());
         var commandList = dc.CreateCommandList();
 
         dc.Target = commandList;
@@ -24,5 +24,33 @@ public class ImageLoader
         dc.Target = null;
         commandList.Close();
         return commandList;
+    }
+
+    public static VideoLoader? CreateVideoLoader(IGraphicsDevicesAndContext context, string filePath)
+    {
+        var device = context.CreateContext();
+
+        var source = VideoFileSourceFactory.Create(device, filePath);
+        var length = source?.Duration ?? new TimeSpan(0, 0, 0, 0, 0);
+        var fps = (source?.GetFrameIndex(length) ?? 0.0) / length.TotalSeconds;
+        return source == null ? null : new VideoLoader(source, source.GetFrameIndex(length), fps);
+    }
+
+    public class VideoLoader(IVideoFileSource source, int length, double fps) : IDisposable
+    {
+        public double Fps => fps;
+        public int Length => length;
+
+        public void Dispose()
+        {
+            source.Dispose();
+        }
+
+        public ID2D1Image LoadImage(int frame)
+        {
+            var time = TimeSpan.FromSeconds(frame / fps);
+            source.Update(time);
+            return source.Output;
+        }
     }
 }

@@ -7,10 +7,10 @@ namespace NodeVideoEffects.Core;
 /// </summary>
 public class Output : IDisposable
 {
-    private readonly IPortValue _value;
-    private object? _result;
-    private bool _isSuccess;
     private readonly bool _noCache;
+    private readonly IPortValue _value;
+    private bool _isSuccess;
+    private object? _result;
 
     /// <summary>
     /// Create new output port object
@@ -63,15 +63,28 @@ public class Output : IDisposable
         {
             _isSuccess = !_noCache & value;
             if (Connection.Count == 0) return;
-            foreach (var connection in Connection) NodesManager.NotifyOutputChanged(connection.Id, connection.Index);
+            lock (Connection)
+            {
+                foreach (var connection in Connection)
+                    NodesManager.NotifyOutputChanged(connection.Id, connection.Index);
+            }
         }
+    }
+
+    public void Dispose()
+    {
+        _value.Dispose();
     }
 
     internal void SetIsSuccess(bool isSuccess, bool isChangedByControl)
     {
         _isSuccess = !_noCache & isSuccess;
         if (Connection.Count == 0) return;
-        foreach (var connection in Connection) NodesManager.NotifyOutputChanged(connection.Id, connection.Index, isChangedByControl);
+        lock (Connection)
+        {
+            foreach (var connection in Connection)
+                NodesManager.NotifyOutputChanged(connection.Id, connection.Index, isChangedByControl);
+        }
     }
 
     /// <summary>
@@ -92,10 +105,5 @@ public class Output : IDisposable
     public void RemoveConnection(string id, int index)
     {
         Connection.Remove(new PortInfo(id, index));
-    }
-
-    public void Dispose()
-    {
-        _value.Dispose();
     }
 }

@@ -7,26 +7,35 @@ namespace NodeVideoEffects.Nodes.Basic;
 
 public class ImageInputNode : NodeLogic
 {
-    private readonly IGraphicsDevicesAndContext? _context;
+    private readonly Lock _lock = new();
+    private IGraphicsDevicesAndContext? _context;
 
     public ImageInputNode(string id) : base(
         [
             new Input(new FilePath("", [
-                ("Image", [
+                (Text_Node.Image, [
                     ".png", ".jpg", ".jpeg", ".jpe", ".jfif", ".bmp", ".dib", ".gif", ".ico", ".tiff",
                     ".tif", ".hdp", ".dds", ".dng", ".heic", ".heif", ".hif", ".avif", ".jxr", ".wdp",
                     ".webp", ".psd", ".psb", ".svg"
                 ])
-            ]), "File")
+            ]), Text_Node.File)
         ],
-        [new Output(new Image(null), Text_Node.Input)],
-        "Image Input",
+        [new Output(new Image(null), Text_Node.Image)],
+        Text_Node.ImageInputNode,
         Colors.PaleVioletRed,
         Text_Node.BasicCategory)
     {
         if (string.IsNullOrEmpty(id))
             return;
         _context = NodesManager.GetContext(id);
+    }
+
+    public override void UpdateContext(IGraphicsDevicesAndContext context)
+    {
+        lock (_lock)
+        {
+            _context = context;
+        }
     }
 
     public override Task Calculate()

@@ -1,8 +1,8 @@
 ﻿using System.Windows.Media;
 using NodeVideoEffects.Core;
 using NodeVideoEffects.Utility;
-using Vortice.Direct2D1;
 using Vortice.Direct2D1.Effects;
+using YukkuriMovieMaker.Commons;
 
 namespace NodeVideoEffects.Nodes.Effect;
 
@@ -27,13 +27,13 @@ public class GaussianBlurNode : NodeLogic
         _blur = new GaussianBlur(NodesManager.GetContext(id).DeviceContext);
     }
 
-    public override void UpdateContext(ID2D1DeviceContext6 context)
+    public override void UpdateContext(IGraphicsDevicesAndContext context)
     {
         lock (_lock)
         {
             _blur?.SetInput(0, null, true);
             _blur?.Dispose();
-            _blur = new GaussianBlur(context);
+            _blur = new GaussianBlur(context.DeviceContext);
         }
     }
 

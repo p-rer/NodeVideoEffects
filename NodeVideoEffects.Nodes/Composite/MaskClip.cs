@@ -1,7 +1,7 @@
 using System.Windows.Media;
 using NodeVideoEffects.Core;
 using NodeVideoEffects.Utility;
-using Vortice.Direct2D1;
+using YukkuriMovieMaker.Commons;
 
 namespace NodeVideoEffects.Nodes.Composite;
 
@@ -32,7 +32,7 @@ public class MaskClip : NodeLogic
         ], _shaderId, _effectId, 2);
     }
 
-    public override void UpdateContext(ID2D1DeviceContext6 context)
+    public override void UpdateContext(IGraphicsDevicesAndContext context)
     {
         _videoEffect?.Dispose();
         _videoEffect = VideoEffectsLoader.LoadEffectSync([

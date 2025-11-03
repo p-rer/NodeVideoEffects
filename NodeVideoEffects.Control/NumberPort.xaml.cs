@@ -13,13 +13,13 @@ namespace NodeVideoEffects.Control;
 public sealed partial class NumberPort : IControl
 {
     private readonly float _def;
-    private readonly int _dig;
-    private readonly float _max;
-    private readonly float _min;
+    private int _dig;
 
     private bool _isClicking;
     private bool _isDragging;
     private bool _isEditing;
+    private float _max;
+    private float _min;
     private Point _startPoint;
     private float _value;
 
@@ -42,6 +42,22 @@ public sealed partial class NumberPort : IControl
     {
         get => _value;
         set => Update((float?)value ?? _def);
+    }
+
+    public void ChangeSetting(float? min, float? max, int? digits, string? unit)
+    {
+        if (min != null)
+            _min = (float)min;
+        if (max != null)
+            _max = (float)max;
+        if (digits != null)
+        {
+            _dig = (int)digits;
+            Box.Text = Math.Round(_value, _dig).ToString("F" + _dig);
+        }
+
+        if (unit != null)
+            Unit.Content = unit;
     }
 
     [DllImport("User32.dll")]

@@ -1,6 +1,6 @@
 using NodeVideoEffects.Core;
 using NodeVideoEffects.Utility;
-using Vortice.Direct2D1;
+using YukkuriMovieMaker.Commons;
 using Colors = System.Windows.Media.Colors;
 using Enum = NodeVideoEffects.Core.Enum;
 
@@ -46,7 +46,7 @@ public class CreateMaskNode : NodeLogic
         ], _shaderId, _effectId);
     }
 
-    public override void UpdateContext(ID2D1DeviceContext6 context)
+    public override void UpdateContext(IGraphicsDevicesAndContext context)
     {
         _videoEffect?.Dispose();
         _videoEffect = VideoEffectsLoader.LoadEffectSync([

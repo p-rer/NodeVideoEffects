@@ -202,7 +202,7 @@ public static class NodesManager
         if (!Contexts.TryAdd(id, context))
             Contexts[id] = context;
         Dictionary.Where(kvp => kvp.Key.StartsWith(id)).ToList()
-            .ForEach(kvp => kvp.Value.UpdateContext(context.DeviceContext));
+            .ForEach(kvp => kvp.Value.UpdateContext(context));
     }
 
     public static IGraphicsDevicesAndContext GetContext(string id)

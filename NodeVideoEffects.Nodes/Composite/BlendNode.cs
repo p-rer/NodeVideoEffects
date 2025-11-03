@@ -2,6 +2,7 @@
 using NodeVideoEffects.Core;
 using NodeVideoEffects.Utility;
 using Vortice.Direct2D1;
+using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Resources.Localization;
 using Blend = Vortice.Direct2D1.Effects.Blend;
 using Enum = NodeVideoEffects.Core.Enum;
@@ -60,14 +61,14 @@ public class BlendNode : NodeLogic
         _blend = new Blend(NodesManager.GetContext(id).DeviceContext);
     }
 
-    public override void UpdateContext(ID2D1DeviceContext6 context)
+    public override void UpdateContext(IGraphicsDevicesAndContext context)
     {
         lock (_lock)
         {
             _blend?.SetInput(0, null, true);
             _blend?.SetInput(1, null, true);
             _blend?.Dispose();
-            _blend = new Blend(context);
+            _blend = new Blend(context.DeviceContext);
         }
     }
 
