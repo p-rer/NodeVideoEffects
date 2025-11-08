@@ -10,16 +10,18 @@
     </UserControl.Resources>
     <Grid>
         <StackPanel Orientation="Horizontal">
-            <TextBox Name="Box" PreviewTextInput="PreviewTextInput" KeyDown="ValueSubmit"
+            <TextBox Text="{Binding Text, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                     Focusable="{Binding IsFocusable, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                     PreviewTextInput="PreviewTextInput" KeyDown="ValueSubmit"
                      DataObject.Pasting="TextBoxPasting"
                      VerticalAlignment="Center" VerticalContentAlignment="Center"
                      PreviewMouseDown="Box_PreviewMouseDown"
                      PreviewMouseLeftButtonDown="Box_PreviewMouseLeftButtonDown"
                      PreviewMouseMove="Box_PreviewMouseMove"
                      PreviewMouseLeftButtonUp="Box_PreviewMouseLeftButtonUp"
-                     LostFocus="Box_LostFocus"
-                     Focusable="False" />
-            <Label Name="Unit" VerticalAlignment="Center" VerticalContentAlignment="Center"
+                     LostFocus="Box_LostFocus" />
+            <Label Content="{Binding Unit, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                   VerticalAlignment="Center" VerticalContentAlignment="Center"
                    Foreground="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" />
         </StackPanel>
     </Grid>

@@ -52,7 +52,7 @@ public class VideoInputNode : NodeLogic
                 _lastPath = (string)Inputs[0].Value!;
                 if (_lastPath == "") return Task.CompletedTask;
                 _videoLoader = ImageLoader.CreateVideoLoader(_context, _lastPath);
-                ((Number)Inputs[1].PortValue).ChengePortSetting(null, _videoLoader!.Length, null, null);
+                ((Number)Inputs[1].PortValue).ChangePortSetting(null, _videoLoader!.Length, null, null);
             }
 
             Outputs[0].Value = new ImageWrapper(_videoLoader!.LoadImage(Convert.ToInt32((float)Inputs[1].Value!)));

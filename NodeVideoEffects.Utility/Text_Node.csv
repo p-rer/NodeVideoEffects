@@ -52,6 +52,8 @@ Image,画像,画像,Image,图像,影像,이미지,Imagen,صورة
 Video,映像,映像,Video,视频,影片,비디오,Video,فيديو
 Audio,音声,音声,Audio,音频,音訊,오디오,Audio,صوت
 File,ファイル,ファイル,File,文件,檔案,파일,Archivo,ملف
+Select,選択,選択,Select,选择,選擇,선택,Seleccionar,تحديد
+NoFileSelected,ファイル未選択,ファイル未選択,No File Selected,未选择文件,未選擇檔案,파일이 선택되지 않음,Ningún archivo seleccionado,لم يتم تحديد ملف
 Mask,マスク,マスク,Mask,蒙版,遮罩,마스크,Máscara,قناع
 KeyColor,キーの色,キー色,Key Color,键色,鍵色,키 색상,Color clave,لون المفتاح
 Invert,反転,反転,Invert,反转,反轉,반전,Invertir,عكس

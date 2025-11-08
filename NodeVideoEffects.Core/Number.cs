@@ -62,7 +62,7 @@ public class Number : IPortValue
 
     public IControl Control { get; }
 
-    public void ChengePortSetting(float? min, float? max, int? digits, string? unit)
+    public void ChangePortSetting(float? min, float? max, int? digits, string? unit)
     {
         ((NumberPort)Control).ChangeSetting(min, max, digits, unit);
     }
