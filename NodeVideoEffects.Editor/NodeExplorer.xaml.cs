@@ -32,7 +32,8 @@ public partial class NodeExplorer
             foreach (var assembly in assemblies)
             {
                 var types = assembly.GetTypes()
-                    .Where(t => t is { IsClass: true, IsAbstract: false } && t.IsSubclassOf(baseType));
+                    .Where(t => t is { IsClass: true, IsAbstract: false } && t.IsSubclassOf(baseType) &&
+                                t != typeof(InputNode) && t != typeof(OutputNode));
 
                 foreach (var type in types) AddTypeToExplorerRoot(type);
             }
@@ -108,22 +109,21 @@ public partial class NodeExplorer
         };
     }
 
-    private void TextBlock_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    private void Item_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        if (sender is not TextBlock textBlock) return;
-        if (textBlock.DataContext is not NodesTree dataContext) return;
-        if (dataContext.Type == typeof(InputNode) || dataContext.Type == typeof(OutputNode))
-            return;
+        Cursor = Cursors.Arrow;
+        if (sender is not StackPanel obj) return;
+        if (obj.DataContext is not NodesTree dataContext) return;
         _type = dataContext.Type;
         if (_type != null)
-            textBlock.CaptureMouse();
+            obj.CaptureMouse();
     }
 
-    private void TextBlock_MouseMove(object sender, MouseEventArgs e)
+    private void Item_MouseMove(object sender, MouseEventArgs e)
     {
-        if (_type != null && sender is TextBlock textBlock)
+        if (_type != null && sender is StackPanel obj)
         {
-            var currentWindow = Window.GetWindow(textBlock);
+            var currentWindow = Window.GetWindow(obj);
             var position = e.GetPosition(currentWindow);
             if (currentWindow != null)
             {
@@ -139,12 +139,12 @@ public partial class NodeExplorer
         e.Handled = true;
     }
 
-    private void TextBlock_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    private void Item_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
         Cursor = Cursors.Arrow;
-        if (_type != null && sender is TextBlock textBlock)
+        if (_type != null && sender is StackPanel obj)
         {
-            var currentWindow = Window.GetWindow(textBlock);
+            var currentWindow = Window.GetWindow(obj);
             var position = e.GetPosition(currentWindow);
 
             if (currentWindow != null)
@@ -188,7 +188,7 @@ public partial class NodeExplorer
                 }
             }
 
-            textBlock.ReleaseMouseCapture();
+            obj.ReleaseMouseCapture();
             _type = null;
         }
 
