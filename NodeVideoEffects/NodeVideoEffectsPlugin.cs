@@ -55,7 +55,7 @@ public class NodeVideoEffectsPlugin : VideoEffectBase
 
     public override IVideoEffectProcessor CreateVideoEffect(IGraphicsDevicesAndContext devices)
     {
-        if (_isCreated)
+        if (_isCreated && _processor != null)
         {
             _processor!.UpdateContext(devices);
             return _processor;

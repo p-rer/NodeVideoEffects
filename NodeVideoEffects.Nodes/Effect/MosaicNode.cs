@@ -22,7 +22,7 @@ public class MosaicNode : NodeLogic
                     Text_Node.Voronoi
                 ], 2),
                 Text_Node.MosaicType),
-            new Input(new Number(10, 1, 250, 4), Text_Node.Level)
+            new Input(new Number(10, 1, 250, 4, "px"), Text_Node.Level)
         ],
         [
             new Output(new Image(null), Text_Node.Output)

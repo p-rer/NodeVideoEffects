@@ -20,13 +20,10 @@ public sealed partial class NumberPort : IControl
     private bool _isClicking;
     private bool _isDragging;
     private bool _isEditing;
-    private bool _isFocusable = true;
     private float _max;
     private float _min;
     private Point _startPoint;
 
-    private string _text = string.Empty;
-    private string _unit = string.Empty;
     private float _value;
 
     public NumberPort(float def, float value, float min, float max, int dig, string unit)
@@ -46,30 +43,30 @@ public sealed partial class NumberPort : IControl
 
     public bool IsFocusable
     {
-        get => _isFocusable;
+        get;
         set
         {
-            _isFocusable = value;
+            field = value;
             OnPropertyChanged();
         }
-    }
+    } = true;
 
     public string Text
     {
-        get => _text;
+        get => field;
         set
         {
-            _text = value;
+            field = value;
             OnPropertyChanged();
         }
     }
 
     public string Unit
     {
-        get => _unit;
+        get => field;
         set
         {
-            _unit = value;
+            field = value;
             OnPropertyChanged();
         }
     }

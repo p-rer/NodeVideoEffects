@@ -24,8 +24,17 @@ public interface IPortValue : IDisposable
 
     public void SetValue(object? value)
     {
-        if (value == null || value.GetType() != Type) return;
-        _SetValue(value);
+        if (value == null) return;
+        if (value.GetType() == Type) _SetValue(value);
+        else
+            try
+            {
+                _SetValue(Convert.ChangeType(value, Type));
+            }
+            catch
+            {
+                // ignore
+            }
     }
 
     /// <summary>

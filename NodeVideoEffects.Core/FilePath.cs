@@ -1,4 +1,5 @@
-﻿using System.Windows.Media;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Windows.Media;
 using NodeVideoEffects.Control;
 
 namespace NodeVideoEffects.Core;
@@ -36,5 +37,7 @@ public class FilePath : IPortValue
     {
     }
 
-    public IControl Control => new FilePathPort(_fileName, _allowExtension);
+    [field: AllowNull]
+    [field: MaybeNull]
+    public IControl Control => field ??= new FilePathPort(_fileName, _allowExtension);
 }

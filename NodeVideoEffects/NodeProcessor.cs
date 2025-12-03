@@ -86,10 +86,10 @@ internal class NodeProcessor : IVideoEffectProcessor
                     _inputNode = (InputNode)node;
                 }
 
-                for (var j = 0; j < info.Values.Count; j++)
-                {
-                    node.SetInput(j, info.Values[j]);
-                }
+                for (var j = 0; j < node.Inputs.Length; j++)
+                    node.Inputs[j].Value = info.Values[j];
+                foreach (var t in node.Outputs)
+                    t.IsSuccess = false;
             }
 
             foreach (var info in item.Nodes)
