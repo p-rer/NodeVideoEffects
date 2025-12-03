@@ -45,7 +45,7 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
         if (dockingManager == null) return;
         if (dockingManager.GetValue(mainWindow) is not DockingManager dockingManagerInstance) return;
 
-        var editor = new NodeEditor(dockingManagerInstance)
+        var editor = ((NodeVideoEffectsPlugin)ItemProperties[0].Item).Editor = new NodeEditor(dockingManagerInstance)
         {
             Nodes = pluginItem.Nodes,
             ItemId = pluginItem.Id
@@ -83,7 +83,7 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
             if (ItemProperties == null) return;
             editor.ClearEvents();
             pluginItem.Editor = null;
-            editor = null;
+            editor = ((NodeVideoEffectsPlugin)ItemProperties[0].Item).Editor = null;
         };
 
         editor.NeedToClose += (_, _) => anchorable.Close();

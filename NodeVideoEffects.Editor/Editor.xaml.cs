@@ -27,7 +27,7 @@ public partial class Editor : INotifyPropertyChanged
     private readonly Dictionary<string, Node> _nodes = [];
     private readonly ScaleTransform _scaleTransform;
     private readonly TranslateTransform _translateTransform;
-    private string _infoText = "";
+    private readonly List<string> _uiInitializedNode = [];
     private bool _isDragging;
 
     private bool _isInitialized;
@@ -133,11 +133,11 @@ public partial class Editor : INotifyPropertyChanged
 
     public string InfoText
     {
-        get => _infoText;
+        get;
         set
         {
-            if (_infoText == value) return;
-            _infoText = value;
+            if (field == value) return;
+            field = value;
             OnPropertyChanged(nameof(InfoText));
         }
     }
@@ -208,6 +208,8 @@ public partial class Editor : INotifyPropertyChanged
             {
                 _nodes[info.Id].Loaded += (_, _) =>
                 {
+                    if (_uiInitializedNode.Contains(info.Id)) return;
+                    _uiInitializedNode.Add(info.Id);
                     for (var i = 0; i < info.Connections.Count; i++)
                     {
                         if (info.Connections[i].Id == "") continue;

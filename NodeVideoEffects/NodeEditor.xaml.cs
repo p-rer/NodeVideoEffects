@@ -26,51 +26,6 @@ public partial class NodeEditor
         _tag = ResourceLoader.FileLoad("git_tag.txt");
         _commit = ResourceLoader.FileLoad("git_id.txt");
 
-        /*Loaded += (_, _) =>
-        {
-            var mainWindow = Owner;
-            var dockingManager = mainWindow.GetType().GetField("docker",
-                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
-            if (dockingManager == null) return;
-            if (dockingManager.GetValue(mainWindow) is not DockingManager dockingManagerInstance) return;
-
-            var layoutProperty = dockingManagerInstance.GetType().GetProperty(
-                "Layout",
-                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
-            if (layoutProperty == null) return;
-
-            if (layoutProperty.GetValue(dockingManagerInstance) is not LayoutRoot layoutValue) return;
-
-            Explorer.Content = new NodeExplorer { DockingManager = dockingManagerInstance };
-
-            if (Content is not UIElement content) return;
-
-            Content = null;
-
-            var layoutAnchorable = new LayoutAnchorable
-            {
-                Title = Title,
-                Content = content
-            };
-
-            var anchorablePane = new LayoutAnchorablePane(layoutAnchorable)
-            {
-                DockMinHeight = MinHeight,
-                DockMinWidth = MinWidth
-            };
-            var floatingWindow = new LayoutAnchorableFloatingWindow
-            {
-                RootPanel = new LayoutAnchorablePaneGroup(anchorablePane),
-                Parent = layoutValue
-            };
-
-            layoutValue.FloatingWindows.Add(floatingWindow);
-
-            dockingManagerInstance.UpdateLayout();
-            layoutAnchorable.IsActive = true;
-            layoutAnchorable.Float();
-        };*/
-
         Explorer.Content = new NodeExplorer { DockingManager = dockingManagerInstance };
 
         CommandBindings.Add(new CommandBinding(
