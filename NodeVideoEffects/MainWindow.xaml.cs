@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
+using AvalonDock;
 using NodeVideoEffects.Core;
 using NodeVideoEffects.Editor;
 using NodeVideoEffects.Utility;
@@ -18,14 +19,59 @@ public partial class NodeEditor
 
     private readonly string _tag;
 
-    public NodeEditor()
+    public NodeEditor(DockingManager dockingManagerInstance)
     {
         InitializeComponent();
 
         _tag = ResourceLoader.FileLoad("git_tag.txt");
         _commit = ResourceLoader.FileLoad("git_id.txt");
 
-        Task.Run(() => { Explorer.Dispatcher.Invoke(() => { Explorer.Content = new NodeExplorer(); }); });
+        /*Loaded += (_, _) =>
+        {
+            var mainWindow = Owner;
+            var dockingManager = mainWindow.GetType().GetField("docker",
+                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            if (dockingManager == null) return;
+            if (dockingManager.GetValue(mainWindow) is not DockingManager dockingManagerInstance) return;
+
+            var layoutProperty = dockingManagerInstance.GetType().GetProperty(
+                "Layout",
+                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
+            if (layoutProperty == null) return;
+
+            if (layoutProperty.GetValue(dockingManagerInstance) is not LayoutRoot layoutValue) return;
+
+            Explorer.Content = new NodeExplorer { DockingManager = dockingManagerInstance };
+
+            if (Content is not UIElement content) return;
+
+            Content = null;
+
+            var layoutAnchorable = new LayoutAnchorable
+            {
+                Title = Title,
+                Content = content
+            };
+
+            var anchorablePane = new LayoutAnchorablePane(layoutAnchorable)
+            {
+                DockMinHeight = MinHeight,
+                DockMinWidth = MinWidth
+            };
+            var floatingWindow = new LayoutAnchorableFloatingWindow
+            {
+                RootPanel = new LayoutAnchorablePaneGroup(anchorablePane),
+                Parent = layoutValue
+            };
+
+            layoutValue.FloatingWindows.Add(floatingWindow);
+
+            dockingManagerInstance.UpdateLayout();
+            layoutAnchorable.IsActive = true;
+            layoutAnchorable.Float();
+        };*/
+
+        Explorer.Content = new NodeExplorer { DockingManager = dockingManagerInstance };
 
         CommandBindings.Add(new CommandBinding(
             AllSelectCommand,
@@ -56,9 +102,11 @@ public partial class NodeEditor
         set => EditSpace.ItemId = value;
     }
 
+    public event EventHandler NeedToClose = delegate { };
+
     private void ShowAbout(object sender, RoutedEventArgs e)
     {
-        new About(_tag, _commit) { Owner = this }.ShowDialog();
+        new About(_tag, _commit) { Owner = Application.Current.MainWindow }.ShowDialog();
     }
 
     public event PropertyChangedEventHandler NodesUpdated = delegate { };
@@ -70,7 +118,7 @@ public partial class NodeEditor
 
     private void EditSpace_NodesUpdated(object sender, PropertyChangedEventArgs e)
     {
-        NodesUpdated.Invoke(this, new PropertyChangedEventArgs(Title));
+        NodesUpdated.Invoke(this, new PropertyChangedEventArgs(Text_UI.Editor));
     }
 
     private void OpenLogViewer(object sender, RoutedEventArgs e)
@@ -112,6 +160,11 @@ public partial class NodeEditor
     private void Close(object sender, RoutedEventArgs e)
     {
         Close();
+    }
+
+    public void Close()
+    {
+        NeedToClose(this, EventArgs.Empty);
     }
 
     private void LogsDelete(object sender, RoutedEventArgs e)

@@ -1,7 +1,10 @@
 ﻿// ReSharper disable RedundantUsingDirective
 
+using System.Reflection;
 using System.Text.Json.Serialization;
 using System.Windows;
+using AvalonDock;
+using AvalonDock.Layout;
 using Newtonsoft.Json;
 using NodeVideoEffects.Utility;
 using YukkuriMovieMaker.Commons;
@@ -30,40 +33,102 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
     private void Button_Click(object sender, RoutedEventArgs e)
     {
         if (ItemProperties is null) throw new InvalidOperationException(Text_UI.ItemPropertiesNotSet);
-        if (((NodeVideoEffectsPlugin)ItemProperties[0].Item).Window != null) return;
+        if (((NodeVideoEffectsPlugin)ItemProperties[0].Item).Editor != null) return;
 
         BeginEdit?.Invoke(this, EventArgs.Empty);
 
         var pluginItem = (NodeVideoEffectsPlugin)ItemProperties[0].Item;
-        var window = pluginItem.Window = new NodeEditor
+
+        var mainWindow = Application.Current.MainWindow!;
+        var dockingManager = mainWindow.GetType().GetField("docker",
+            BindingFlags.Instance | BindingFlags.NonPublic);
+        if (dockingManager == null) return;
+        if (dockingManager.GetValue(mainWindow) is not DockingManager dockingManagerInstance) return;
+
+        var editor = new NodeEditor(dockingManagerInstance)
         {
-            Owner = Window.GetWindow(this),
             Nodes = pluginItem.Nodes,
             ItemId = pluginItem.Id
         };
 
-        var parentWindow = Window.GetWindow(this);
-        if (parentWindow != null) window.CommandBindings.AddRange(parentWindow.CommandBindings);
+        var floatingService = new FloatingWindowService(dockingManagerInstance);
+        var anchorable = floatingService.CreateFloating(
+            editor,
+            Text_UI.Editor,
+            800,
+            450
+        );
 
-        window.Show();
-
-        window.NodesUpdated += (_, _) =>
+        /*var window = pluginItem.Window = new NodeEditor
         {
-            if (window == null) return;
+            Owner = Window.GetWindow(this),
+            Nodes = pluginItem.Nodes,
+            ItemId = pluginItem.Id
+        };*/
+
+        var parentWindow = Window.GetWindow(this);
+        if (parentWindow != null) editor.CommandBindings.AddRange(parentWindow.CommandBindings);
+
+        editor.NodesUpdated += (_, _) =>
+        {
+            if (editor == null) return;
 
             BeginEdit?.Invoke(this, EventArgs.Empty);
-            pluginItem.EditorNodes = window.Nodes;
+            pluginItem.EditorNodes = editor.Nodes;
             EndEdit?.Invoke(this, EventArgs.Empty);
         };
 
-        window.Closing += (_, _) =>
+        anchorable.Closing += (_, _) =>
         {
             if (ItemProperties == null) return;
-            window.ClearEvents();
-            pluginItem.Window = null;
-            window = null;
+            editor.ClearEvents();
+            pluginItem.Editor = null;
+            editor = null;
         };
 
+        editor.NeedToClose += (_, _) => anchorable.Close();
+
         EndEdit?.Invoke(this, EventArgs.Empty);
+    }
+}
+
+public class FloatingWindowService
+{
+    private readonly LayoutRoot _layout;
+    private readonly DockingManager _manager;
+
+    public FloatingWindowService(DockingManager manager)
+    {
+        _manager = manager;
+        _layout = manager.Layout;
+    }
+
+    public LayoutAnchorable CreateFloating(UIElement content, string title, double minWidth, double minHeight)
+    {
+        var anchorable = new LayoutAnchorable
+        {
+            Title = title,
+            Content = content
+        };
+
+        var pane = new LayoutAnchorablePane(anchorable)
+        {
+            DockMinHeight = minHeight,
+            DockMinWidth = minWidth
+        };
+
+        var floatingWindow = new LayoutAnchorableFloatingWindow
+        {
+            RootPanel = new LayoutAnchorablePaneGroup(pane),
+            Parent = _layout
+        };
+
+        _layout.FloatingWindows.Add(floatingWindow);
+
+        _manager.UpdateLayout();
+        anchorable.Float();
+        anchorable.IsActive = true;
+
+        return anchorable;
     }
 }

@@ -26,6 +26,9 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Reference Include="AvalonDock">
+            <HintPath>..\..\..\..\..\ymm4\AvalonDock.dll</HintPath>
+        </Reference>
         <Reference Include="YukkuriMovieMaker.Plugin">
             <HintPath>$(YMM4DirPath)YukkuriMovieMaker.Plugin.dll</HintPath>
         </Reference>
