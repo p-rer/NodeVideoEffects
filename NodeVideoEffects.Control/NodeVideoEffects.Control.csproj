@@ -44,7 +44,7 @@
 
   <ItemGroup>
     <Reference Include="Microsoft.Xaml.Behaviors">
-      <HintPath>..\..\..\..\..\ymm4\Microsoft.Xaml.Behaviors.dll</HintPath>
+        <HintPath>$(YMM4DirPath)Microsoft.Xaml.Behaviors.dll</HintPath>
     </Reference>
   </ItemGroup>
 
