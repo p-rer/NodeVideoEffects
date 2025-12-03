@@ -29,6 +29,8 @@ public partial class Editor : INotifyPropertyChanged
     private readonly TranslateTransform _translateTransform;
     private string _infoText = "";
     private bool _isDragging;
+
+    private bool _isInitialized;
     private bool _isSelecting;
 
     private Point _lastPos;
@@ -162,6 +164,9 @@ public partial class Editor : INotifyPropertyChanged
     {
         try
         {
+            if (_isInitialized)
+                return;
+            _isInitialized = true;
             await Dispatcher.InvokeAsync(() =>
             {
                 UpdateScrollBar();
