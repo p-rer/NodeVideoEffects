@@ -39,11 +39,11 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
 
         var pluginItem = (NodeVideoEffectsPlugin)ItemProperties[0].Item;
 
-        var mainWindow = Application.Current.MainWindow!;
-        var dockingManager = mainWindow.GetType().GetField("docker",
+        var parentWindow = Window.GetWindow(this)!;
+        var dockingManager = parentWindow.GetType().GetField("docker",
             BindingFlags.Instance | BindingFlags.NonPublic);
         if (dockingManager == null) return;
-        if (dockingManager.GetValue(mainWindow) is not DockingManager dockingManagerInstance) return;
+        if (dockingManager.GetValue(parentWindow) is not DockingManager dockingManagerInstance) return;
 
         var editor = ((NodeVideoEffectsPlugin)ItemProperties[0].Item).Editor = new NodeEditor(dockingManagerInstance)
         {
@@ -59,15 +59,7 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
             450
         );
 
-        /*var window = pluginItem.Window = new NodeEditor
-        {
-            Owner = Window.GetWindow(this),
-            Nodes = pluginItem.Nodes,
-            ItemId = pluginItem.Id
-        };*/
-
-        var parentWindow = Window.GetWindow(this);
-        if (parentWindow != null) editor.CommandBindings.AddRange(parentWindow.CommandBindings);
+        editor.CommandBindings.AddRange(parentWindow.CommandBindings);
 
         editor.NodesUpdated += (_, _) =>
         {
@@ -78,15 +70,21 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
             EndEdit?.Invoke(this, EventArgs.Empty);
         };
 
-        anchorable.Closing += (_, _) =>
+        anchorable.Hiding += (_, _) =>
         {
             if (ItemProperties == null) return;
             editor.ClearEvents();
             pluginItem.Editor = null;
             editor = ((NodeVideoEffectsPlugin)ItemProperties[0].Item).Editor = null;
+            var parent = anchorable.Parent;
+            parent?.RemoveChild(anchorable);
         };
 
-        editor.NeedToClose += (_, _) => anchorable.Close();
+        editor.NeedToClose += (_, _) =>
+        {
+            anchorable.Close();
+            editor = ((NodeVideoEffectsPlugin)ItemProperties[0].Item).Editor = null;
+        };
 
         EndEdit?.Invoke(this, EventArgs.Empty);
     }
