@@ -1,4 +1,5 @@
-﻿using System.Windows.Media;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Windows.Media;
 using NodeVideoEffects.Control;
 
 namespace NodeVideoEffects.Core;
@@ -33,5 +34,5 @@ public class Bool : IPortValue
     {
     }
 
-    public IControl Control => new BoolPort(_value);
+    [field: AllowNull] [field: MaybeNull] public IControl Control => field ??= new BoolPort(_value);
 }

@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Windows.Media;
 using NodeVideoEffects.Control;
@@ -75,7 +76,9 @@ public class FloatVector2 : IPortValue
         GC.SuppressFinalize(this);
     }
 
-    public IControl Control => new StackPanelPort([
+    [field: AllowNull]
+    [field: MaybeNull]
+    public IControl Control => field ??= new StackPanelPort([
         (new NumberPort(_default1, _value1, _min, _max, Digits, _unit), _name1),
         (new NumberPort(_default2, _value1, _min, _max, Digits, _unit), _name2)
     ]);

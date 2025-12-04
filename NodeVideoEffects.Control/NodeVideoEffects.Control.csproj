@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net9.0-windows</TargetFramework>
+    <TargetFramework>net10.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -30,11 +30,22 @@
       <XamlRuntime>Wpf</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
+    <Page Update="FilePathPort.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <XamlRuntime>Wpf</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\NodeVideoEffects.Utility\NodeVideoEffects.Utility.csproj" />
     <ProjectReference Include="..\UtilityControls\UtilityControls\UtilityControls.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Microsoft.Xaml.Behaviors">
+        <HintPath>$(YMM4DirPath)Microsoft.Xaml.Behaviors.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

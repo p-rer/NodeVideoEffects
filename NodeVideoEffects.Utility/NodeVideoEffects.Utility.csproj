@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net9.0-windows</TargetFramework>
+        <TargetFramework>net10.0-windows</TargetFramework>
         <UseWPF>true</UseWPF>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
@@ -11,11 +11,30 @@
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
         <DebugType>none</DebugType>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Preview Release' ">
+        <Optimize>true</Optimize>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup>
+        <Reference Include="SharpGen.Runtime">
+            <HintPath>$(YMM4DirPath)SharpGen.Runtime.dll</HintPath>
+        </Reference>
         <Reference Include="Vortice.Direct2D1">
             <HintPath>$(YMM4DirPath)Vortice.Direct2D1.dll</HintPath>
+        </Reference>
+        <Reference Include="Vortice.DirectX">
+            <HintPath>$(YMM4DirPath)Vortice.DirectX.dll</HintPath>
+        </Reference>
+        <Reference Include="Vortice.Mathematics">
+            <HintPath>$(YMM4DirPath)Vortice.Mathematics.dll</HintPath>
         </Reference>
         <Reference Include="YukkuriMovieMaker">
             <HintPath>$(YMM4DirPath)YukkuriMovieMaker.dll</HintPath>

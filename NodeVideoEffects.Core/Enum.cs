@@ -1,17 +1,12 @@
-﻿using System.Windows.Media;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Windows.Media;
 using NodeVideoEffects.Control;
 
 namespace NodeVideoEffects.Core;
 
-public class Enum : IPortValue
+public class Enum(List<string> items, int value = 0) : IPortValue
 {
-    private int _value;
-
-    public Enum(List<string> items, int value = 0)
-    {
-        Control = new EnumPort(items, value);
-        _value = value;
-    }
+    private int _value = value;
 
     public Type Type => typeof(int);
 
@@ -19,7 +14,7 @@ public class Enum : IPortValue
 
     public Color Color => Colors.CornflowerBlue;
 
-    public IControl Control { get; }
+    [field: AllowNull] [field: MaybeNull] public IControl Control => field ??= new EnumPort(items, _value);
 
     public void Dispose()
     {

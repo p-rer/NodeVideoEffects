@@ -1,4 +1,5 @@
-﻿using System.Windows.Media;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Windows.Media;
 using NodeVideoEffects.Control;
 
 namespace NodeVideoEffects.Core;
@@ -59,5 +60,12 @@ public class Number : IPortValue
     {
     }
 
-    public IControl Control => new NumberPort(_default, _value, _min, _max, _digits, _unit);
+    [field: AllowNull]
+    [field: MaybeNull]
+    public IControl Control => field ??= new NumberPort(_default, _value, _min, _max, _digits, _unit);
+
+    public void ChangePortSetting(float? min, float? max, int? digits, string? unit)
+    {
+        ((NumberPort)Control).ChangeSetting(min, max, digits, unit);
+    }
 }

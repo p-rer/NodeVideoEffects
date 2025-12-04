@@ -1,4 +1,6 @@
 name: Update Releases JSON
+permissions:
+  contents: write
 
 on:
   release:
@@ -17,9 +19,11 @@ jobs:
       - name: Get latest releases (including prereleases)
         id: releases
         run: |
-          curl -s https://api.github.com/repos/${{ github.repository }}/releases \
-          | jq '[.[] | {tag_name: .tag_name, asset_url: (if .assets | length > 0 then .assets[0].browser_download_url else null end)}]' \
-          | jq '{latest: .[0], prerelease: (map(select(.tag_name | test("-")))[0] // null)}' > releases.json
+            curl -s https://api.github.com/repos/${{ github.repository }}/releases?per_page=100 \
+            | jq '{
+                latest: (map(select(.prerelease == false))[0] | {tag_name, asset_url: (if .assets|length>0 then .assets[0].browser_download_url else null end)}),
+                prerelease: (map(select(.prerelease == true))[0] | {tag_name, asset_url: (if .assets|length>0 then .assets[0].browser_download_url else null end)})
+              }' > releases.json
 
       - name: Commit to gh-pages
         run: |

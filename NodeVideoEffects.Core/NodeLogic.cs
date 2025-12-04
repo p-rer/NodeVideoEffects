@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Windows.Media;
 using NodeVideoEffects.Utility;
-using Vortice.Direct2D1;
+using YukkuriMovieMaker.Commons;
 
 namespace NodeVideoEffects.Core;
 
@@ -140,7 +140,7 @@ public abstract class NodeLogic : IDisposable
         Inputs[index].RemoveConnection(Id, index);
     }
 
-    public virtual void UpdateContext(ID2D1DeviceContext6 context)
+    public virtual void UpdateContext(IGraphicsDevicesAndContext context)
     {
     }
 

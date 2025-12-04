@@ -1,7 +1,7 @@
 using NodeVideoEffects.Core;
 using NodeVideoEffects.Utility;
-using Vortice.Direct2D1;
 using Vortice.Mathematics;
+using YukkuriMovieMaker.Commons;
 using Colors = System.Windows.Media.Colors;
 
 namespace NodeVideoEffects.Nodes.Effect;
@@ -15,8 +15,8 @@ public class LensBlurNode : NodeLogic
     public LensBlurNode(string id) : base(
         [
             new Input(new Image(null), Text_Node.Input),
-            new Input(new Number(10, 0, 2000, 1), Text_Node.Radius),
-            new Input(new Number(100, 0, 1000, 1), Text_Node.Brightness),
+            new Input(new Number(10, 0, 2000, 1, "px"), Text_Node.Radius),
+            new Input(new Number(100, 0, 1000, 1, "%"), Text_Node.Brightness),
             new Input(new Number(2, 0, 10, 1), Text_Node.EdgeStrength),
             new Input(new Number(16, 0.5f, 100, 1), Text_Node.Quality)
         ],
@@ -38,7 +38,7 @@ public class LensBlurNode : NodeLogic
         ], _shaderId, _effectId);
     }
 
-    public override void UpdateContext(ID2D1DeviceContext6 context)
+    public override void UpdateContext(IGraphicsDevicesAndContext context)
     {
         _videoEffect?.Dispose();
         _videoEffect = VideoEffectsLoader.LoadEffectSync([

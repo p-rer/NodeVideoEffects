@@ -1,17 +1,12 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Windows.Media;
 using NodeVideoEffects.Control;
 
 namespace NodeVideoEffects.Core;
 
-public class ColorValue : IPortValue
+public class ColorValue(Color? color) : IPortValue
 {
-    private Color _value;
-
-    public ColorValue(Color? color)
-    {
-        _value = color ?? Colors.White;
-        Control = new ColorPort(_value);
-    }
+    private Color _value = color ?? Colors.White;
 
     public void Dispose()
     {
@@ -27,5 +22,5 @@ public class ColorValue : IPortValue
         _value = (Color?)value ?? Colors.White;
     }
 
-    public IControl Control { get; }
+    [field: AllowNull] [field: MaybeNull] public IControl Control => field ??= new ColorPort(_value);
 }

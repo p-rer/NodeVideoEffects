@@ -1,7 +1,9 @@
 ﻿using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using NodeVideoEffects.Utility;
 
@@ -13,14 +15,15 @@ namespace NodeVideoEffects.Control;
 public sealed partial class NumberPort : IControl
 {
     private readonly float _def;
-    private readonly int _dig;
-    private readonly float _max;
-    private readonly float _min;
+    private int _dig;
 
     private bool _isClicking;
     private bool _isDragging;
     private bool _isEditing;
+    private float _max;
+    private float _min;
     private Point _startPoint;
+
     private float _value;
 
     public NumberPort(float def, float value, float min, float max, int dig, string unit)
@@ -32,8 +35,40 @@ public sealed partial class NumberPort : IControl
         _min = min;
         _max = max;
         _dig = dig;
-        Box.Text = Math.Round(_value, _dig).ToString("F" + _dig);
-        Unit.Content = unit;
+        Text = Math.Round(_value, _dig).ToString("F" + _dig);
+        Unit = unit;
+
+        DataContext = this;
+    }
+
+    public bool IsFocusable
+    {
+        get;
+        set
+        {
+            field = value;
+            OnPropertyChanged();
+        }
+    } = true;
+
+    public string Text
+    {
+        get => field;
+        set
+        {
+            field = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public string Unit
+    {
+        get => field;
+        set
+        {
+            field = value;
+            OnPropertyChanged();
+        }
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -44,10 +79,26 @@ public sealed partial class NumberPort : IControl
         set => Update((float?)value ?? _def);
     }
 
+    public void ChangeSetting(float? min, float? max, int? digits, string? unit)
+    {
+        if (min != null)
+            _min = (float)min;
+        if (max != null)
+            _max = (float)max;
+        if (digits != null)
+        {
+            _dig = (int)digits;
+            Text = Math.Round(_value, _dig).ToString("F" + _dig);
+        }
+
+        if (unit != null)
+            Unit = unit;
+    }
+
     [DllImport("User32.dll")]
     private static extern bool SetCursorPos(int x, int y);
 
-    private void OnPropertyChanged(string propertyName)
+    private void OnPropertyChanged([CallerMemberName] string propertyName = "")
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
@@ -55,12 +106,12 @@ public sealed partial class NumberPort : IControl
     private void Update()
     {
         float v;
-        if (Box.Text == "")
+        if (Text == "")
             v = _def;
         else
             try
             {
-                v = float.Parse(Box.Text);
+                v = float.Parse(Text);
             }
             catch (Exception)
             {
@@ -76,10 +127,10 @@ public sealed partial class NumberPort : IControl
         if (!float.IsNaN(_min) && value < _min) v = _min;
         if (!float.IsNaN(_max) && value > _max) v = _max;
         _value = (float)Math.Round(v, _dig);
-        Box.Text = _value.ToString("F" + _dig);
+        Text = _value.ToString("F" + _dig);
         OnPropertyChanged(nameof(Value));
         Keyboard.ClearFocus();
-        Box.Focusable = false;
+        IsFocusable = false;
         if (!_isDragging)
             Mouse.OverrideCursor = null;
     }
@@ -89,23 +140,25 @@ public sealed partial class NumberPort : IControl
         e.Handled = true;
     }
 
-    private void Box_PreviewMouseLeftButtonDown(object _, MouseButtonEventArgs e)
+    private void Box_PreviewMouseLeftButtonDown(object o, MouseButtonEventArgs e)
     {
+        if (o is not TextBox box) return;
         _isClicking = true;
         if (_isEditing) return;
-        _startPoint = Box.PointToScreen(e.GetPosition(Box));
+        _startPoint = box.PointToScreen(e.GetPosition(box));
         e.Handled = true;
-        Box.Focusable = false;
+        IsFocusable = false;
         Mouse.OverrideCursor = Cursors.None;
-        Box.CaptureMouse();
+        box.CaptureMouse();
     }
 
-    private void Box_PreviewMouseMove(object _, MouseEventArgs e)
+    private void Box_PreviewMouseMove(object o, MouseEventArgs e)
     {
+        if (o is not TextBox box) return;
         try
         {
             if (!_isClicking || _isEditing) return;
-            var currentPoint = Box.PointToScreen(e.GetPosition(Box));
+            var currentPoint = box.PointToScreen(e.GetPosition(box));
             var delta = currentPoint.X - _startPoint.X;
 
             if (Math.Abs(delta) > SystemParameters.MinimumHorizontalDragDistance || _isDragging)
@@ -122,16 +175,17 @@ public sealed partial class NumberPort : IControl
         catch (Exception ex)
         {
             Mouse.OverrideCursor = null;
-            Box.ReleaseMouseCapture();
+            box.ReleaseMouseCapture();
             Logger.Write(LogLevel.Error, ex.Message, ex);
         }
     }
 
-    private void Box_PreviewMouseLeftButtonUp(object _, MouseButtonEventArgs e)
+    private void Box_PreviewMouseLeftButtonUp(object o, MouseButtonEventArgs e)
     {
+        if (o is not TextBox box) return;
         _isClicking = false;
         Mouse.OverrideCursor = null;
-        Box.ReleaseMouseCapture();
+        box.ReleaseMouseCapture();
 
         if (_isDragging)
         {
@@ -142,14 +196,14 @@ public sealed partial class NumberPort : IControl
         else
         {
             _isEditing = true;
-            Box.Focusable = true;
-            Keyboard.Focus(Box);
+            IsFocusable = true;
+            Keyboard.Focus(box);
         }
 
         OnPropertyChanged(nameof(Value));
     }
 
-    private void Box_LostFocus(object sender, RoutedEventArgs e)
+    private void Box_LostFocus(object _, RoutedEventArgs e)
     {
         _isEditing = false;
         Update();

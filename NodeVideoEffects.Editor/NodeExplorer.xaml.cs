@@ -6,6 +6,8 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
+using AvalonDock;
+using AvalonDock.Layout;
 using NodeVideoEffects.Core;
 using NodeVideoEffects.Nodes.Basic;
 using NodeVideoEffects.Utility;
@@ -32,7 +34,8 @@ public partial class NodeExplorer
             foreach (var assembly in assemblies)
             {
                 var types = assembly.GetTypes()
-                    .Where(t => t is { IsClass: true, IsAbstract: false } && t.IsSubclassOf(baseType));
+                    .Where(t => t is { IsClass: true, IsAbstract: false } && t.IsSubclassOf(baseType) &&
+                                t != typeof(InputNode) && t != typeof(OutputNode));
 
                 foreach (var type in types) AddTypeToExplorerRoot(type);
             }
@@ -95,100 +98,123 @@ public partial class NodeExplorer
 
     public ObservableCollection<NodesTree> Root { get; } = [];
 
-    private static T? FindParent<T>(DependencyObject? child) where T : DependencyObject
-    {
-        if (child == null) return null;
-        var parentObject = VisualTreeHelper.GetParent(child);
+    public required DockingManager DockingManager { init; get; }
 
-        return parentObject switch
+    private static void TryHitTestFloatingElement<T>(DockingManager? dockManager,
+        Point screenPoint,
+        out T? hitElement)
+        where T : FrameworkElement
+    {
+        hitElement = null;
+
+        if (dockManager?.Layout is not { } layoutRoot) return;
+
+        foreach (var anchorable in layoutRoot.Descendents().OfType<LayoutAnchorable>())
         {
-            null => null,
-            T parent => parent,
-            _ => FindParent<T>(parentObject)
-        };
+            if (anchorable.Content is not FrameworkElement { IsVisible: true } fe) continue;
+            foreach (var element in FindVisualChildren<T>(fe))
+            {
+                if (!element.IsVisible || element.ActualWidth <= 0 || element.ActualHeight <= 0)
+                    continue;
+
+                var topLeft = element.PointToScreen(new Point(0, 0));
+                var bottomRight = element.PointToScreen(new Point(element.ActualWidth, element.ActualHeight));
+
+                if (!(screenPoint.X >= topLeft.X) || !(screenPoint.X <= bottomRight.X) ||
+                    !(screenPoint.Y >= topLeft.Y) || !(screenPoint.Y <= bottomRight.Y)) continue;
+                hitElement = element;
+                return;
+            }
+        }
     }
 
-    private void TextBlock_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    private static IEnumerable<T> FindVisualChildren<T>(DependencyObject? depObj) where T : DependencyObject
     {
-        if (sender is not TextBlock textBlock) return;
-        if (textBlock.DataContext is not NodesTree dataContext) return;
-        if (dataContext.Type == typeof(InputNode) || dataContext.Type == typeof(OutputNode))
-            return;
+        if (depObj == null)
+            yield break;
+
+        var count = VisualTreeHelper.GetChildrenCount(depObj);
+
+        for (var i = 0; i < count; i++)
+        {
+            var child = VisualTreeHelper.GetChild(depObj, i);
+
+            if (child is T t)
+                yield return t;
+
+            foreach (var childOfChild in FindVisualChildren<T>(child))
+                yield return childOfChild;
+        }
+    }
+
+    private void Item_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        Cursor = Cursors.Arrow;
+        if (sender is not StackPanel obj) return;
+        if (obj.DataContext is not NodesTree dataContext) return;
         _type = dataContext.Type;
         if (_type != null)
-            textBlock.CaptureMouse();
+            obj.CaptureMouse();
     }
 
-    private void TextBlock_MouseMove(object sender, MouseEventArgs e)
+    private void Item_MouseMove(object sender, MouseEventArgs e)
     {
-        if (_type != null && sender is TextBlock textBlock)
+        if (_type != null && sender is StackPanel)
         {
-            var currentWindow = Window.GetWindow(textBlock);
-            var position = e.GetPosition(currentWindow);
-            if (currentWindow != null)
-            {
-                var result = VisualTreeHelper.HitTest(currentWindow, position);
-                if (result?.VisualHit is FrameworkElement element)
-                {
-                    var editor = FindParent<Editor>(element);
-                    Cursor = editor != null ? Cursors.Arrow : Cursors.No;
-                }
-            }
+            var position = PointToScreen(e.GetPosition(this));
+            TryHitTestFloatingElement<Editor>(
+                DockingManager,
+                position,
+                out var editor);
+            Cursor = editor != null ? Cursors.Arrow : Cursors.No;
         }
 
         e.Handled = true;
     }
 
-    private void TextBlock_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    private void Item_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
         Cursor = Cursors.Arrow;
-        if (_type != null && sender is TextBlock textBlock)
+        if (_type != null && sender is StackPanel obj)
         {
-            var currentWindow = Window.GetWindow(textBlock);
-            var position = e.GetPosition(currentWindow);
-
-            if (currentWindow != null)
+            var position = PointToScreen(e.GetPosition(this));
+            TryHitTestFloatingElement<Editor>(
+                DockingManager,
+                position,
+                out var editor);
+            if (editor != null)
             {
-                var result = VisualTreeHelper.HitTest(currentWindow, position);
-
-                if (result?.VisualHit is FrameworkElement element)
+                NodeLogic? node = null;
+                try
                 {
-                    var editor = FindParent<Editor>(element);
-                    if (editor != null)
+                    try
                     {
-                        NodeLogic? node = null;
-                        try
-                        {
-                            try
-                            {
-                                node = Activator.CreateInstance(_type, editor.ItemId) as NodeLogic;
-                            }
-                            catch (MissingMethodException)
-                            {
-                                node = Activator.CreateInstance(_type, []) as NodeLogic;
-                            }
-                        }
-                        catch (Exception exception)
-                        {
-                            Logger.Write(LogLevel.Error, exception.Message, exception);
-                        }
-
-                        if (node != null)
-                        {
-                            node.Id = editor.ItemId + "-" + Guid.NewGuid().ToString("N");
-                            for (var i = 0; i < (node.Inputs?.Length ?? 0); i++)
-                                node.SetInputConnection(i, new PortInfo());
-                            NodesManager.AddNode(node.Id, node);
-                            editor.AddChildren(new Node(node),
-                                editor.ConvertToTransform(e.GetPosition(editor)).X,
-                                editor.ConvertToTransform(e.GetPosition(editor)).Y);
-                            editor.OnNodesUpdated();
-                        }
+                        node = Activator.CreateInstance(_type, editor.ItemId) as NodeLogic;
                     }
+                    catch (MissingMethodException)
+                    {
+                        node = Activator.CreateInstance(_type, []) as NodeLogic;
+                    }
+                }
+                catch (Exception exception)
+                {
+                    Logger.Write(LogLevel.Error, exception.Message, exception);
+                }
+
+                if (node != null)
+                {
+                    node.Id = editor.ItemId + "-" + Guid.NewGuid().ToString("N");
+                    for (var i = 0; i < (node.Inputs?.Length ?? 0); i++)
+                        node.SetInputConnection(i, new PortInfo());
+                    NodesManager.AddNode(node.Id, node);
+                    editor.AddChildren(new Node(node),
+                        editor.ConvertToTransform(e.GetPosition(editor)).X,
+                        editor.ConvertToTransform(e.GetPosition(editor)).Y);
+                    editor.OnNodesUpdated();
                 }
             }
 
-            textBlock.ReleaseMouseCapture();
+            obj.ReleaseMouseCapture();
             _type = null;
         }
 

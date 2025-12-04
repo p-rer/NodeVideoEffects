@@ -1,4 +1,6 @@
-﻿using System.Windows.Media;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Windows.Media;
+using Newtonsoft.Json;
 using NodeVideoEffects.Control;
 using Vortice.Direct2D1;
 
@@ -7,7 +9,6 @@ namespace NodeVideoEffects.Core;
 public class Image : IPortValue
 {
     private ImageWrapper _value;
-    private IControl? _control;
 
     /// <summary>
     /// Create new Image object
@@ -30,13 +31,13 @@ public class Image : IPortValue
     {
         _value = (ImageWrapper?)value ?? new ImageWrapper();
     }
-    
+
     public void Dispose()
     {
         _value.Image?.Dispose();
     }
 
-    public IControl Control => _control ??= new NoControlPort();
+    [field: AllowNull] [field: MaybeNull] public IControl Control => field ??= new NoControlPort();
 }
 
 public struct ImageWrapper(ID2D1Image? image)
@@ -44,7 +45,7 @@ public struct ImageWrapper(ID2D1Image? image)
     /// <summary>
     /// Image
     /// </summary>
-    [Newtonsoft.Json.JsonIgnore]
+    [JsonIgnore]
     public ID2D1Image? Image { get; set; } = image;
 
     public override string ToString()

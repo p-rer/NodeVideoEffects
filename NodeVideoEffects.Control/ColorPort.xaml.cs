@@ -9,27 +9,10 @@ namespace NodeVideoEffects.Control;
 
 public partial class ColorPort : IControl
 {
-    public event PropertyChangedEventHandler? PropertyChanged;
-    private bool _suppressRgbChannelCallback;
-    private bool _suppressSelectedColorCallback;
-    public object? Value
-    {
-        get => Color.FromArgb(Alpha, Red, Green, Blue);
-        set =>
-            (Alpha, Red, Green, Blue) = (((Color?)value)?.A ?? 0xff, ((Color?)value)?.R ?? 0xff,
-                ((Color?)value)?.G ?? 0xff, ((Color?)value)?.B ?? 0xff);
-    }
-
     public static readonly DependencyProperty SelectedColorProperty =
         DependencyProperty.Register(nameof(SelectedColor), typeof(Color), typeof(ColorPort),
             new FrameworkPropertyMetadata(Colors.White, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
                 OnSelectedColorChanged));
-
-    public Color SelectedColor
-    {
-        get => (Color)GetValue(SelectedColorProperty);
-        set => SetValue(SelectedColorProperty, value);
-    }
 
     public static readonly DependencyProperty RedProperty =
         DependencyProperty.Register(nameof(Red), typeof(byte), typeof(ColorPort),
@@ -50,6 +33,26 @@ public partial class ColorPort : IControl
         DependencyProperty.Register(nameof(Alpha), typeof(byte), typeof(ColorPort),
             new FrameworkPropertyMetadata((byte)255, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
                 OnRgbChannelChanged));
+
+    private bool _suppressRgbChannelCallback;
+    private bool _suppressSelectedColorCallback;
+
+    public ColorPort(Color color)
+    {
+        InitializeComponent();
+        Value = color;
+        DataContext = this;
+    }
+
+    public ColorPort() : this(Colors.White)
+    {
+    }
+
+    public Color SelectedColor
+    {
+        get => (Color)GetValue(SelectedColorProperty);
+        set => SetValue(SelectedColorProperty, value);
+    }
 
     public byte Red
     {
@@ -75,15 +78,14 @@ public partial class ColorPort : IControl
         set => SetValue(AlphaProperty, value);
     }
 
-    public ColorPort(Color color)
-    {
-        InitializeComponent();
-        Value = color;
-        DataContext = this;
-    }
+    public event PropertyChangedEventHandler? PropertyChanged;
 
-    public ColorPort() : this(Colors.White)
+    public object? Value
     {
+        get => Color.FromArgb(Alpha, Red, Green, Blue);
+        set =>
+            (Alpha, Red, Green, Blue) = (((Color?)value)?.A ?? 0xff, ((Color?)value)?.R ?? 0xff,
+                ((Color?)value)?.G ?? 0xff, ((Color?)value)?.B ?? 0xff);
     }
 
     private static void OnRgbChannelChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -108,7 +110,9 @@ public partial class ColorPort : IControl
         if (cp._suppressSelectedColorCallback)
             return;
         cp.UpdateRgbFromSelectedColor();
+        cp.PropertyChanged?.Invoke(cp, new PropertyChangedEventArgs(nameof(Value)));
     }
+
 
     private void UpdateRgbFromSelectedColor()
     {

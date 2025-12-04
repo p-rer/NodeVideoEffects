@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Windows.Media;
 using Newtonsoft.Json;
 using NodeVideoEffects.Control;
@@ -7,7 +8,6 @@ namespace NodeVideoEffects.Core;
 
 public class Mask : IPortValue
 {
-    private IControl? _control;
     private MaskWrapper _value;
 
     /// <summary>
@@ -37,7 +37,7 @@ public class Mask : IPortValue
         _value.Image?.Dispose();
     }
 
-    public IControl Control => _control ??= new NoControlPort();
+    [field: AllowNull] [field: MaybeNull] public IControl Control => field ??= new NoControlPort();
 }
 
 public struct MaskWrapper(ID2D1Image? image)

@@ -18,7 +18,7 @@ public class NodeVideoEffectsPlugin : VideoEffectBase
     private List<NodeInfo> _nodes = [];
     private NodeProcessor? _processor;
 
-    internal NodeEditor? Window = null;
+    internal NodeEditor? Editor = null;
 
     public override string Label => "NodeVideoEffects";
 
@@ -32,7 +32,7 @@ public class NodeVideoEffectsPlugin : VideoEffectBase
         get => _nodes;
         set
         {
-            Window?.EditSpace.RebuildNodes(value);
+            Editor?.EditSpace.RebuildNodes(value);
             _nodes = value;
         }
     }
@@ -44,7 +44,7 @@ public class NodeVideoEffectsPlugin : VideoEffectBase
 
     ~NodeVideoEffectsPlugin()
     {
-        Window?.Close();
+        Editor?.Close();
     }
 
     public override IEnumerable<string> CreateExoVideoFilters(int keyFrameIndex,
@@ -55,7 +55,7 @@ public class NodeVideoEffectsPlugin : VideoEffectBase
 
     public override IVideoEffectProcessor CreateVideoEffect(IGraphicsDevicesAndContext devices)
     {
-        if (_isCreated)
+        if (_isCreated && _processor != null)
         {
             _processor!.UpdateContext(devices);
             return _processor;

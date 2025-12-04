@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
+using AvalonDock;
 using NodeVideoEffects.Core;
 using NodeVideoEffects.Editor;
 using NodeVideoEffects.Utility;
@@ -12,36 +13,20 @@ namespace NodeVideoEffects;
 /// </summary>
 public partial class NodeEditor
 {
-    private static readonly RoutedCommand AllSelectCommand = new();
-    private static readonly RoutedCommand RemoveCommand = new();
+    public static readonly RoutedCommand AllSelectCommand = new();
+    public static readonly RoutedCommand RemoveCommand = new();
     private readonly string _commit;
 
     private readonly string _tag;
 
-    public NodeEditor()
+    public NodeEditor(DockingManager dockingManagerInstance)
     {
         InitializeComponent();
 
         _tag = ResourceLoader.FileLoad("git_tag.txt");
         _commit = ResourceLoader.FileLoad("git_id.txt");
 
-        Task.Run(() => { Explorer.Dispatcher.Invoke(() => { Explorer.Content = new NodeExplorer(); }); });
-
-        CommandBindings.Add(new CommandBinding(
-            AllSelectCommand,
-            (_, _) => EditSpace.AllSelect()));
-
-        InputBindings.Add(new KeyBinding(
-            AllSelectCommand,
-            new KeyGesture(Key.A, ModifierKeys.Control)));
-
-        CommandBindings.Add(new CommandBinding(
-            RemoveCommand,
-            (_, _) => EditSpace.RemoveChildren()));
-
-        InputBindings.Add(new KeyBinding(
-            RemoveCommand,
-            new KeyGesture(Key.Delete)));
+        Explorer.Content = new NodeExplorer { DockingManager = dockingManagerInstance };
     }
 
     public List<NodeInfo> Nodes
@@ -56,9 +41,11 @@ public partial class NodeEditor
         set => EditSpace.ItemId = value;
     }
 
+    public event EventHandler NeedToClose = delegate { };
+
     private void ShowAbout(object sender, RoutedEventArgs e)
     {
-        new About(_tag, _commit) { Owner = this }.ShowDialog();
+        new About(_tag, _commit) { Owner = Application.Current.MainWindow }.ShowDialog();
     }
 
     public event PropertyChangedEventHandler NodesUpdated = delegate { };
@@ -70,7 +57,7 @@ public partial class NodeEditor
 
     private void EditSpace_NodesUpdated(object sender, PropertyChangedEventArgs e)
     {
-        NodesUpdated.Invoke(this, new PropertyChangedEventArgs(Title));
+        NodesUpdated.Invoke(this, new PropertyChangedEventArgs(Text_UI.Editor));
     }
 
     private void OpenLogViewer(object sender, RoutedEventArgs e)
@@ -109,9 +96,24 @@ public partial class NodeEditor
         EditSpace.ResetView();
     }
 
+    public void AllSelect()
+    {
+        EditSpace.AllSelect();
+    }
+
+    public void RemoveChildren()
+    {
+        EditSpace.RemoveChildren();
+    }
+
     private void Close(object sender, RoutedEventArgs e)
     {
         Close();
+    }
+
+    public void Close()
+    {
+        NeedToClose(this, EventArgs.Empty);
     }
 
     private void LogsDelete(object sender, RoutedEventArgs e)
