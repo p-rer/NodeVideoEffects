@@ -1,4 +1,6 @@
 name: Update Releases JSON
+permissions:
+  contents: write
 
 on:
   release:
