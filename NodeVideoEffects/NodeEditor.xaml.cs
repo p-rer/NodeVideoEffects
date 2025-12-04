@@ -13,8 +13,8 @@ namespace NodeVideoEffects;
 /// </summary>
 public partial class NodeEditor
 {
-    private static readonly RoutedCommand AllSelectCommand = new();
-    private static readonly RoutedCommand RemoveCommand = new();
+    public static readonly RoutedCommand AllSelectCommand = new();
+    public static readonly RoutedCommand RemoveCommand = new();
     private readonly string _commit;
 
     private readonly string _tag;
@@ -27,22 +27,6 @@ public partial class NodeEditor
         _commit = ResourceLoader.FileLoad("git_id.txt");
 
         Explorer.Content = new NodeExplorer { DockingManager = dockingManagerInstance };
-
-        CommandBindings.Add(new CommandBinding(
-            AllSelectCommand,
-            (_, _) => EditSpace.AllSelect()));
-
-        InputBindings.Add(new KeyBinding(
-            AllSelectCommand,
-            new KeyGesture(Key.A, ModifierKeys.Control)));
-
-        CommandBindings.Add(new CommandBinding(
-            RemoveCommand,
-            (_, _) => EditSpace.RemoveChildren()));
-
-        InputBindings.Add(new KeyBinding(
-            RemoveCommand,
-            new KeyGesture(Key.Delete)));
     }
 
     public List<NodeInfo> Nodes
@@ -110,6 +94,16 @@ public partial class NodeEditor
     private void ResetView(object sender, RoutedEventArgs e)
     {
         EditSpace.ResetView();
+    }
+
+    public void AllSelect()
+    {
+        EditSpace.AllSelect();
+    }
+
+    public void RemoveChildren()
+    {
+        EditSpace.RemoveChildren();
     }
 
     private void Close(object sender, RoutedEventArgs e)

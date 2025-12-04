@@ -1,13 +1,19 @@
 ﻿// ReSharper disable RedundantUsingDirective
 
+using System.ComponentModel;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using System.Windows;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Threading;
 using AvalonDock;
+using AvalonDock.Controls;
 using AvalonDock.Layout;
 using Newtonsoft.Json;
 using NodeVideoEffects.Utility;
 using YukkuriMovieMaker.Commons;
+using YukkuriMovieMaker.Settings;
 using JsonConverter = Newtonsoft.Json.JsonConverter;
 
 namespace NodeVideoEffects;
@@ -60,6 +66,82 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
         );
 
         editor.CommandBindings.AddRange(parentWindow.CommandBindings);
+        var registeredFloatingWindows = new HashSet<LayoutAnchorableFloatingWindowControl>();
+        List<CommandBinding>? savedParentCommandBindings = null;
+
+        // キーと実行内容の組を定義
+        var keyActions = new[]
+        {
+            new { Key = Key.A, Modifiers = ModifierKeys.Control, Action = (Action)(() => editor.AllSelect()) },
+            new { Key = Key.Delete, Modifiers = ModifierKeys.None, Action = (Action)(() => editor.RemoveChildren()) }
+        };
+
+        parentWindow.AddHandler(
+            PreviewKeyDownEvent,
+            new KeyEventHandler((_, keyEventArgs) =>
+            {
+                // ドッキング中でanchorableがアクティブな場合のみ処理
+                if (anchorable.IsFloating || !anchorable.IsActive) return;
+
+                SwitchKeyboardAction(keyEventArgs);
+            }),
+            true);
+
+        // anchorableのIsActiveChangedイベントで無効化・復元を管理
+        anchorable.IsActiveChanged += (_, _) =>
+        {
+            if (anchorable is { IsActive: true, IsFloating: false })
+            {
+                // アクティブになったら対象のCommandBindingsだけを無効化
+                if (savedParentCommandBindings != null) return;
+                savedParentCommandBindings = [];
+
+                foreach (var keyAction in keyActions)
+                {
+                    var dict = KeyCommandCollector.Collect();
+                    var command = dict.Where(item =>
+                            item.Key.Key == keyAction.Key && item.Key.Modifiers == keyAction.Modifiers)
+                        .Select(item => item.Value)
+                        .FirstOrDefault();
+                    if (command == null)
+                        continue;
+
+                    var matchingCommandBindings = parentWindow.CommandBindings
+                        .OfType<CommandBinding>()
+                        .Where(binding => binding.Command == command)
+                        .ToList();
+
+                    if (matchingCommandBindings.Count != 0)
+                        savedParentCommandBindings.AddRange(matchingCommandBindings);
+                }
+
+                // 保存したCommandBindingsを削除
+                foreach (var binding in savedParentCommandBindings) parentWindow.CommandBindings.Remove(binding);
+            }
+            else
+            {
+                // アクティブでなくなったら復元
+                if (savedParentCommandBindings == null) return;
+                foreach (var binding in savedParentCommandBindings) parentWindow.CommandBindings.Add(binding);
+
+                savedParentCommandBindings = null;
+            }
+        };
+
+        // フローティングに変わった時も復元
+        anchorable.PropertyChanged += (_, propertyChangedEventArgs) =>
+        {
+            if (propertyChangedEventArgs.PropertyName == nameof(LayoutAnchorable.IsFloating) && anchorable.IsFloating)
+                if (savedParentCommandBindings != null)
+                {
+                    foreach (var binding in savedParentCommandBindings) parentWindow.CommandBindings.Add(binding);
+
+                    savedParentCommandBindings = null;
+                }
+        };
+
+        dockingManagerInstance.LayoutUpdated += CheckAndRegisterFloatingWindow;
+        CheckAndRegisterFloatingWindow(null, EventArgs.Empty);
 
         editor.NodesUpdated += (_, _) =>
         {
@@ -87,6 +169,82 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
         };
 
         EndEdit?.Invoke(this, EventArgs.Empty);
+        return;
+
+        void SwitchKeyboardAction(KeyEventArgs keyEventArgs)
+        {
+            var matchingAction = keyActions.FirstOrDefault(ka =>
+                ka.Key == keyEventArgs.Key && ka.Modifiers == Keyboard.Modifiers);
+
+            if (matchingAction != null)
+            {
+                matchingAction.Action();
+                keyEventArgs.Handled = true;
+            }
+        }
+
+        // DockingManagerのLayoutUpdatedイベントで監視
+        void CheckAndRegisterFloatingWindow(object? _, EventArgs __)
+        {
+            var layoutFloatingWindow = anchorable.FindParent<LayoutAnchorableFloatingWindow>();
+            if (layoutFloatingWindow == null) return;
+            var floatingWindowControl = dockingManagerInstance.FloatingWindows
+                .OfType<LayoutAnchorableFloatingWindowControl>()
+                .FirstOrDefault(w => Equals(w.Model, layoutFloatingWindow));
+
+            if (floatingWindowControl != null) RegisterFloatingWindowEvents(floatingWindowControl);
+        }
+
+        // フローティングウィンドウのイベントを登録
+        void RegisterFloatingWindowEvents(LayoutAnchorableFloatingWindowControl floatingWindowControl)
+        {
+            if (!registeredFloatingWindows.Add(floatingWindowControl))
+                return;
+
+            floatingWindowControl.Activated += (_, _) =>
+            {
+                // アクティブになったら対象のCommandBindingsだけを無効化
+                if (savedParentCommandBindings != null) return;
+                savedParentCommandBindings = [];
+
+                foreach (var keyAction in keyActions)
+                {
+                    var dict = KeyCommandCollector.Collect();
+                    var command = dict.Where(item =>
+                            item.Key.Key == keyAction.Key && item.Key.Modifiers == keyAction.Modifiers)
+                        .Select(item => item.Value)
+                        .FirstOrDefault();
+                    if (command == null)
+                        continue;
+
+                    var matchingCommandBindings = parentWindow.CommandBindings
+                        .OfType<CommandBinding>()
+                        .Where(binding => binding.Command == command)
+                        .ToList();
+
+                    if (matchingCommandBindings.Count != 0)
+                        savedParentCommandBindings.AddRange(matchingCommandBindings);
+                }
+
+                // 保存したCommandBindingsを削除
+                foreach (var binding in savedParentCommandBindings) parentWindow.CommandBindings.Remove(binding);
+            };
+
+            floatingWindowControl.Deactivated += (_, _) =>
+            {
+                if (savedParentCommandBindings == null) return;
+                foreach (var binding in savedParentCommandBindings) parentWindow.CommandBindings.Add(binding);
+
+                savedParentCommandBindings = null;
+            };
+
+            floatingWindowControl.AddHandler(
+                PreviewKeyDownEvent,
+                new KeyEventHandler((_, keyEventArgs) => SwitchKeyboardAction(keyEventArgs)),
+                true);
+
+            floatingWindowControl.Closed += (_, _) => { registeredFloatingWindows.Remove(floatingWindowControl); };
+        }
     }
 }
 
