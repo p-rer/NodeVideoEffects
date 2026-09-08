@@ -1,0 +1,97 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+        <UseWPF>true</UseWPF>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <Configurations>Debug;Release;</Configurations>
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)'=='Release'">
+        <!--Pdb内にソースコードのフルパスを含めない-->
+        <RepoRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\'))</RepoRoot>
+        <PathMap>$(RepoRoot)=.</PathMap>
+    </PropertyGroup>
+
+    <!-- YMM4のdllや、カスタムdllを参照。サードパーティー開発者向け。-->
+    <ItemGroup Condition="'$(YMM4Proj)' == ''">
+        <Reference Include="AvalonDock">
+            <HintPath>$(YMM4DirPath)AvalonDock.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="Newtonsoft.Json">
+            <HintPath>$(YMM4DirPath)Newtonsoft.Json.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="YukkuriMovieMaker.Controls">
+            <HintPath>$(YMM4DirPath)YukkuriMovieMaker.Controls.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="YukkuriMovieMaker.Plugin">
+            <HintPath>$(YMM4DirPath)YukkuriMovieMaker.Plugin.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="SharpGen.Runtime">
+            <HintPath>$(YMM4DirPath)SharpGen.Runtime.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="Vortice.Direct2D1">
+            <HintPath>$(YMM4DirPath)Vortice.Direct2D1.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="Vortice.Direct3D11">
+            <HintPath>$(YMM4DirPath)Vortice.Direct3D11.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="Vortice.DirectX">
+            <HintPath>$(YMM4DirPath)Vortice.DirectX.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="Vortice.DXGI">
+            <HintPath>$(YMM4DirPath)Vortice.DXGI.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="Vortice.Mathematics">
+            <HintPath>$(YMM4DirPath)Vortice.Mathematics.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="Vortice.MediaFoundation">
+            <HintPath>$(YMM4DirPath)Vortice.MediaFoundation.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="System.Drawing.Common">
+            <HintPath>$(YMM4DirPath)System.Drawing.Common.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="SharpGen.Runtime.COM">
+            <HintPath>$(YMM4DirPath)SharpGen.Runtime.COM.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+    </ItemGroup>
+
+    <!-- nugetパッケージで公開されているライブラリはPackageReferenceで参照する。-->
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.142"/>
+        <PackageReference Include="SkiaSharp" Version="4.151.1"/>
+        <PackageReference Include="SkiaSharp.NativeAssets.Win32" Version="4.151.1"/>
+    </ItemGroup>
+
+    <!--ビルド後、YMM4フォルダに関連ファイルをコピーする-->
+    <Target Condition="'$(YMM4Proj)' == ''" Name="PostBuild" AfterTargets="PostBuildEvent">
+        <Exec Command="xcopy &quot;$(TargetDir)&quot; &quot;$(YMM4DirPath)user\plugin\node\&quot; /y /s"/>
+    </Target>
+
+    <ItemGroup>
+        <ProjectReference Include="..\YukkuriMovieMaker.Generator\YukkuriMovieMaker.Generator\YukkuriMovieMaker.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
+        <AdditionalFiles Include="**/*.csv"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Resource Include="..\Release\MaskClip.cso" Link="Resources\Shader\MaskClip.cso"/>
+        <Resource Include="..\Release\MaskCreate.cso" Link="Resources\Shader\MaskCreate.cso"/>
+        <Resource Include="..\Release\MaskThreshold.cso" Link="Resources\Shader\MaskThreshold.cso"/>
+    </ItemGroup>
+
+</Project>
