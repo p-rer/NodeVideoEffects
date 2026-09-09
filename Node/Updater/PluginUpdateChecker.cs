@@ -104,11 +104,7 @@ internal static class PluginUpdateChecker
     internal static string GetPluginDirectory()
     {
         var location = Assembly.GetExecutingAssembly().Location;
-        var dir = Path.GetDirectoryName(location);
-
-        return dir is { Length: > 0 }
-            ? Directory.GetParent(dir)?.FullName ?? AppContext.BaseDirectory
-            : AppContext.BaseDirectory;
+        return Path.GetDirectoryName(location) is { Length: > 0 } dir ? dir : AppContext.BaseDirectory;
     }
 
     internal static async Task<UpdateCheckResult?> CheckForUpdateAsync(
@@ -238,7 +234,7 @@ internal static class PluginUpdateChecker
                 $ErrorActionPreference = 'SilentlyContinue'
                 Wait-Process -Id {waitForProcessId} -ErrorAction SilentlyContinue
                 Start-Sleep -Seconds 2
-                Copy-Item -Path "{stagingDir}\*" -Destination "{pluginDirectory}" -Recurse -Force
+                Copy-Item -Path "{stagingDir}\*" -Destination "{Directory.GetParent(pluginDirectory)?.FullName}" -Recurse -Force
                 Remove-Item -Path "{stagingDir}" -Recurse -Force -ErrorAction SilentlyContinue
                 Remove-Item -Path "{stateFilePath}" -Force -ErrorAction SilentlyContinue
                 Remove-Item -Path "{selfPath}" -Force -ErrorAction SilentlyContinue
