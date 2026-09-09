@@ -15,7 +15,12 @@
         <PathMap>$(RepoRoot)=.</PathMap>
     </PropertyGroup>
 
-    <!-- YMM4のdllや、カスタムdllを参照。サードパーティー開発者向け。-->
+    <!--バージョン指定 -->
+    <PropertyGroup>
+        <Version>1.0.0</Version>
+    </PropertyGroup>
+
+    <!--YMM4のdllや、カスタムdllを参照。-->
     <ItemGroup Condition="'$(YMM4Proj)' == ''">
         <Reference Include="AvalonDock">
             <HintPath>$(YMM4DirPath)AvalonDock.dll</HintPath>
@@ -71,7 +76,7 @@
         </Reference>
     </ItemGroup>
 
-    <!-- nugetパッケージで公開されているライブラリはPackageReferenceで参照する。-->
+    <!--nugetパッケージで公開されているライブラリはPackageReferenceで参照する。-->
     <ItemGroup>
         <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.142"/>
         <PackageReference Include="SkiaSharp" Version="4.151.1"/>

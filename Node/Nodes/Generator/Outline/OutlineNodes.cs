@@ -199,9 +199,24 @@ public class ShapeOutlineNode : NodeLogic
         if (kind == _kind)
             return;
 
+        PreserveCurrentParamsValues();
+
         _kind = kind;
 
         SetDynamicContainer(GetCurrentInputs(), nameof(Params));
+    }
+
+    private void PreserveCurrentParamsValues()
+    {
+        const string prefix = nameof(Params) + ".";
+        foreach (var (key, port) in Inputs)
+        {
+            if (!key.StartsWith(prefix, StringComparison.Ordinal)) continue;
+            if (port.IsConnected) continue;
+            var value = port.LocalValue;
+            if (value is null) continue;
+            QueuePendingDynamicValue(key, value);
+        }
     }
 
     private InputsContainer GetCurrentInputs()
@@ -224,6 +239,8 @@ public class ShapeOutlineNode : NodeLogic
 
         if (kind != _kind)
         {
+            PreserveCurrentParamsValues();
+
             _kind = kind;
 
             var newContainer = GetCurrentInputs();

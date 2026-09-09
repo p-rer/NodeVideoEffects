@@ -149,7 +149,7 @@ public static class EffectNodeFactory
         }
 
         var effectType = PluginLoader.VideoEffects.FirstOrDefault(t => MatchesEffectName(t, effectName)) ??
-                         PluginLoader.VideoEffects.FirstOrDefault(t => MatchesEffectNameLoosely(t, effectName));
+                          PluginLoader.VideoEffects.FirstOrDefault(t => MatchesEffectNameLoosely(t, effectName));
         if (effectType == null) return null;
 
         try
@@ -900,7 +900,6 @@ public static class EffectNodeCalculator
     {
         foreach (var def in portDefs)
         {
-            if (def.PortType != PortType.Unknown) continue;
             if (def.DefaultValue == null) continue;
             if (!self.Inputs.TryGetValue(def.PropName, out var port)) continue;
             if (port.LocalValue != null) continue;

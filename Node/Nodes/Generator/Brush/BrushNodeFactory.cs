@@ -87,8 +87,11 @@ public static class DynamicBrushNodeFactory
         }
 
         var pluginType = PluginLoader.BrushPlugins
-            .Select(p => p.GetType())
-            .FirstOrDefault(t => (t.AssemblyQualifiedName ?? t.FullName ?? t.Name) == pluginName);
+                              .Select(p => p.GetType())
+                              .FirstOrDefault(t => MatchesPluginName(t, pluginName)) ??
+                          PluginLoader.BrushPlugins
+                              .Select(p => p.GetType())
+                              .FirstOrDefault(t => MatchesPluginNameLoosely(t, pluginName));
 
         if (pluginType == null) return null;
 
@@ -100,6 +103,37 @@ public static class DynamicBrushNodeFactory
         {
             return null;
         }
+    }
+
+    private static bool MatchesPluginName(Type candidate, string storedName)
+    {
+        return (candidate.AssemblyQualifiedName ?? candidate.FullName ?? candidate.Name) == storedName;
+    }
+
+    private static bool MatchesPluginNameLoosely(Type candidate, string storedName)
+    {
+        var (storedTypeName, storedAssemblyName) = SplitAssemblyQualifiedName(storedName);
+        if (storedTypeName == null) return false;
+
+        var candidateTypeName = candidate.FullName ?? candidate.Name;
+        if (candidateTypeName != storedTypeName) return false;
+
+        if (storedAssemblyName == null) return true;
+
+        var candidateAssemblyName = candidate.Assembly.GetName().Name;
+        return string.Equals(candidateAssemblyName, storedAssemblyName, StringComparison.Ordinal);
+    }
+
+    private static (string? TypeName, string? AssemblyName) SplitAssemblyQualifiedName(string assemblyQualifiedName)
+    {
+        var firstComma = assemblyQualifiedName.IndexOf(',');
+        if (firstComma < 0) return (assemblyQualifiedName, null);
+
+        var typeName = assemblyQualifiedName[..firstComma].Trim();
+        var rest = assemblyQualifiedName[(firstComma + 1)..];
+        var secondComma = rest.IndexOf(',');
+        var assemblyName = (secondComma >= 0 ? rest[..secondComma] : rest).Trim();
+        return (typeName, assemblyName);
     }
 
     private static Type GetOrCreate(Type pluginType)
