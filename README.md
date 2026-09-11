@@ -74,6 +74,3 @@ YMM4（ゆっくりMovieMaker4）向けの、ノードベース画像処理映�
 3. `Node.sln`をビルドする。`YMM4Proj`プロパティが未設定の場合、ビルド後に`PostBuild`ターゲットが実行され、成果物が`%YMM4DirPath%\user\plugin\node\`へコピーされる。
 4. `Node.Shader`はC++（`vcxproj`）プロジェクトであり、HLSLをコンパイルして`.cso`を生成する。
 
-### ライセンス
-
-`LICENSE`ファイルにUnlicense（パブリックドメイン相当）の全文が記載されている。
