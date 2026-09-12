@@ -281,6 +281,7 @@ public sealed class Processor : IVideoEffectProcessor
 
                 if (outputImage == null || outputImage.NativePointer == IntPtr.Zero)
                     throw new InvalidOperationException(TextUi.OutputImageIsNull);
+                _devices.DeviceContext.GetImageLocalBounds(outputImage);
 
                 _outputImage = outputImage;
                 _hasError = false;
